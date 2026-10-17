@@ -160,7 +160,7 @@ Both the simulator and the Massive client implement the same abstract interface.
 
 - REST API polling (not WebSocket) — simpler, works on all tiers
 - Polls for the union of all watched tickers on a configurable interval
-- Free tier (5 calls/min): poll every 15 seconds
+- Free tier (5 calls/min, end-of-day data only, no snapshots): grouped daily bars, poll every 15 minutes
 - Paid tiers: poll every 2-15 seconds depending on tier
 - Parses REST response into the same format as the simulator
 

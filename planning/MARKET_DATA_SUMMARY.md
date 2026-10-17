@@ -30,7 +30,7 @@ MarketDataSource (ABC)
 | `cache.py` | `PriceCache` — thread-safe price store with version counter for SSE change detection |
 | `seed_prices.py` | Realistic seed prices, per-ticker GBM params (drift/volatility), correlation groups |
 | `simulator.py` | `GBMSimulator` (Geometric Brownian Motion with Cholesky-correlated moves) + `SimulatorDataSource` |
-| `massive_client.py` | `MassiveDataSource` — REST polling client for Polygon.io via the `massive` package |
+| `massive_client.py` | `MassiveDataSource` — REST poller; snapshot mode (Starter+) with automatic end-of-day fallback for free keys |
 | `factory.py` | `create_market_data_source()` — selects simulator or Massive based on `MASSIVE_API_KEY` env var |
 | `stream.py` | `create_stream_router()` — FastAPI SSE endpoint factory using version-based change detection |
 
@@ -44,7 +44,7 @@ MarketDataSource (ABC)
 
 ## Test Suite
 
-**73 tests, all passing.** 6 test modules in `backend/tests/market/`.
+**82 tests, all passing.** 6 test modules in `backend/tests/market/`.
 
 | Module | Tests | Coverage |
 |--------|-------|----------|
@@ -53,7 +53,7 @@ MarketDataSource (ABC)
 | test_simulator.py | 17 | simulator.py: 98% |
 | test_simulator_source.py | 10 | (integration tests) |
 | test_factory.py | 7 | factory.py: 100% |
-| test_massive.py | 13 | massive_client.py: 56% (expected — API methods mocked) |
+| test_massive.py | 22 | Real SDK models; snapshot fallbacks, free-tier EOD mode |
 
 Overall coverage: 84%.
 

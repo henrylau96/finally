@@ -4,25 +4,57 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import date, timedelta
 
 from massive import RESTClient
-from massive.rest.models import SnapshotMarketType
+from massive.exceptions import BadResponse
+from massive.rest.models import SnapshotMarketType, TickerSnapshot
 
 from .cache import PriceCache
 from .interface import MarketDataSource
 
 logger = logging.getLogger(__name__)
 
+PriceAndTime = tuple[float, float | None]
+
+
+def snapshot_price(snap: TickerSnapshot) -> PriceAndTime | None:
+    """Best available (price, unix_seconds) from a snapshot, or None.
+
+    last_trade is only present on plans with trades (Developer+); Starter
+    falls back to the latest minute bar. day.close is 0 before the open.
+    """
+    if snap.last_trade and snap.last_trade.price:
+        return snap.last_trade.price, snap.last_trade.sip_timestamp / 1e9  # ns
+    if snap.min and snap.min.close:
+        return snap.min.close, snap.min.timestamp / 1e3  # ms
+    if snap.day and snap.day.close:
+        return snap.day.close, None
+    if snap.prev_day and snap.prev_day.close:
+        return snap.prev_day.close, None
+    return None
+
+
+def latest_eod_closes(client: RESTClient, max_days_back: int = 5) -> dict[str, float]:
+    """Close prices for all US stocks from the most recent trading day with data."""
+    day = date.today() - timedelta(days=1)
+    for _ in range(max_days_back):
+        bars = client.get_grouped_daily_aggs(day.isoformat(), adjusted=True)
+        if bars:
+            return {b.ticker: b.close for b in bars if b.close}
+        day -= timedelta(days=1)
+    return {}
+
 
 class MassiveDataSource(MarketDataSource):
     """MarketDataSource backed by the Massive (Polygon.io) REST API.
 
-    Polls GET /v2/snapshot/locale/us/markets/stocks/tickers for all watched
-    tickers in a single API call, then writes results to the PriceCache.
+    Two modes, each one API call per poll regardless of ticker count:
+      - snapshot: GET /v2/snapshot/locale/us/markets/stocks/tickers (Starter+)
+      - eod: GET /v2/aggs/grouped/locale/us/market/stocks/{date} (all plans)
 
-    Rate limits:
-      - Free tier: 5 req/min → poll every 15s (default)
-      - Paid tiers: higher limits → poll every 2-5s
+    Starts in snapshot mode and switches to eod permanently if the plan is
+    not entitled to snapshots (free tier returns 403 NOT_AUTHORIZED).
     """
 
     def __init__(
@@ -30,25 +62,30 @@ class MassiveDataSource(MarketDataSource):
         api_key: str,
         price_cache: PriceCache,
         poll_interval: float = 15.0,
+        eod_poll_interval: float = 900.0,
     ) -> None:
         self._api_key = api_key
         self._cache = price_cache
         self._interval = poll_interval
+        self._eod_interval = eod_poll_interval
+        self._mode = "snapshot"
+        self._eod_closes: dict[str, float] = {}
         self._tickers: list[str] = []
         self._task: asyncio.Task | None = None
         self._client: RESTClient | None = None
 
     async def start(self, tickers: list[str]) -> None:
         self._client = RESTClient(api_key=self._api_key)
-        self._tickers = list(tickers)
+        self._tickers = [t.upper().strip() for t in tickers]
 
         # Do an immediate first poll so the cache has data right away
         await self._poll_once()
 
         self._task = asyncio.create_task(self._poll_loop(), name="massive-poller")
         logger.info(
-            "Massive poller started: %d tickers, %.1fs interval",
-            len(tickers),
+            "Massive poller started: %d tickers, %s mode, %.1fs interval",
+            len(self._tickers),
+            self._mode,
             self._interval,
         )
 
@@ -67,7 +104,10 @@ class MassiveDataSource(MarketDataSource):
         ticker = ticker.upper().strip()
         if ticker not in self._tickers:
             self._tickers.append(ticker)
-            logger.info("Massive: added ticker %s (will appear on next poll)", ticker)
+            # In eod mode the last grouped response already holds every ticker
+            if ticker in self._eod_closes:
+                self._cache.update(ticker=ticker, price=self._eod_closes[ticker])
+            logger.info("Massive: added ticker %s", ticker)
 
     async def remove_ticker(self, ticker: str) -> None:
         ticker = ticker.upper().strip()
@@ -87,42 +127,39 @@ class MassiveDataSource(MarketDataSource):
             await self._poll_once()
 
     async def _poll_once(self) -> None:
-        """Execute one poll cycle: fetch snapshots, update cache."""
+        """Execute one poll cycle: fetch prices, update cache. Never raises."""
         if not self._tickers or not self._client:
             return
 
         try:
-            # The Massive RESTClient is synchronous — run in a thread to
-            # avoid blocking the event loop.
-            snapshots = await asyncio.to_thread(self._fetch_snapshots)
-            processed = 0
-            for snap in snapshots:
-                try:
-                    price = snap.last_trade.price
-                    # Massive timestamps are Unix milliseconds → convert to seconds
-                    timestamp = snap.last_trade.timestamp / 1000.0
-                    self._cache.update(
-                        ticker=snap.ticker,
-                        price=price,
-                        timestamp=timestamp,
-                    )
-                    processed += 1
-                except (AttributeError, TypeError) as e:
-                    logger.warning(
-                        "Skipping snapshot for %s: %s",
-                        getattr(snap, "ticker", "???"),
-                        e,
-                    )
-            logger.debug("Massive poll: updated %d/%d tickers", processed, len(self._tickers))
-
+            # The Massive RESTClient is synchronous; run it off the event loop.
+            prices = await asyncio.to_thread(self._fetch)
+        except BadResponse as e:
+            if self._mode == "snapshot" and "NOT_AUTHORIZED" in str(e):
+                logger.warning("Massive plan has no snapshot access; using end-of-day prices")
+                self._mode = "eod"
+                self._interval = self._eod_interval
+                await self._poll_once()
+            else:
+                logger.error("Massive poll failed: %s", e)
+            return
         except Exception as e:
+            # Network errors etc. The loop retries on the next interval.
             logger.error("Massive poll failed: %s", e)
-            # Don't re-raise — the loop will retry on the next interval.
-            # Common failures: 401 (bad key), 429 (rate limit), network errors.
+            return
 
-    def _fetch_snapshots(self) -> list:
-        """Synchronous call to the Massive REST API. Runs in a thread."""
-        return self._client.get_snapshot_all(
-            market_type=SnapshotMarketType.STOCKS,
-            tickers=self._tickers,
-        )
+        for ticker, (price, timestamp) in prices.items():
+            self._cache.update(ticker=ticker, price=price, timestamp=timestamp)
+        logger.debug("Massive poll: updated %d/%d tickers", len(prices), len(self._tickers))
+
+    def _fetch(self) -> dict[str, PriceAndTime]:
+        """Synchronous fetch for the current mode. Runs in a thread."""
+        if self._mode == "snapshot":
+            snapshots = self._client.get_snapshot_all(
+                market_type=SnapshotMarketType.STOCKS,
+                tickers=self._tickers,
+            )
+            return {s.ticker: p for s in snapshots if (p := snapshot_price(s))}
+
+        self._eod_closes = latest_eod_closes(self._client)
+        return {t: (self._eod_closes[t], None) for t in self._tickers if t in self._eod_closes}
