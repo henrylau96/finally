@@ -380,7 +380,7 @@ Stage 1: Node 20 slim
   - Copy frontend/
   - npm install && npm run build (produces static export)
 
-Stage 2: Python 3.12 slim
+Stage 2: Python 3.14 slim
   - Install uv
   - Copy backend/
   - uv sync (install Python dependencies from lockfile)
