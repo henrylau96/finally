@@ -98,14 +98,15 @@ SDK mapping (`massive.rest.models.TickerSnapshot`):
 
 Note: `LastTrade` has **no `timestamp` attribute**. Use `sip_timestamp` (ns).
 
+**SDK bug: pass `market_type="stocks"`, not `SnapshotMarketType.STOCKS`.** The enum is a plain `Enum` (not `str`), so the SDK formats it into the URL as `.../locale/global/markets/SnapshotMarketType.STOCKS/tickers`, and the server returns `404 page not found`. This was confirmed with SDK 2.2.0 by tracing the request, and the latest source (2.9.0) has the same code.
+
 ```python
 from massive import RESTClient
-from massive.rest.models import SnapshotMarketType
 
 client = RESTClient()  # reads MASSIVE_API_KEY
 
 snapshots = client.get_snapshot_all(
-    market_type=SnapshotMarketType.STOCKS,
+    market_type="stocks",  # NOT SnapshotMarketType.STOCKS, see note below
     tickers=["AAPL", "MSFT", "TSLA"],
 )
 for snap in snapshots:
@@ -123,7 +124,7 @@ for snap in snapshots:
 `GET /v2/snapshot/locale/us/markets/stocks/tickers/{ticker}` returns the same object as above under a `"ticker"` key.
 
 ```python
-snap = client.get_snapshot_ticker(SnapshotMarketType.STOCKS, "AAPL")
+snap = client.get_snapshot_ticker("stocks", "AAPL")
 ```
 
 Use this only for one-off lookups, such as checking that a ticker is valid before adding it to the watchlist. Use 3.1 for polling.
@@ -132,7 +133,7 @@ Use this only for one-off lookups, such as checking that a ticker is valid befor
 
 `GET /v2/aggs/grouped/locale/us/market/stocks/{date}` (date `YYYY-MM-DD`)
 
-Returns one daily OHLCV bar for **every** US stock on that date. This is the best EOD endpoint for the free tier, because it costs one call however many tickers are watched. The bar for today is not available until after the close. On a weekend or holiday, `results` is empty, so step back to the previous day.
+Returns one daily OHLCV bar for **every** US stock on that date. **Use the New York date.** Free keys get `403 NOT_AUTHORIZED` (*"Attempted to request today's data before end of day"*) for the current market date, and outside US time zones the local "yesterday" can still be today in New York (verified live). This is the best EOD endpoint for the free tier, because it costs one call however many tickers are watched. The bar for today is not available until after the close. On a weekend or holiday, `results` is empty, so step back to the previous day.
 
 ```json
 {"status": "OK", "adjusted": true, "resultsCount": 10342,
@@ -142,11 +143,12 @@ Returns one daily OHLCV bar for **every** US stock on that date. This is the bes
 `t` is the window timestamp in milliseconds.
 
 ```python
-from datetime import date, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 def latest_eod_closes(client: RESTClient, tickers: set[str]) -> dict[str, float]:
     """Close prices from the most recent trading day that has data."""
-    day = date.today() - timedelta(days=1)
+    day = datetime.now(ZoneInfo("America/New_York")).date() - timedelta(days=1)
     for _ in range(5):  # skip weekends/holidays
         bars = client.get_grouped_daily_aggs(day.isoformat(), adjusted=True)
         if bars:
@@ -218,7 +220,7 @@ FinAlly uses REST polling instead (see PLAN.md section 6). It works with every k
 
 | Need | Endpoint | SDK method | Plan |
 |---|---|---|---|
-| Live prices, whole watchlist | Full Market Snapshot | `get_snapshot_all(STOCKS, tickers=[...])` | Starter+ |
+| Live prices, whole watchlist | Full Market Snapshot | `get_snapshot_all("stocks", tickers=[...])` | Starter+ |
 | EOD prices, whole watchlist | Grouped Daily | `get_grouped_daily_aggs(date)` | All (free OK) |
 | Validate one ticker | Single snapshot / prev close | `get_snapshot_ticker` / `get_previous_close_agg` | Starter+ / All |
 

@@ -1,13 +1,20 @@
 """Tests for MassiveDataSource, built from real SDK models (not MagicMock)."""
 
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+from massive import RESTClient
 from massive.exceptions import BadResponse
 from massive.rest.models import GroupedDailyAgg, TickerSnapshot
 
 from app.market.cache import PriceCache
-from app.market.massive_client import MassiveDataSource, latest_eod_closes, snapshot_price
+from app.market.massive_client import (
+    MARKET_TZ,
+    MassiveDataSource,
+    latest_eod_closes,
+    snapshot_price,
+)
 
 TRADE_NS = 1760790000_000000000
 MINUTE_MS = 1760790060_000
@@ -73,6 +80,18 @@ class TestLatestEodCloses:
         client.get_grouped_daily_aggs.side_effect = [[], [], [_bar("AAPL", 190.0)]]
         assert latest_eod_closes(client) == {"AAPL": 190.0}
         assert client.get_grouped_daily_aggs.call_count == 3
+
+    def test_starts_from_new_york_yesterday(self):
+        """Local clock already on Oct 18 (UTC+8) while New York is still Oct 17."""
+        client = MagicMock()
+        client.get_grouped_daily_aggs.return_value = [_bar("AAPL", 190.0)]
+        ny_now = datetime(2026, 10, 17, 13, 19, tzinfo=MARKET_TZ)
+        with patch("app.market.massive_client.datetime") as dt:
+            dt.now.return_value = ny_now
+            latest_eod_closes(client)
+
+        dt.now.assert_called_once_with(MARKET_TZ)
+        assert client.get_grouped_daily_aggs.call_args.args[0] == "2026-10-16"
 
     def test_gives_up_after_max_days(self):
         client = MagicMock()
@@ -156,6 +175,18 @@ class TestMassiveDataSource:
 
         assert cache.get_price("TSLA") == 250.0
         assert source._client.get_grouped_daily_aggs.call_count == calls
+
+    async def test_snapshot_request_url(self):
+        """Real SDK builds the URL; only the HTTP layer is stubbed."""
+        source, cache = _source(["AAPL"])
+        source._client = RESTClient(api_key="test-key")
+        body = b'{"status":"OK","tickers":[{"ticker":"AAPL","lastTrade":{"p":190.5,"t":1760790000000000000}}]}'
+        source._client.client.request = MagicMock(return_value=MagicMock(status=200, data=body))
+        await source._poll_once()
+
+        url = source._client.client.request.call_args.args[1]
+        assert url == "https://api.massive.com/v2/snapshot/locale/us/markets/stocks/tickers"
+        assert cache.get_price("AAPL") == 190.5
 
     async def test_add_ticker(self):
         source, _ = _source()

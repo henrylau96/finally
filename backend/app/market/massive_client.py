@@ -4,16 +4,19 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from datetime import date, timedelta
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from massive import RESTClient
 from massive.exceptions import BadResponse
-from massive.rest.models import SnapshotMarketType, TickerSnapshot
+from massive.rest.models import TickerSnapshot
 
 from .cache import PriceCache
 from .interface import MarketDataSource
 
 logger = logging.getLogger(__name__)
+
+MARKET_TZ = ZoneInfo("America/New_York")
 
 PriceAndTime = tuple[float, float | None]
 
@@ -36,8 +39,12 @@ def snapshot_price(snap: TickerSnapshot) -> PriceAndTime | None:
 
 
 def latest_eod_closes(client: RESTClient, max_days_back: int = 5) -> dict[str, float]:
-    """Close prices for all US stocks from the most recent trading day with data."""
-    day = date.today() - timedelta(days=1)
+    """Close prices for all US stocks from the most recent trading day with data.
+
+    Starts from yesterday in New York time: free plans reject the current
+    market date until end of day, whatever the local timezone.
+    """
+    day = datetime.now(MARKET_TZ).date() - timedelta(days=1)
     for _ in range(max_days_back):
         bars = client.get_grouped_daily_aggs(day.isoformat(), adjusted=True)
         if bars:
@@ -155,8 +162,10 @@ class MassiveDataSource(MarketDataSource):
     def _fetch(self) -> dict[str, PriceAndTime]:
         """Synchronous fetch for the current mode. Runs in a thread."""
         if self._mode == "snapshot":
+            # Must be the plain string: the SDK formats SnapshotMarketType (a
+            # plain Enum) into the URL as "SnapshotMarketType.STOCKS" -> 404.
             snapshots = self._client.get_snapshot_all(
-                market_type=SnapshotMarketType.STOCKS,
+                market_type="stocks",
                 tickers=self._tickers,
             )
             return {s.ticker: p for s in snapshots if (p := snapshot_price(s))}
