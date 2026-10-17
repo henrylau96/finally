@@ -171,7 +171,7 @@ Polls Massive on an interval. Its key job is to **work on every plan** (see `MAS
 
 | Mode | Endpoint | When | Interval |
 |---|---|---|---|
-| `snapshot` | `get_snapshot_all(STOCKS, tickers=...)` | Starter+ keys | 15 s (default) |
+| `snapshot` | `get_snapshot_all("stocks", tickers=...)` | Starter+ keys | 15 s (default) |
 | `eod` | `get_grouped_daily_aggs(date)` | Free keys (snapshot returns 403 `NOT_AUTHORIZED`) | 15 min |
 
 The source starts in `snapshot` mode. If the first snapshot call is rejected as not authorised, it switches to `eod` permanently and logs a warning once. Both modes use a single API call per poll whatever the number of tickers.
@@ -201,7 +201,6 @@ def snapshot_price(snap: TickerSnapshot) -> tuple[float, float | None] | None:
 ```python
 from massive import RESTClient
 from massive.exceptions import BadResponse
-from massive.rest.models import SnapshotMarketType
 
 class MassiveDataSource(MarketDataSource):
     def __init__(self, api_key: str, price_cache: PriceCache,
@@ -244,7 +243,7 @@ class MassiveDataSource(MarketDataSource):
 
     def _fetch(self) -> dict[str, tuple[float, float | None]]:
         if self._mode == "snapshot":
-            snaps = self._client.get_snapshot_all(SnapshotMarketType.STOCKS, tickers=self._tickers)
+            snaps = self._client.get_snapshot_all("stocks", tickers=self._tickers)
             return {s.ticker: p for s in snaps if (p := snapshot_price(s))}
         self._eod_closes = latest_eod_closes(self._client)        # all US stocks, MASSIVE_API.md 3.3
         return {t: (self._eod_closes[t], None) for t in self._tickers if t in self._eod_closes}
