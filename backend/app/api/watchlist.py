@@ -9,6 +9,7 @@ from app import db
 from app.api.schemas import Ticker
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
+from app.streaming import reconcile_stream
 
 
 class AddTicker(BaseModel):
@@ -50,6 +51,6 @@ def create_watchlist_router(cache: PriceCache, source: MarketDataSource) -> APIR
         t = ticker.strip().upper()
         if not await asyncio.to_thread(db.remove_ticker, t):
             raise HTTPException(404, "Ticker not on watchlist")
-        await source.remove_ticker(t)
+        await reconcile_stream(source, t)
 
     return router
