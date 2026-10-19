@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from massive.exceptions import BadResponse
 
 from app.market.cache import PriceCache
 from app.market.massive_client import MassiveDataSource
@@ -199,3 +200,74 @@ class TestMassiveDataSource:
         assert cache.get_price("AAPL") == 190.50
 
         await source.stop()
+
+
+def _make_agg(ticker: str, close: float, timestamp_ms: int) -> MagicMock:
+    """Create a mock grouped daily aggregate."""
+    agg = MagicMock()
+    agg.ticker, agg.close, agg.timestamp = ticker, close, timestamp_ms
+    return agg
+
+
+def _source_with_client(tickers: list[str]) -> tuple[MassiveDataSource, PriceCache]:
+    cache = PriceCache()
+    source = MassiveDataSource(api_key="test-key", price_cache=cache, poll_interval=60.0)
+    source._tickers = tickers
+    source._client = MagicMock()
+    return source, cache
+
+
+@pytest.mark.asyncio
+class TestMassiveFreeTierFallback:
+    """Snapshot URL fix and end-of-day fallback for plans without snapshot access."""
+
+    async def test_snapshot_uses_string_market_type(self):
+        source, _ = _source_with_client(["AAPL"])
+        source._client.get_snapshot_all.return_value = []
+        await source._poll_once()
+        source._client.get_snapshot_all.assert_called_once_with(
+            market_type="stocks", tickers=["AAPL"]
+        )
+
+    async def test_not_authorized_falls_back_to_eod_closes(self):
+        source, cache = _source_with_client(["AAPL", "MSFT"])
+        source._client.get_snapshot_all.side_effect = BadResponse('{"status":"NOT_AUTHORIZED"}')
+        source._client.get_grouped_daily_aggs.return_value = [
+            _make_agg("AAPL", 343.46, 1792180800000),
+            _make_agg("MSFT", 529.05, 1792180800000),
+            _make_agg("ZZZZ", 1.0, 1792180800000),
+        ]
+        await source._poll_once()
+        assert cache.get_price("AAPL") == 343.46
+        assert cache.get_price("MSFT") == 529.05
+        assert cache.get_price("ZZZZ") is None
+        assert source._eod_date is not None
+
+        await source._poll_once()
+        assert source._client.get_snapshot_all.call_count == 1  # Sticky fallback
+
+    async def test_eod_walks_back_past_empty_days(self):
+        source, cache = _source_with_client(["AAPL"])
+        source._client.get_snapshot_all.side_effect = BadResponse('{"status":"NOT_AUTHORIZED"}')
+        source._client.get_grouped_daily_aggs.side_effect = [
+            [],
+            [_make_agg("AAPL", 340.0, 1792180800000)],
+        ]
+        await source._poll_once()
+        assert cache.get_price("AAPL") == 340.0
+        assert source._client.get_grouped_daily_aggs.call_count == 2
+
+    async def test_eod_walk_back_is_capped(self):
+        source, cache = _source_with_client(["AAPL"])
+        source._client.get_snapshot_all.side_effect = BadResponse('{"status":"NOT_AUTHORIZED"}')
+        source._client.get_grouped_daily_aggs.return_value = []
+        await source._poll_once()  # Logs the error, does not raise
+        assert cache.get_price("AAPL") is None
+        assert source._client.get_grouped_daily_aggs.call_count <= 7
+
+    async def test_other_errors_do_not_fall_back(self):
+        source, _ = _source_with_client(["AAPL"])
+        source._client.get_snapshot_all.side_effect = BadResponse("404 page not found")
+        await source._poll_once()
+        source._client.get_grouped_daily_aggs.assert_not_called()
+        assert source._eod_date is None

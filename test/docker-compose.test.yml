@@ -1,0 +1,30 @@
+services:
+  finally-app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      LLM_MOCK: "true"
+      MASSIVE_API_KEY: ""
+    tmpfs:
+      - /app/db
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.64.1-noble
+    depends_on:
+      finally-app:
+        condition: service_healthy
+    working_dir: /work
+    ipc: host
+    environment:
+      BASE_URL: http://finally-app:8000
+      CI: "true"
+    volumes:
+      - ./:/work
+      - /work/node_modules
+    command: sh -c "npm install --no-audit --no-fund && npx playwright test"

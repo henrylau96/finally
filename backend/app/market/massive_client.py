@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import date, timedelta
+from types import SimpleNamespace
 
 from massive import RESTClient
-from massive.rest.models import SnapshotMarketType
+from massive.exceptions import BadResponse
 
 from .cache import PriceCache
 from .interface import MarketDataSource
@@ -23,6 +25,9 @@ class MassiveDataSource(MarketDataSource):
     Rate limits:
       - Free tier: 5 req/min → poll every 15s (default)
       - Paid tiers: higher limits → poll every 2-5s
+
+    The free tier is not entitled to snapshots (NOT_AUTHORIZED). In that case the
+    source switches to end-of-day closes from the grouped daily endpoint.
     """
 
     def __init__(
@@ -37,6 +42,7 @@ class MassiveDataSource(MarketDataSource):
         self._tickers: list[str] = []
         self._task: asyncio.Task | None = None
         self._client: RESTClient | None = None
+        self._eod_date: date | None = None
 
     async def start(self, tickers: list[str]) -> None:
         self._client = RESTClient(api_key=self._api_key)
@@ -122,7 +128,35 @@ class MassiveDataSource(MarketDataSource):
 
     def _fetch_snapshots(self) -> list:
         """Synchronous call to the Massive REST API. Runs in a thread."""
-        return self._client.get_snapshot_all(
-            market_type=SnapshotMarketType.STOCKS,
-            tickers=self._tickers,
-        )
+        if self._eod_date is None:
+            try:
+                # Pass a string: massive 2.2.0 renders the enum into the URL path (404).
+                return self._client.get_snapshot_all(market_type="stocks", tickers=self._tickers)
+            except BadResponse as e:
+                if "NOT_AUTHORIZED" not in str(e):
+                    raise
+                logger.warning("Massive: snapshots not available on this plan, using end-of-day closes")
+        return self._fetch_eod_closes()
+
+    def _fetch_eod_closes(self, max_days_back: int = 7) -> list:
+        """Free-tier fallback: latest grouped daily closes, shaped like snapshots."""
+        if self._eod_date:
+            days = [self._eod_date]
+        else:
+            days = [date.today() - timedelta(days=n) for n in range(1, max_days_back + 1)]
+        for day in days:
+            if day.weekday() >= 5:
+                continue
+            aggs = self._client.get_grouped_daily_aggs(day.isoformat())
+            if aggs:
+                self._eod_date = day
+                wanted = set(self._tickers)
+                return [
+                    SimpleNamespace(
+                        ticker=a.ticker,
+                        last_trade=SimpleNamespace(price=a.close, timestamp=a.timestamp),
+                    )
+                    for a in aggs
+                    if a.ticker in wanted
+                ]
+        raise RuntimeError(f"No end-of-day data in the last {max_days_back} days")
