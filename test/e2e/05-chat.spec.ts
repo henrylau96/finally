@@ -84,3 +84,21 @@ test("input is disabled while a reply is pending", async ({ page }) => {
   await expect(page.getByTestId("chat-loading")).toHaveCount(0);
   await expect(page.getByTestId("chat-input")).toBeEnabled();
 });
+
+test("a late history load keeps a message sent before it", async ({ page }) => {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.route("**/api/chat/history", async (route) => {
+    const response = await route.fetch();
+    await held;
+    await route.fulfill({ response });
+  });
+  await openApp(page);
+  const text = `early ${Date.now()}`;
+  await sendChat(page, text);
+  const loaded = page.waitForResponse("**/api/chat/history");
+  release();
+  await loaded;
+  await page.waitForTimeout(500);
+  await expect(page.locator('[data-testid="chat-message"][data-role="user"]').filter({ hasText: text })).toBeVisible();
+});

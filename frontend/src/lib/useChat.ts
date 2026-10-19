@@ -32,7 +32,7 @@ export function useChat(onActions: () => void) {
   useEffect(() => {
     fetch("/api/chat/history")
       .then((res) => (res.ok ? res.json() : []))
-      .then((items: ChatEntry[]) => setMessages(items))
+      .then((items: ChatEntry[]) => setMessages((prev) => (prev.length > 0 ? prev : items)))
       .catch(() => {});
   }, []);
 
