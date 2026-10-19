@@ -151,7 +151,7 @@ Plans:
 **Wave 2** *(blocked on Wave 1 completion)*
 
 - [x] 04-03-PLAN.md — FinAlly AI chat dock: useChat, bubbles, action chips, loading, history, post-action refresh
-- [ ] 04-04-PLAN.md — Real LiteLLM/Cerebras structured call, grounded prompt, graceful failures, non-blocking proof
+- [x] 04-04-PLAN.md — Real LiteLLM/Cerebras structured call, grounded prompt, graceful failures, non-blocking proof
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -197,6 +197,6 @@ Plans:
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
-| 4. AI Chat Copilot | 3/5 | In Progress|  |
+| 4. AI Chat Copilot | 4/5 | In Progress|  |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
