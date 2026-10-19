@@ -84,12 +84,17 @@ def execute_trade(ticker: str, side: str, quantity: float, price: float) -> dict
 
 
 def portfolio_view(cache: PriceCache) -> dict:
-    """Return cash, positions marked to the cached price (avg cost fallback), totals and P&L."""
+    """Return cash, positions marked to the cached price (avg cost fallback), totals and P&L.
+
+    Cash and positions are read in one transaction so a concurrent trade cannot tear the total.
+    """
     with closing(connect(db_path())) as conn:
+        conn.execute("BEGIN")
         cash = conn.execute("SELECT cash_balance FROM users_profile WHERE id = 'default'").fetchone()[0]
         rows = conn.execute(
             "SELECT ticker, quantity, avg_cost FROM positions WHERE user_id = 'default' ORDER BY rowid"
         ).fetchall()
+        conn.commit()
     positions = []
     for r in rows:
         u = cache.get(r["ticker"])

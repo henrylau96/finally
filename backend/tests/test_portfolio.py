@@ -112,3 +112,30 @@ def test_micro_buys_pay_full_value():
     assert cash() == pytest.approx(10000 - 0.01 * 49.99)
     execute_trade("ZZZ", "sell", 0.01, 49.99)
     assert cash() == pytest.approx(10000.0)
+
+
+def test_portfolio_view_consistent_read(monkeypatch):
+    """A trade committing between the cash and positions reads must not tear the total."""
+    from app import portfolio
+
+    real_connect = portfolio.connect
+
+    class TradeMidRead:
+        def __init__(self, conn):
+            self.conn = conn
+
+        def __getattr__(self, name):
+            return getattr(self.conn, name)
+
+        def execute(self, sql, *args):
+            if "FROM positions" in sql:
+                with closing(real_connect(db.db_path())) as other, other:
+                    other.execute("UPDATE users_profile SET cash_balance = 9000.0")
+                    other.execute(
+                        "INSERT INTO positions (id, user_id, ticker, quantity, avg_cost, updated_at) "
+                        "VALUES ('p', 'default', 'AAPL', 10, 100.0, 'now')"
+                    )
+            return self.conn.execute(sql, *args)
+
+    monkeypatch.setattr(portfolio, "connect", lambda path: TradeMidRead(real_connect(path)))
+    assert portfolio_view(PriceCache())["total_value"] == 10000.0
