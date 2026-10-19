@@ -1,54 +1,62 @@
 "use client";
 
+import { useState } from "react";
 import { DEFAULT_TICKERS } from "@/lib/tickers";
-import { usePriceStream, type Status } from "@/lib/usePriceStream";
-
-const DOT: Record<Status, string> = {
-  connected: "bg-up",
-  reconnecting: "bg-warn",
-  disconnected: "bg-down",
-};
-const LABEL: Record<Status, string> = {
-  connected: "Live",
-  reconnecting: "Connecting",
-  disconnected: "Offline",
-};
+import { usePriceStream } from "@/lib/usePriceStream";
+import ChatDock from "./ChatDock";
+import Header from "./Header";
+import Panel from "./Panel";
 
 function formatPrice(price: number) {
   return "$" + price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+function Placeholder({ children }: { children: string }) {
+  return <p className="p-4 text-center text-text-muted">{children}</p>;
+}
+
 export default function Terminal() {
-  const { status, quotes } = usePriceStream();
+  const { status, hasConnected, quotes } = usePriceStream();
+  const [selected, setSelected] = useState("AAPL");
   return (
-    <div className="flex h-full flex-col">
-      <header className="flex h-12 items-center justify-between border-b border-border bg-surface px-4">
-        <span className="text-base font-semibold text-accent">FinAlly</span>
-        <div
-          data-testid="connection-status"
-          data-status={status}
-          role="status"
-          aria-live="polite"
-          title={"Price stream: " + status}
-          className="flex items-center gap-2"
-        >
-          <span className={"h-2 w-2 rounded-full " + DOT[status]} />
-          <span className="text-xs text-text-muted">{LABEL[status]}</span>
-        </div>
-      </header>
-      <div className="overflow-auto">
-        {DEFAULT_TICKERS.map((t) => (
-          <div
-            key={t}
-            data-testid={"watchlist-row-" + t}
-            className="flex items-center justify-between border-b border-border px-4 py-2 hover:bg-row-hover"
-          >
-            <span className="font-mono font-semibold">{t}</span>
-            <span data-testid={"price-" + t} className="font-mono">
-              {quotes[t] ? formatPrice(quotes[t].price) : "--"}
-            </span>
+    <div className="flex h-full flex-col gap-2 p-2">
+      <Header status={status} hasConnected={hasConnected} />
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,28%)_1fr_auto] gap-2">
+        <Panel title="Watchlist">
+          {DEFAULT_TICKERS.map((t) => (
+            <div
+              key={t}
+              data-testid={"watchlist-row-" + t}
+              onClick={() => setSelected(t)}
+              className={
+                "flex items-center justify-between border-b border-border px-2 py-1 hover:bg-row-hover " +
+                (selected === t ? "border-l-2 border-l-primary bg-row-hover" : "")
+              }
+            >
+              <span className="font-mono font-semibold">{t}</span>
+              <span data-testid={"price-" + t} className="font-mono">
+                {quotes[t] ? formatPrice(quotes[t].price) : "--"}
+              </span>
+            </div>
+          ))}
+        </Panel>
+        <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_1fr] gap-2">
+          <Panel title="Main chart" testId="main-chart" data-ticker="">
+            <Placeholder>Select a ticker to see its chart. Coming soon.</Placeholder>
+          </Panel>
+          <div className="grid min-h-0 grid-cols-3 gap-2">
+            <Panel title="Heatmap" testId="heatmap">
+              <Placeholder>Portfolio heatmap. Coming soon.</Placeholder>
+            </Panel>
+            <Panel title="Positions">
+              <Placeholder>Positions. Coming soon.</Placeholder>
+            </Panel>
+            <Panel title="P&L" testId="pnl-chart">
+              <Placeholder>P&L chart. Coming soon.</Placeholder>
+            </Panel>
           </div>
-        ))}
+        </div>
+        <ChatDock />
       </div>
     </div>
   );

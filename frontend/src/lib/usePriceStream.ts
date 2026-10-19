@@ -16,12 +16,16 @@ const MAX_POINTS = 120;
 
 export function usePriceStream() {
   const [status, setStatus] = useState<Status>("reconnecting");
+  const [hasConnected, setHasConnected] = useState(false);
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
   const [history, setHistory] = useState<Record<string, number[]>>({});
 
   useEffect(() => {
     const es = new EventSource("/api/stream/prices");
-    es.onopen = () => setStatus("connected");
+    es.onopen = () => {
+      setStatus("connected");
+      setHasConnected(true);
+    };
     es.onerror = () =>
       setStatus(es.readyState === EventSource.CLOSED ? "disconnected" : "reconnecting");
     es.onmessage = (e) => {
@@ -36,5 +40,5 @@ export function usePriceStream() {
     return () => es.close();
   }, []);
 
-  return { status, quotes, history };
+  return { status, hasConnected, quotes, history };
 }
