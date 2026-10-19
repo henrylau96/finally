@@ -73,7 +73,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 02-02-PLAN.md — Add/remove tickers from the panel; grid semantics, fixed notice slot, empty state (wave 2)
+- [x] 02-02-PLAN.md — Add/remove tickers from the panel; grid semantics, fixed notice slot, empty state (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -155,7 +155,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
-| 2. Persistent Watchlist & Charts | 1/4 | In Progress|  |
+| 2. Persistent Watchlist & Charts | 2/4 | In Progress|  |
 | 3. Trading & Portfolio | 0/TBD | Not started | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
