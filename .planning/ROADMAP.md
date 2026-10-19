@@ -98,7 +98,29 @@ Plans:
   4. The header shows live total value, cash balance and a connection dot (green, yellow, red)
   5. The positions table, treemap heatmap (green profit, red loss) and P&L chart refresh after each trade and the P&L chart keeps growing from 30-second snapshots
 
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Trade engine: atomic SQLite trade + portfolio API with lifespan lock; header shows real cash and live total (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 03-02-PLAN.md — Trade bar with inline errors, positions table with live P&L, shared selection (wave 2)
+- [ ] 03-03-PLAN.md — Streamed set = watchlist ∪ positions via reconcile_stream (startup, trades, watchlist removal) (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 03-04-PLAN.md — Snapshots (startup, after trade, 30 s) + bounded history; P&L line chart and shared chart theme (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 03-05-PLAN.md — Squarified heatmap colored by P&L; folded Phase 2 UI fixes; 04-portfolio-viz E2E (wave 4)
+
+**Wave 5** *(blocked on Wave 4 completion)*
+
+- [ ] 03-06-PLAN.md — Phase gate: full suite, curl smoke, restart persistence, E2E, human browser verification (wave 5)
 **UI hint**: yes
 
 ### Phase 4: AI Chat Copilot
@@ -156,7 +178,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
-| 3. Trading & Portfolio | 0/TBD | Not started | - |
+| 3. Trading & Portfolio | 0/6 | Planned | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
