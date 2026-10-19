@@ -18,7 +18,11 @@ From one command, the user lands in a live, dark trading terminal where prices s
 - ✓ `GET /api/health` and FastAPI serving the Next.js static export from one origin — Phase 1 (OPS-01, OPS-02)
 - ✓ Dark terminal shell with live watchlist: flashing prices, signed day change %, sparklines — Phase 1 (UI-01, UI-03, UI-04)
 
-Validated in Phase 1: Live Price Terminal (2026-10-19).
+- ✓ SQLite database created and seeded at startup (six tables, $10,000 default user, 10 default tickers) — Phase 2 (DATA-01..03)
+- ✓ Persistent watchlist API (list, add, remove, idempotent duplicate) driving what streams — Phase 2 (WATCH-01..04)
+- ✓ Watchlist add/remove UI and Lightweight Charts main chart for the selected ticker — Phase 2 (UI-05, UI-06)
+
+Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19).
 
 ### Active
 
@@ -93,4 +97,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-19 after Phase 1*
+*Last updated: 2026-10-19 after Phase 2*
