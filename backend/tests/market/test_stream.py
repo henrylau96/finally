@@ -2,6 +2,7 @@ import asyncio
 
 import pytest
 
+from app.api import stream
 from app.api.stream import price_events
 from app.market.cache import PriceCache
 from app.market.seed_prices import DEFAULT_TICKERS, SEED_PRICES
@@ -40,3 +41,13 @@ async def test_event_after_update_has_no_retry(cache):
     cache.update("AAPL", 191.0)
     event = await asyncio.wait_for(anext(gen), 1)
     assert event.retry is None
+
+
+async def test_stream_ends_on_shutdown(cache, monkeypatch):
+    """Setting the shutdown event ends the generator so the server can exit."""
+    monkeypatch.setattr(stream, "shutdown", asyncio.Event())
+    gen = price_events(cache, interval=0.01)
+    await anext(gen)
+    stream.shutdown.set()
+    with pytest.raises(StopAsyncIteration):
+        await asyncio.wait_for(anext(gen), 1)

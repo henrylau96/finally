@@ -8,11 +8,13 @@ from fastapi.sse import EventSourceResponse, ServerSentEvent
 
 from app.market.cache import PriceCache
 
+shutdown = asyncio.Event()
+
 
 async def price_events(cache: PriceCache, interval: float = 0.5) -> AsyncIterator[ServerSentEvent]:
-    """Yield a full price snapshot whenever the cache version changes."""
+    """Yield a full price snapshot whenever the cache version changes, until shutdown is set."""
     last_version, retry = -1, 1000
-    while True:
+    while not shutdown.is_set():
         if cache.version != last_version:
             last_version = cache.version
             payload = {t: u.to_dict() for t, u in cache.get_all().items()}
