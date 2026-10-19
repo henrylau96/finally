@@ -21,7 +21,7 @@ created: 2026-10-19
 | Tool | none (shadcn gate: N, no `components.json`; hand-built Tailwind 4.3 components, in line with the dense terminal aesthetic; registry gate not applicable) |
 | Preset | not applicable |
 | Component library | none (plain React 19.3 components + Tailwind theme tokens in CSS via `@theme`) |
-| Icon library | none in Phase 1 (inline SVG only: sparkline, chevron). Later phases may add `lucide-react` (decision) |
+| Icon library | none in Phase 1 (inline SVG only: sparkline, chevron; the icon-only chat dock chevron carries `aria-label="Collapse chat panel"` / `"Expand chat panel"`). Later phases may add `lucide-react` (decision) |
 | Font | UI: system sans stack (`ui-sans-serif, system-ui, "Segoe UI", sans-serif`). Numerics and tickers: `ui-monospace, "SF Mono", Menlo, Consolas, monospace` with `font-variant-numeric: tabular-nums`. No webfont download (static export, offline-friendly) (decision) |
 
 ---
@@ -191,7 +191,7 @@ Empty / error states in watchlist:
 | Primary CTA | none in Phase 1 (no actions yet). Reserved for Phase 3: "Buy" / "Sell" |
 | Brand / title | "FinAlly" (header), page `<title>`: "FinAlly - AI Trading Workstation" |
 | Connection labels | "Live", "Reconnecting", "Offline", initial "Connecting" |
-| Empty state heading (watchlist before first tick) | "Waiting for prices" |
+| Empty state heading (watchlist before first tick) | "Waiting for prices" (watchlist panel body line, shown until the first SSE tick; rows still render with `--`) |
 | Empty state body | "Prices appear as soon as the stream connects. No action needed." |
 | Error state (stream offline) | reconnecting: "Reconnecting to price stream. Prices shown may be stale."; disconnected (EventSource CLOSED, no auto-retry): "Price stream closed. Reload the page to retry." (shown as a 12px muted line at the top of the watchlist panel only when status is not connected) |
 | Placeholder panels | Main chart: "Select a ticker to see its chart. Coming soon." Heatmap: "Portfolio heatmap. Coming soon." Positions: "Positions. Coming soon." P&L: "P&L chart. Coming soon." Chat dock: "AI assistant. Coming soon." |
