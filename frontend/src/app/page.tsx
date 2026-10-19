@@ -1,3 +1,5 @@
+import Terminal from "@/components/Terminal";
+
 export default function Page() {
-  return <h1 className="text-accent">FinAlly</h1>;
+  return <Terminal />;
 }
