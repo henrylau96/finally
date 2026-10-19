@@ -217,3 +217,6 @@ test/test-results/
 test/playwright-report/
 # The Python template rule lib/ above must not hide frontend source
 !frontend/src/lib/
+
+frontend/next-env.d.ts
+frontend/tsconfig.tsbuildinfo
