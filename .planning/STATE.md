@@ -65,7 +65,7 @@ Recent decisions affecting current work:
 - [Roadmap]: Vertical MVP slices; Massive poller deferred to Phase 5 so the simulator path ships first
 - [Roadmap]: Docker/scripts/full test suite consolidated in Phase 6; Phase 1 already served by FastAPI on port 8000
 - [Phase 01]: [01-01]: to_dict drops change/change_percent; main.py mkdirs STATIC_DIR since StaticFiles raises per request if missing
-- [Phase ?]: Phase 1-03: factory always returns simulator; Massive selection deferred to Phase 5 (MKT-06)
+- [Phase 1]: Phase 1-03: factory always returns simulator; Massive selection deferred to Phase 5 (MKT-06)
 
 ### Pending Todos
 
