@@ -42,7 +42,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 01-03-PLAN.md — Realistic market: Cholesky-correlated GBM, 2-5% shocks, seeds, MarketDataSource interface + factory, TEST-01 suite (wave 3)
+- [x] 01-03-PLAN.md — Realistic market: Cholesky-correlated GBM, 2-5% shocks, seeds, MarketDataSource interface + factory, TEST-01 suite (wave 3)
 - [ ] 01-04-PLAN.md — Terminal UI: grid shell, connection dot states, flashing prices, Day %, sparklines (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
@@ -137,7 +137,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Live Price Terminal | 2/5 | In Progress|  |
+| 1. Live Price Terminal | 3/5 | In Progress|  |
 | 2. Persistent Watchlist & Charts | 0/TBD | Not started | - |
 | 3. Trading & Portfolio | 0/TBD | Not started | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |

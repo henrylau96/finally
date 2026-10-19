@@ -8,11 +8,11 @@
 
 ### Market Data (§6)
 
-- [ ] **MKT-01**: Simulator and Massive client implement one abstract market-data interface; downstream code is agnostic to the source
+- [x] **MKT-01**: Simulator and Massive client implement one abstract market-data interface; downstream code is agnostic to the source
 - [x] **MKT-02**: Simulator generates prices by geometric Brownian motion with per-ticker drift and volatility, updating ~every 500ms
-- [ ] **MKT-03**: Simulator moves related tickers together (correlated moves, e.g. tech stocks)
-- [ ] **MKT-04**: Simulator occasionally applies a sudden 2-5% move to a ticker
-- [ ] **MKT-05**: Simulator starts from realistic seed prices (e.g. AAPL ~$190, GOOGL ~$175)
+- [x] **MKT-03**: Simulator moves related tickers together (correlated moves, e.g. tech stocks)
+- [x] **MKT-04**: Simulator occasionally applies a sudden 2-5% move to a ticker
+- [x] **MKT-05**: Simulator starts from realistic seed prices (e.g. AAPL ~$190, GOOGL ~$175)
 - [ ] **MKT-06**: When `MASSIVE_API_KEY` is set and non-empty the backend uses the Massive REST poller; otherwise it uses the simulator
 - [ ] **MKT-07**: Massive poller fetches the union of watched tickers on a configurable interval (free tier: grouped daily bars every 15 min; paid: 2-15s) and parses responses into the simulator's format
 - [x] **MKT-08**: A single background task writes to an in-memory price cache holding latest price, previous price and timestamp per ticker
@@ -91,7 +91,7 @@
 
 ### Testing (§12)
 
-- [ ] **TEST-01**: Backend pytest covers market data (valid simulator prices, GBM math, Massive parsing, interface conformance)
+- [x] **TEST-01**: Backend pytest covers market data (valid simulator prices, GBM math, Massive parsing, interface conformance)
 - [ ] **TEST-02**: Backend pytest covers portfolio logic (trades, P&L, oversell, insufficient cash, selling at a loss)
 - [ ] **TEST-03**: Backend pytest covers LLM structured-output parsing, malformed responses and trade validation in the chat flow
 - [ ] **TEST-04**: Backend pytest covers API routes (status codes, response shapes, errors)
@@ -125,11 +125,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MKT-01 | Phase 1 | Pending |
+| MKT-01 | Phase 1 | Complete |
 | MKT-02 | Phase 1 | Complete |
-| MKT-03 | Phase 1 | Pending |
-| MKT-04 | Phase 1 | Pending |
-| MKT-05 | Phase 1 | Pending |
+| MKT-03 | Phase 1 | Complete |
+| MKT-04 | Phase 1 | Complete |
+| MKT-05 | Phase 1 | Complete |
 | MKT-06 | Phase 5 | Pending |
 | MKT-07 | Phase 5 | Pending |
 | MKT-08 | Phase 1 | Complete |
@@ -184,7 +184,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPS-05 | Phase 6 | Pending |
 | OPS-06 | Phase 6 | Pending |
 | OPS-07 | Phase 6 | Pending |
-| TEST-01 | Phase 1 | Pending |
+| TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 3 | Pending |
 | TEST-03 | Phase 4 | Pending |
 | TEST-04 | Phase 6 | Pending |
