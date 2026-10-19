@@ -52,14 +52,14 @@
 
 ### AI Chat (§9)
 
-- [ ] **CHAT-01**: `POST /api/chat` returns one complete JSON response (message plus executed actions); no token streaming
+- [x] **CHAT-01**: `POST /api/chat` returns one complete JSON response (message plus executed actions); no token streaming
 - [ ] **CHAT-02**: The prompt includes a FinAlly system prompt, current portfolio context (cash, positions with P&L, watchlist with live prices, total value) and recent conversation history
 - [ ] **CHAT-03**: The LLM is called via LiteLLM -> OpenRouter `openrouter/openai/gpt-oss-120b` with Cerebras as provider, using structured output `{message, trades[], watchlist_changes[]}`
-- [ ] **CHAT-04**: Trades from the LLM auto-execute through the same validation as manual trades; failures are reported back in the response
-- [ ] **CHAT-05**: Watchlist changes from the LLM auto-execute
-- [ ] **CHAT-06**: User and assistant messages, with assistant actions as JSON, are stored in `chat_messages`
+- [x] **CHAT-04**: Trades from the LLM auto-execute through the same validation as manual trades; failures are reported back in the response
+- [x] **CHAT-05**: Watchlist changes from the LLM auto-execute
+- [x] **CHAT-06**: User and assistant messages, with assistant actions as JSON, are stored in `chat_messages`
 - [ ] **CHAT-07**: Malformed LLM output is handled gracefully with an error message instead of a crash
-- [ ] **CHAT-08**: With `LLM_MOCK=true` the backend returns deterministic mock responses (including a trade) without calling OpenRouter
+- [x] **CHAT-08**: With `LLM_MOCK=true` the backend returns deterministic mock responses (including a trade) without calling OpenRouter
 - [ ] **CHAT-09**: The chat request does not block the event loop (price streaming continues during an LLM call)
 
 ### Frontend (§2, §10)
@@ -93,7 +93,7 @@
 
 - [x] **TEST-01**: Backend pytest covers market data (valid simulator prices, GBM math, Massive parsing, interface conformance)
 - [x] **TEST-02**: Backend pytest covers portfolio logic (trades, P&L, oversell, insufficient cash, selling at a loss)
-- [ ] **TEST-03**: Backend pytest covers LLM structured-output parsing, malformed responses and trade validation in the chat flow
+- [x] **TEST-03**: Backend pytest covers LLM structured-output parsing, malformed responses and trade validation in the chat flow
 - [ ] **TEST-04**: Backend pytest covers API routes (status codes, response shapes, errors)
 - [ ] **TEST-05**: Frontend tests cover component rendering with mock data, price flash triggering, watchlist CRUD, portfolio calculations, and chat rendering with loading state
 - [ ] **TEST-06**: `test/docker-compose.test.yml` runs the app container plus a Playwright container with `LLM_MOCK=true`
@@ -154,14 +154,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WATCH-02 | Phase 2 | Complete |
 | WATCH-03 | Phase 2 | Complete |
 | WATCH-04 | Phase 2 | Complete |
-| CHAT-01 | Phase 4 | Pending |
+| CHAT-01 | Phase 4 | Complete |
 | CHAT-02 | Phase 4 | Pending |
 | CHAT-03 | Phase 4 | Pending |
-| CHAT-04 | Phase 4 | Pending |
-| CHAT-05 | Phase 4 | Pending |
-| CHAT-06 | Phase 4 | Pending |
+| CHAT-04 | Phase 4 | Complete |
+| CHAT-05 | Phase 4 | Complete |
+| CHAT-06 | Phase 4 | Complete |
 | CHAT-07 | Phase 4 | Pending |
-| CHAT-08 | Phase 4 | Pending |
+| CHAT-08 | Phase 4 | Complete |
 | CHAT-09 | Phase 4 | Pending |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 3 | Complete |
@@ -186,7 +186,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPS-07 | Phase 6 | Pending |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 3 | Complete |
-| TEST-03 | Phase 4 | Pending |
+| TEST-03 | Phase 4 | Complete |
 | TEST-04 | Phase 6 | Pending |
 | TEST-05 | Phase 6 | Pending |
 | TEST-06 | Phase 6 | Pending |

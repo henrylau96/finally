@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-10-19T15:38:30.547Z"
-last_activity: 2026-10-19 -- Phase 4 execution started
+stopped_at: Completed 04-01-PLAN.md
+last_updated: "2026-10-19T15:41:37.526Z"
+last_activity: 2026-10-19
 progress:
   total_phases: 6
   completed_phases: 3
   total_plans: 20
-  completed_plans: 15
+  completed_plans: 16
   percent: 50
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-10-19)
 ## Current Position
 
 Phase: 4 (AI Chat Copilot) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 4
-Last activity: 2026-10-19 -- Phase 4 execution started
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-10-19
 
-Progress: [██████████] 100%
+Progress: [████████░░] 80%
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [██████████] 100%
 | Phase 02 P04 | 10min | 2 tasks | 0 files |
 | Phase 3 P01 | 25min | 3 tasks | 13 files |
 | Phase 3 P04 | 15min | 2 tasks | 9 files |
+| Phase 04 P01 | 15min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,7 @@ Recent decisions affecting current work:
 - [Phase 01]: [01-01]: to_dict drops change/change_percent; main.py mkdirs STATIC_DIR since StaticFiles raises per request if missing
 - [Phase 1]: Phase 1-03: factory always returns simulator; Massive selection deferred to Phase 5 (MKT-06)
 - [Phase 3]: [03-01]: 422 handler omits request input (NaN bodies); qty/avg_cost 4dp, cash 2dp
+- [Phase 04]: Chat actions run through lock-owning services; watchlist changes before trades
 
 ### Pending Todos
 
@@ -92,6 +94,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-19T12:03:42.021Z
-Stopped at: Phase 1 UI-SPEC approved
+Last session: 2026-10-19T15:41:37.512Z
+Stopped at: Completed 04-01-PLAN.md
 Resume file: None
