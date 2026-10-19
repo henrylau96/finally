@@ -70,12 +70,12 @@
 - [x] **UI-04**: Prices flash green on uptick or red on downtick, fading over ~500ms via CSS transition
 - [x] **UI-05**: User can add and remove watchlist tickers from the watchlist panel
 - [x] **UI-06**: Clicking a ticker shows a larger price-over-time chart for it in the main chart area
-- [ ] **UI-07**: Trade bar has ticker and quantity fields plus buy and sell buttons; orders fill instantly with no confirmation and errors are shown inline
-- [ ] **UI-08**: Positions table shows ticker, quantity, average cost, current price, unrealized P&L and % change
+- [x] **UI-07**: Trade bar has ticker and quantity fields plus buy and sell buttons; orders fill instantly with no confirmation and errors are shown inline
+- [x] **UI-08**: Positions table shows ticker, quantity, average cost, current price, unrealized P&L and % change
 - [ ] **UI-09**: Portfolio heatmap (treemap) sizes positions by weight and colors them by P&L (green profit, red loss)
 - [ ] **UI-10**: P&L chart plots total portfolio value over time from `/api/portfolio/history`
 - [ ] **UI-11**: Collapsible AI chat panel with message input, scrolling history, a loading indicator while waiting, and inline confirmations of executed trades and watchlist changes
-- [ ] **UI-12**: Portfolio, positions and charts refresh after manual or AI-executed trades
+- [x] **UI-12**: Portfolio, positions and charts refresh after manual or AI-executed trades
 - [ ] **UI-13**: Layout is dense and desktop-first and remains functional at tablet width
 - [ ] **UI-14**: UI elements expose the `data-testid` hooks used by the E2E suite
 
@@ -169,12 +169,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-04 | Phase 1 | Complete |
 | UI-05 | Phase 2 | Complete |
 | UI-06 | Phase 2 | Complete |
-| UI-07 | Phase 3 | Pending |
-| UI-08 | Phase 3 | Pending |
+| UI-07 | Phase 3 | Complete |
+| UI-08 | Phase 3 | Complete |
 | UI-09 | Phase 3 | Pending |
 | UI-10 | Phase 3 | Pending |
 | UI-11 | Phase 4 | Pending |
-| UI-12 | Phase 3 | Pending |
+| UI-12 | Phase 3 | Complete |
 | UI-13 | Phase 6 | Pending |
 | UI-14 | Phase 6 | Pending |
 | OPS-01 | Phase 1 | Complete |
