@@ -1,4 +1,3 @@
-import { DEFAULT_TICKERS } from "@/lib/tickers";
 import type { Quote, Status } from "@/lib/usePriceStream";
 import Panel from "./Panel";
 import WatchlistRow from "./WatchlistRow";
@@ -25,12 +24,14 @@ function Notice({ status, hasQuotes }: { status: Status; hasQuotes: boolean }) {
 }
 
 export default function Watchlist({
+  tickers,
   quotes,
   history,
   status,
   selected,
   onSelect,
 }: {
+  tickers: string[];
   quotes: Record<string, Quote>;
   history: Record<string, number[]>;
   status: Status;
@@ -49,7 +50,7 @@ export default function Watchlist({
         <span className="w-[72px] text-right">{HEADERS[2]}</span>
         <span className="w-16 text-center">{HEADERS[3]}</span>
       </div>
-      {DEFAULT_TICKERS.map((t) => (
+      {tickers.map((t) => (
         <WatchlistRow
           key={t}
           ticker={t}
