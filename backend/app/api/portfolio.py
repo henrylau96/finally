@@ -4,7 +4,7 @@ import asyncio
 
 from fastapi import APIRouter, HTTPException, Request
 
-from app import portfolio
+from app import portfolio, snapshots
 from app.api.schemas import TradeRequest
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
@@ -18,6 +18,10 @@ def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIR
     async def get_portfolio() -> dict:
         return await asyncio.to_thread(portfolio.portfolio_view, cache)
 
+    @router.get("/api/portfolio/history")
+    async def get_history() -> list[dict]:
+        return await asyncio.to_thread(snapshots.history)
+
     @router.post("/api/portfolio/trade")
     async def trade(body: TradeRequest, request: Request) -> dict:
         try:
@@ -28,11 +32,13 @@ def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIR
                 if update is None:
                     raise HTTPException(400, f"No price available for {body.ticker}")
                 try:
-                    return await asyncio.to_thread(
+                    result = await asyncio.to_thread(
                         portfolio.execute_trade, body.ticker, body.side, body.quantity, update.price
                     )
                 except portfolio.TradeError as e:
                     raise HTTPException(400, str(e)) from e
+            await asyncio.to_thread(snapshots.record_snapshot, cache)
+            return result
         finally:
             await reconcile_stream(source, body.ticker)
 
