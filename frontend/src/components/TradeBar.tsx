@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 const BAD_TICKER = "Enter a ticker of 1-5 letters.";
 const BAD_QTY = "Enter a quantity above 0 (up to 4 decimals).";
+/** Plain decimal with at most 4 places; rejects hex, binary and exponent forms. */
+const QTY = /^(\d+(\.\d{1,4})?|\.\d{1,4})$/;
 
 export default function TradeBar({
   selected,
@@ -26,12 +28,11 @@ export default function TradeBar({
   async function submit(side: "buy" | "sell") {
     const sym = ticker.trim().toUpperCase();
     if (!/^[A-Z]{1,5}$/.test(sym)) return setError(BAD_TICKER);
-    const q = Number(quantity.trim());
-    const ok = quantity.trim() !== "" && Number.isFinite(q) && q > 0 && Math.abs(q * 1e4 - Math.round(q * 1e4)) < 1e-6;
-    if (!ok || Math.round(q * 1e4) === 0) return setError(BAD_QTY);
+    const text = quantity.trim();
+    if (!QTY.test(text) || Number(text) <= 0) return setError(BAD_QTY);
     setError("");
     setPending(true);
-    const err = await onTrade(sym, Math.round(q * 1e4) / 1e4, side);
+    const err = await onTrade(sym, Number(text), side);
     setPending(false);
     if (err) setError(err);
     else setQuantity("");
