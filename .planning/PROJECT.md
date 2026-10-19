@@ -22,7 +22,11 @@ From one command, the user lands in a live, dark trading terminal where prices s
 - ✓ Persistent watchlist API (list, add, remove, idempotent duplicate) driving what streams — Phase 2 (WATCH-01..04)
 - ✓ Watchlist add/remove UI and Lightweight Charts main chart for the selected ticker — Phase 2 (UI-05, UI-06)
 
-Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19).
+- ✓ Market-order trading with fractional shares, weighted avg cost and cash/share validation; append-only trade log — Phase 3 (PORT-01..06)
+- ✓ Portfolio snapshots (startup, after trades, every 30 s) with bounded history; streamed set = watchlist ∪ positions — Phase 3 (PORT-07, PORT-08)
+- ✓ Live header totals, trade bar, positions table, treemap heatmap and P&L chart refreshing after trades — Phase 3 (UI-02, UI-07..10, UI-12, TEST-02)
+
+Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19). Validated in Phase 3: Trading & Portfolio (2026-10-19).
 
 ### Active
 
@@ -97,4 +101,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-19 after Phase 2*
+*Last updated: 2026-10-19 after Phase 3*
