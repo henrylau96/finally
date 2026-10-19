@@ -20,13 +20,17 @@ export type Portfolio = {
 
 export type PositionRow = Position;
 
-/** Mark positions to live quotes; rows and total are unset until the portfolio has loaded. */
+/**
+ * Mark positions to live quotes; rows and total are unset until the portfolio has loaded.
+ * Rows are ordered by market value as of the last portfolio fetch, so live ticks never reorder them.
+ */
 export function derivePositions(
   p: Portfolio | null,
   quotes: Record<string, Quote>,
 ): { rows: PositionRow[] | null; total: number | undefined } {
   if (!p) return { rows: null, total: undefined };
-  const rows = p.positions
+  const rows = [...p.positions]
+    .sort((a, b) => b.market_value - a.market_value)
     .map((pos) => {
       const price = quotes[pos.ticker]?.price ?? pos.current_price ?? pos.avg_cost;
       return {
@@ -36,8 +40,7 @@ export function derivePositions(
         unrealized_pnl: (price - pos.avg_cost) * pos.quantity,
         pnl_pct: ((price - pos.avg_cost) / pos.avg_cost) * 100,
       };
-    })
-    .sort((a, b) => b.market_value - a.market_value);
+    });
   const total = p.cash_balance + rows.reduce((sum, r) => sum + r.market_value, 0);
   return { rows, total };
 }
