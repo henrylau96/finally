@@ -23,7 +23,7 @@
 - [x] **STRM-01**: `GET /api/stream/prices` is a long-lived SSE stream consumable by native `EventSource`
 - [x] **STRM-02**: The stream pushes updates for all tickers known to the system at ~500ms cadence
 - [x] **STRM-03**: Each event contains ticker, price, previous price, timestamp and change direction
-- [ ] **STRM-04**: Clients reconnect automatically after a dropped connection (EventSource retry)
+- [x] **STRM-04**: Clients reconnect automatically after a dropped connection (EventSource retry)
 
 ### Database (§7)
 
@@ -64,7 +64,7 @@
 
 ### Frontend (§2, §10)
 
-- [ ] **UI-01**: Single-page Next.js TypeScript app built as a static export, styled with Tailwind using the PLAN.md dark theme and colors
+- [x] **UI-01**: Single-page Next.js TypeScript app built as a static export, styled with Tailwind using the PLAN.md dark theme and colors
 - [ ] **UI-02**: Header shows live portfolio total value, cash balance and a connection dot (green connected, yellow reconnecting, red disconnected)
 - [ ] **UI-03**: Watchlist panel shows each ticker's symbol, current price, daily change % and a sparkline accumulated from SSE since page load
 - [ ] **UI-04**: Prices flash green on uptick or red on downtick, fading over ~500ms via CSS transition
@@ -137,7 +137,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STRM-01 | Phase 1 | Complete |
 | STRM-02 | Phase 1 | Complete |
 | STRM-03 | Phase 1 | Complete |
-| STRM-04 | Phase 1 | Pending |
+| STRM-04 | Phase 1 | Complete |
 | DATA-01 | Phase 2 | Pending |
 | DATA-02 | Phase 2 | Pending |
 | DATA-03 | Phase 2 | Pending |
@@ -163,7 +163,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-07 | Phase 4 | Pending |
 | CHAT-08 | Phase 4 | Pending |
 | CHAT-09 | Phase 4 | Pending |
-| UI-01 | Phase 1 | Pending |
+| UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 1 | Pending |
 | UI-04 | Phase 1 | Pending |

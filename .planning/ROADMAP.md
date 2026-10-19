@@ -38,7 +38,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 01-02-PLAN.md — Walking skeleton browser: Next.js static export with live ticker rows served from one origin (wave 2)
+- [x] 01-02-PLAN.md — Walking skeleton browser: Next.js static export with live ticker rows served from one origin (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -137,7 +137,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Live Price Terminal | 1/5 | In Progress|  |
+| 1. Live Price Terminal | 2/5 | In Progress|  |
 | 2. Persistent Watchlist & Charts | 0/TBD | Not started | - |
 | 3. Trading & Portfolio | 0/TBD | Not started | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
