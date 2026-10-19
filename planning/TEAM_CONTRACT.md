@@ -20,13 +20,14 @@ Only edit files you own. Need a change elsewhere? Message the owner (SendMessage
 Existing `backend/app/market/**` is done; do not modify it without telling `backend`.
 
 **Git: do not commit or push.** The team lead commits. Everyone shares one working tree.
+The local `origin` is the upstream course repo; push branches and open PRs on the fork `henrylau96/finally`.
 
 ## Environment (WSL2 on Windows)
 
-- Python: `cd backend && uv run ...` / `uv add ...` (uv at `~/.local/bin/uv`). Tests: `uv run --extra dev pytest`.
+- Python 3.14 (pinned in `backend/.python-version`): `cd backend && uv run ...` / `uv add ...` (uv at `~/.local/bin/uv`). Tests: `uv run --extra dev pytest`.
 - Node is Windows-only: use `npm.cmd` / `npx.cmd` / `node.exe` (in `/mnt/c/Program Files/nodejs/`).
 - Docker is Docker Desktop, Windows-only: use `docker.exe` (`/mnt/c/Users/fulai/AppData/Local/Programs/DockerDesktop/resources/bin/docker.exe`). Server is running.
-- No `.env` exists yet. Use `LLM_MOCK=true` for anything automated. The real LLM path must still be implemented.
+- The root `.env` holds the user's `OPENROUTER_API_KEY` and a free-tier `MASSIVE_API_KEY` (never print them). Free tier gives static end-of-day prices; set `MASSIVE_API_KEY=` (empty) for the moving simulator. Use `LLM_MOCK=true` for anything automated.
 
 ## Backend Module Interfaces (Python)
 
@@ -42,7 +43,7 @@ SQLite via stdlib `sqlite3`. Schema per PLAN.md section 7. All functions take `u
 - `get_trades(user_id, limit=50) -> list[dict]`
 - `record_snapshot(total_value, user_id)`, `get_snapshots(user_id) -> list[dict]` (`total_value, recorded_at`, ascending)
 - `add_chat_message(role, content, actions: dict | None, user_id) -> dict`, `get_chat_messages(user_id, limit=20) -> list[dict]` (ascending, `actions` parsed back to dict/None)
-- Optional: a single `transaction()` context manager so a trade's cash + position + trade writes are atomic.
+- `transaction()` context manager (`BEGIN IMMEDIATE`): pass its connection as `conn=conn` to each repository call so a trade's cash + position + trade writes are atomic and serialized.
 
 ### `app.portfolio` (backend)
 - `class TradeError(Exception)` - validation failure, message is user-facing.
