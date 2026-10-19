@@ -43,7 +43,7 @@ The full specification is `planning/PLAN.md` (the source of truth). Summary:
 
 ## Context
 
-- **Greenfield rebuild.** A previous implementation of the whole platform (built by a 6-agent team) was removed on branch `finally-gsd` (frontend in `4619f5b`, backend in `f2ef207`) so GSD can rebuild everything from `planning/PLAN.md`. It remains in git history; its codebase map is archived at `.planning/archive/codebase-prior/` for reference only. It does not describe the current tree.
+- **Greenfield rebuild.** A previous implementation of the whole platform (built by a 6-agent team) was removed on branch `finally-gsd` (frontend in `4619f5b`, backend in `f2ef207`) so GSD can rebuild everything from `planning/PLAN.md`. It remains in git history; its codebase map is archived at `.planning/reference/codebase-prior/` for reference only. It does not describe the current tree.
 - **Prior known issues worth not repeating:** Massive snapshot prices with missing timestamps looked live; adding a ticker on Massive gave it no starting price; the async chat handler did blocking sqlite calls; portfolio history was unbounded; the old `lib/` Python gitignore rule hid `frontend/src/lib`.
 - **Remaining scaffolding** (may be reused or rewritten): `Dockerfile`, `docker-compose.yml`, `scripts/start_*`/`stop_*`, `test/` (Playwright config, `docker-compose.test.yml`, six E2E specs with `data-testid` hooks), `.env.example`, `db/.gitkeep`.
 - **Reference docs:** `planning/MARKET_*.md`, `planning/MASSIVE_API.md`, `planning/archive/`, `planning/TEAM_CONTRACT.md`. The `cerebras` skill (`.claude/skills/cerebras`) shows how to call the LLM.
