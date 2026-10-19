@@ -103,3 +103,12 @@ def test_portfolio_view(seed_position):
     assert zzzz["current_price"] == 50.0 and zzzz["unrealized_pnl"] == 0.0
     assert v["total_value"] == 10000.0 + 270.0
     assert v["unrealized_pnl"] == 20.0
+
+
+def test_micro_buys_pay_full_value():
+    """Repeated tiny fills cost exactly price x quantity; a round trip creates no money."""
+    for _ in range(100):
+        execute_trade("ZZZ", "buy", 0.0001, 49.99)
+    assert cash() == pytest.approx(10000 - 0.01 * 49.99)
+    execute_trade("ZZZ", "sell", 0.01, 49.99)
+    assert cash() == pytest.approx(10000.0)

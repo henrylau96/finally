@@ -53,9 +53,12 @@ def _write(conn, ticker, side, quantity, price, new_cash, new_qty, new_avg, now)
 
 
 def execute_trade(ticker: str, side: str, quantity: float, price: float) -> dict:
-    """Fill a market order in one transaction; raise TradeError and change nothing on rejection."""
+    """Fill a market order in one transaction; raise TradeError and change nothing on rejection.
+
+    Cash moves by exactly quantity x price (stored unrounded); it is rounded to cents only in output.
+    """
     quantity = round(quantity, 4)
-    amount = round(quantity * price, 2)
+    amount = quantity * price
     now = datetime.now(UTC).isoformat()
     with closing(connect(db_path())) as conn:
         conn.execute("BEGIN IMMEDIATE")
@@ -67,7 +70,7 @@ def execute_trade(ticker: str, side: str, quantity: float, price: float) -> dict
             ).fetchone()
             held, avg = (pos["quantity"], pos["avg_cost"]) if pos else (0.0, 0.0)
             _validate(side, ticker, quantity, amount, cash, held)
-            new_cash = round(cash - amount if side == "buy" else cash + amount, 2)
+            new_cash = cash - amount if side == "buy" else cash + amount
             new_qty, new_avg = _next_position(side, held, avg, quantity, price)
             trade_id = _write(conn, ticker, side, quantity, price, new_cash, new_qty, new_avg, now)
             conn.commit()
@@ -77,7 +80,7 @@ def execute_trade(ticker: str, side: str, quantity: float, price: float) -> dict
     position = None if new_qty <= EPS else {"ticker": ticker, "quantity": new_qty, "avg_cost": new_avg}
     trade = {"id": trade_id, "ticker": ticker, "side": side, "quantity": quantity,
              "price": price, "executed_at": now}
-    return {"trade": trade, "cash_balance": new_cash, "position": position}
+    return {"trade": trade, "cash_balance": round(new_cash, 2), "position": position}
 
 
 def portfolio_view(cache: PriceCache) -> dict:
@@ -101,7 +104,7 @@ def portfolio_view(cache: PriceCache) -> dict:
             "pnl_pct": round((price - r["avg_cost"]) / r["avg_cost"] * 100, 2),
         })
     return {
-        "cash_balance": cash,
+        "cash_balance": round(cash, 2),
         "total_value": round(cash + sum(p["market_value"] for p in positions), 2),
         "unrealized_pnl": round(sum(p["unrealized_pnl"] for p in positions), 2),
         "positions": positions,
