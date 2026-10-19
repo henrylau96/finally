@@ -18,7 +18,7 @@ Not in this phase: chat (Phase 4), Massive (Phase 5), Docker/tablet/frontend uni
 ### Trade execution
 - Trading a ticker with no live price starts streaming it via `source.add_ticker` (simulator seeds instantly), then fills at the cache price. Needed for AI trades in Phase 4
 - One SQLite transaction updates `users_profile.cash_balance`, upserts or deletes the `positions` row, and appends to `trades`; run via `asyncio.to_thread`. A module-level `asyncio.Lock` serializes trades. A portfolio snapshot is recorded right after each trade
-- Quantity must be > 0 with at most 4 decimals (fractional shares). Cash and prices rounded to 2 dp. Average cost recomputed on buys (weighted); selling the full quantity deletes the position (epsilon 1e-9); avg cost unchanged on partial sells
+- Quantity must be > 0 with at most 4 decimals (fractional shares). Cash stored at full precision (moves by exactly quantity x price) and displayed/returned at 2 dp (revised by review fix CR-01). Average cost recomputed on buys (weighted); selling the full quantity deletes the position (epsilon 1e-9); avg cost unchanged on partial sells
 - `POST /api/portfolio/trade {ticker, quantity, side}` (side `buy`|`sell`; ticker normalized like the watchlist: strip, uppercase, `^[A-Z]{1,5}$`, strings only) returns 200 `{trade, cash_balance, position}` (position null when sold out). Business-rule failures return 400 with a clear `detail`, e.g. "Insufficient cash: need $X, have $Y" or "Cannot sell N AAPL; you hold M". Invalid input returns 422. No state change on any failure
 
 ### Portfolio and snapshots
