@@ -33,7 +33,7 @@ async def test_add(client):
     assert cache.get("PYPL") is not None
 
 
-@pytest.mark.parametrize("bad", ["TOOLONG", "A1", "", "BRK.B"])
+@pytest.mark.parametrize("bad", ["TOOLONG", "A1", "", "BRK.B", None, True, False, 123])
 async def test_invalid(client, bad):
     """Invalid tickers are rejected with 422 and leave the list unchanged."""
     response = await client.post("/api/watchlist", json={"ticker": bad})

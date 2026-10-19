@@ -14,11 +14,11 @@ from app.market.interface import MarketDataSource
 class AddTicker(BaseModel):
     ticker: str
 
-    @field_validator("ticker", mode="before")
+    @field_validator("ticker")
     @classmethod
-    def normalize(cls, v):
+    def normalize(cls, v: str) -> str:
         """Trim, uppercase and require 1-5 letters."""
-        v = str(v).strip().upper()
+        v = v.strip().upper()
         if not re.fullmatch(r"[A-Z]{1,5}", v):
             raise ValueError("ticker must be 1-5 letters")
         return v
