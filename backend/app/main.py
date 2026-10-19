@@ -9,12 +9,12 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api.health import router as health_router
 from app.api.stream import create_stream_router
-from app.market import DEFAULT_TICKERS, PriceCache, SimulatorDataSource
+from app.market import DEFAULT_TICKERS, PriceCache, create_market_data_source
 
 STATIC_DIR = Path(os.environ.get("STATIC_DIR", Path(__file__).parent.parent / "static"))
 
 cache = PriceCache()
-source = SimulatorDataSource(cache)
+source = create_market_data_source(cache)
 
 
 @asynccontextmanager

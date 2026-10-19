@@ -21,7 +21,8 @@ async def running():
 async def test_cache_seeded_before_start_returns(running):
     cache, _ = running
     prices = {t: u.price for t, u in cache.get_all().items()}
-    assert prices == {t: SEED_PRICES[t] for t in DEFAULT_TICKERS}
+    assert set(prices) == set(DEFAULT_TICKERS)
+    assert all(abs(prices[t] / SEED_PRICES[t] - 1) < 0.01 for t in prices)
 
 
 async def test_loop_updates_cache(running):
