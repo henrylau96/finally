@@ -6,10 +6,13 @@ import signal
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 from app import db, snapshots, streaming
 from app.api.health import router as health_router
