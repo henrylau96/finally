@@ -1,27 +1,18 @@
 """Watchlist REST endpoints backed by SQLite and the market data source."""
 
 import asyncio
-import re
 
 from fastapi import APIRouter, HTTPException, Response
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 from app import db
+from app.api.schemas import Ticker
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
 
 
 class AddTicker(BaseModel):
-    ticker: str
-
-    @field_validator("ticker")
-    @classmethod
-    def normalize(cls, v: str) -> str:
-        """Trim, uppercase and require 1-5 letters."""
-        v = v.strip().upper()
-        if not re.fullmatch(r"[A-Z]{1,5}", v):
-            raise ValueError("ticker must be 1-5 letters")
-        return v
+    ticker: Ticker
 
 
 def create_watchlist_router(cache: PriceCache, source: MarketDataSource) -> APIRouter:

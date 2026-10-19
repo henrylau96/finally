@@ -6,11 +6,14 @@ import signal
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app import db
 from app.api.health import router as health_router
+from app.api.portfolio import create_portfolio_router
 from app.api.stream import create_stream_router, shutdown
 from app.api.watchlist import create_watchlist_router
 from app.market import PriceCache, create_market_data_source
@@ -37,6 +40,7 @@ def end_streams_on_exit_signal() -> None:
 async def lifespan(app: FastAPI):
     end_streams_on_exit_signal()
     await asyncio.to_thread(db.init_db)
+    app.state.trade_lock = asyncio.Lock()
     tickers = await asyncio.to_thread(db.list_tickers)
     await source.start(tickers)
     yield
@@ -44,8 +48,18 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="FinAlly", lifespan=lifespan)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
+    """Return 422 without echoing input; a NaN input is not serializable as JSON."""
+    errors = [{"loc": e["loc"], "msg": e["msg"], "type": e["type"]} for e in exc.errors()]
+    return JSONResponse({"detail": errors}, status_code=422)
+
+
 app.include_router(health_router)
 app.include_router(create_stream_router(cache))
 app.include_router(create_watchlist_router(cache, source))
+app.include_router(create_portfolio_router(cache, source))
 STATIC_DIR.mkdir(parents=True, exist_ok=True)  # StaticFiles raises per request if missing
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True, check_dir=False), name="static")
