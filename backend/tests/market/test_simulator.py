@@ -47,7 +47,7 @@ def test_gbm_log_return_moments():
     """Sample mean and std of log returns match the GBM parameters."""
     dt, n = 1e-4, 20000
     sigma, mu = 0.22, 0.05
-    r = _log_returns(GBMSimulator(["AAPL"], dt=dt, seed=42), n)[:, 0]
+    r = _log_returns(GBMSimulator(["AAPL"], dt=dt, event_probability=0.0, seed=42), n)[:, 0]
     expected = (mu - sigma**2 / 2) * dt
     assert abs(r.mean() - expected) < 4 * sigma * np.sqrt(dt) / np.sqrt(n)
     assert abs(r.std() / (sigma * np.sqrt(dt)) - 1) < 0.05
@@ -55,7 +55,7 @@ def test_gbm_log_return_moments():
 
 def test_correlation_matches_groups():
     """Realised correlations follow the tech / finance / cross-sector rules."""
-    r = _log_returns(GBMSimulator(DEFAULT_TICKERS, dt=1e-4, seed=7), 20000)
+    r = _log_returns(GBMSimulator(DEFAULT_TICKERS, dt=1e-4, event_probability=0.0, seed=7), 20000)
     c = np.corrcoef(r.T)
     idx = {t: i for i, t in enumerate(DEFAULT_TICKERS)}
     assert abs(c[idx["AAPL"], idx["GOOGL"]] - 0.6) < 0.05
