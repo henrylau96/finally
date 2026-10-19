@@ -77,3 +77,18 @@ async def test_invalid_trade_action(client, ticker, qty):
     assert a["ok"] is False
     assert a["error"] == "Invalid trade (ticker 1-5 letters, quantity > 0, max 4 decimals)"
     assert trade_count() == n
+
+
+async def test_unexpected_action_error_keeps_turn(client, monkeypatch):
+    """An unexpected error in one action is recorded; earlier actions and the turn are kept."""
+    from app import services
+
+    async def boom(*args, **kwargs):
+        raise RuntimeError("database is locked")
+
+    monkeypatch.setattr(services, "place_trade", boom)
+    acts = await chat(client, "add PYPL buy 2 PYPL")
+    assert [(a["type"], a["ok"]) for a in acts] == [("watchlist", True), ("trade", False)]
+    assert acts[1]["error"] == "Action failed unexpectedly"
+    hist = (await client.get("/api/chat/history")).json()
+    assert [h["role"] for h in hist] == ["user", "assistant"]

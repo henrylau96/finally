@@ -54,6 +54,7 @@ export function useChat(onActions: () => void) {
       if (data.message.actions && data.message.actions.length > 0) onActionsRef.current();
     } catch {
       setMessages((prev) => [...prev, localEntry("assistant", "Could not reach FinAlly. Try again.", true)]);
+      onActionsRef.current();
     } finally {
       pendingRef.current = false;
       setPending(false);

@@ -1,5 +1,7 @@
 """Execute LLM-requested actions through the same services and validation as the REST routes."""
 
+import logging
+
 from fastapi import FastAPI
 from pydantic import ValidationError
 
@@ -13,6 +15,9 @@ from app.portfolio import TradeError
 MAX_ACTIONS = 10
 SKIPPED = f"Skipped: at most {MAX_ACTIONS} actions per reply"
 INVALID_TRADE = "Invalid trade (ticker 1-5 letters, quantity > 0, max 4 decimals)"
+UNEXPECTED = "Action failed unexpectedly"
+
+logger = logging.getLogger(__name__)
 
 
 async def _watchlist(app: FastAPI, source: MarketDataSource, change) -> dict:
@@ -46,6 +51,26 @@ async def _trade(app: FastAPI, cache: PriceCache, source: MarketDataSource, trad
     return {**out, "price": result["trade"]["price"], "ok": True}
 
 
+def _failed(kind: str, item, error: str) -> dict:
+    """Return a failed action record with the same shape as an executed one."""
+    if kind == "t":
+        base = {"type": "trade", "ticker": item.ticker, "side": item.side, "quantity": item.quantity}
+    else:
+        base = {"type": "watchlist", "ticker": item.ticker, "action": item.action}
+    return {**base, "ok": False, "error": error}
+
+
+async def _run_one(app: FastAPI, cache: PriceCache, source: MarketDataSource, kind: str, item) -> dict:
+    """Run one action; an unexpected error is logged and recorded as a failed action."""
+    try:
+        if kind == "w":
+            return await _watchlist(app, source, item)
+        return await _trade(app, cache, source, item)
+    except Exception:
+        logger.exception("chat action failed")
+        return _failed(kind, item, UNEXPECTED)
+
+
 async def run_actions(
     app: FastAPI, cache: PriceCache, source: MarketDataSource, resp: ChatResponse
 ) -> list[dict]:
@@ -54,13 +79,7 @@ async def run_actions(
     out = []
     for i, (kind, item) in enumerate(items):
         if i >= MAX_ACTIONS:
-            if kind == "t":
-                base = {"type": "trade", "ticker": item.ticker, "side": item.side, "quantity": item.quantity}
-            else:
-                base = {"type": "watchlist", "ticker": item.ticker, "action": item.action}
-            out.append({**base, "ok": False, "error": SKIPPED})
-        elif kind == "w":
-            out.append(await _watchlist(app, source, item))
+            out.append(_failed(kind, item, SKIPPED))
         else:
-            out.append(await _trade(app, cache, source, item))
+            out.append(await _run_one(app, cache, source, kind, item))
     return out
