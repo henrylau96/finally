@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-10-19T11:42:31.725Z"
-last_activity: 2026-10-19 -- Phase 3 execution started
+last_updated: "2026-10-19T11:47:06.929Z"
+last_activity: 2026-10-19
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 15
-  completed_plans: 9
+  completed_plans: 10
   percent: 33
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-10-19)
 ## Current Position
 
 Phase: 3 (Trading & Portfolio) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 3
-Last activity: 2026-10-19 -- Phase 3 execution started
+Plan: 2 of 6
+Status: Ready to execute
+Last activity: 2026-10-19
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 67%
 
 ## Performance Metrics
 
@@ -58,6 +58,7 @@ Progress: [██████████] 100%
 | Phase 01 P05 | n/a | 2 tasks | 1 files |
 | Phase 02 P01 | 20min | - tasks | - files |
 | Phase 02 P04 | 10min | 2 tasks | 0 files |
+| Phase 3 P01 | 25min | 3 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -70,6 +71,7 @@ Recent decisions affecting current work:
 - [Roadmap]: Docker/scripts/full test suite consolidated in Phase 6; Phase 1 already served by FastAPI on port 8000
 - [Phase 01]: [01-01]: to_dict drops change/change_percent; main.py mkdirs STATIC_DIR since StaticFiles raises per request if missing
 - [Phase 1]: Phase 1-03: factory always returns simulator; Massive selection deferred to Phase 5 (MKT-06)
+- [Phase 3]: [03-01]: 422 handler omits request input (NaN bodies); qty/avg_cost 4dp, cash 2dp
 
 ### Pending Todos
 

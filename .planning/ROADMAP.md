@@ -103,7 +103,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Trade engine: atomic SQLite trade + portfolio API with lifespan lock; header shows real cash and live total (wave 1)
+- [x] 03-01-PLAN.md — Trade engine: atomic SQLite trade + portfolio API with lifespan lock; header shows real cash and live total (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -178,7 +178,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
-| 3. Trading & Portfolio | 0/6 | Planned | - |
+| 3. Trading & Portfolio | 1/6 | In Progress|  |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |

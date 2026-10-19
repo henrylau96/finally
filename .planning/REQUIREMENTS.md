@@ -34,12 +34,12 @@
 
 ### Portfolio (§8)
 
-- [ ] **PORT-01**: `GET /api/portfolio` returns positions, cash balance, total value and unrealized P&L
-- [ ] **PORT-02**: User can buy shares with a market order `{ticker, quantity, side}` via `POST /api/portfolio/trade`; it fills instantly at the current price, no fees
-- [ ] **PORT-03**: User can sell shares the same way; selling all shares removes the position
-- [ ] **PORT-04**: Fractional quantities are supported; average cost updates correctly on repeated buys
-- [ ] **PORT-05**: A buy with insufficient cash or a sell exceeding held shares is rejected with a clear error and no state change
-- [ ] **PORT-06**: Every trade is appended to the `trades` log
+- [x] **PORT-01**: `GET /api/portfolio` returns positions, cash balance, total value and unrealized P&L
+- [x] **PORT-02**: User can buy shares with a market order `{ticker, quantity, side}` via `POST /api/portfolio/trade`; it fills instantly at the current price, no fees
+- [x] **PORT-03**: User can sell shares the same way; selling all shares removes the position
+- [x] **PORT-04**: Fractional quantities are supported; average cost updates correctly on repeated buys
+- [x] **PORT-05**: A buy with insufficient cash or a sell exceeding held shares is rejected with a clear error and no state change
+- [x] **PORT-06**: Every trade is appended to the `trades` log
 - [ ] **PORT-07**: Portfolio value is snapshotted every 30 seconds and immediately after each trade
 - [ ] **PORT-08**: `GET /api/portfolio/history` returns snapshots for the P&L chart in bounded size
 
@@ -65,7 +65,7 @@
 ### Frontend (§2, §10)
 
 - [x] **UI-01**: Single-page Next.js TypeScript app built as a static export, styled with Tailwind using the PLAN.md dark theme and colors
-- [ ] **UI-02**: Header shows live portfolio total value, cash balance and a connection dot (green connected, yellow reconnecting, red disconnected)
+- [x] **UI-02**: Header shows live portfolio total value, cash balance and a connection dot (green connected, yellow reconnecting, red disconnected)
 - [x] **UI-03**: Watchlist panel shows each ticker's symbol, current price, daily change % and a sparkline accumulated from SSE since page load
 - [x] **UI-04**: Prices flash green on uptick or red on downtick, fading over ~500ms via CSS transition
 - [x] **UI-05**: User can add and remove watchlist tickers from the watchlist panel
@@ -92,7 +92,7 @@
 ### Testing (§12)
 
 - [x] **TEST-01**: Backend pytest covers market data (valid simulator prices, GBM math, Massive parsing, interface conformance)
-- [ ] **TEST-02**: Backend pytest covers portfolio logic (trades, P&L, oversell, insufficient cash, selling at a loss)
+- [x] **TEST-02**: Backend pytest covers portfolio logic (trades, P&L, oversell, insufficient cash, selling at a loss)
 - [ ] **TEST-03**: Backend pytest covers LLM structured-output parsing, malformed responses and trade validation in the chat flow
 - [ ] **TEST-04**: Backend pytest covers API routes (status codes, response shapes, errors)
 - [ ] **TEST-05**: Frontend tests cover component rendering with mock data, price flash triggering, watchlist CRUD, portfolio calculations, and chat rendering with loading state
@@ -142,12 +142,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-02 | Phase 2 | Complete |
 | DATA-03 | Phase 2 | Complete |
 | DATA-04 | Phase 6 | Pending |
-| PORT-01 | Phase 3 | Pending |
-| PORT-02 | Phase 3 | Pending |
-| PORT-03 | Phase 3 | Pending |
-| PORT-04 | Phase 3 | Pending |
-| PORT-05 | Phase 3 | Pending |
-| PORT-06 | Phase 3 | Pending |
+| PORT-01 | Phase 3 | Complete |
+| PORT-02 | Phase 3 | Complete |
+| PORT-03 | Phase 3 | Complete |
+| PORT-04 | Phase 3 | Complete |
+| PORT-05 | Phase 3 | Complete |
+| PORT-06 | Phase 3 | Complete |
 | PORT-07 | Phase 3 | Pending |
 | PORT-08 | Phase 3 | Pending |
 | WATCH-01 | Phase 2 | Complete |
@@ -164,7 +164,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-08 | Phase 4 | Pending |
 | CHAT-09 | Phase 4 | Pending |
 | UI-01 | Phase 1 | Complete |
-| UI-02 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 1 | Complete |
 | UI-04 | Phase 1 | Complete |
 | UI-05 | Phase 2 | Complete |
@@ -185,7 +185,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPS-06 | Phase 6 | Pending |
 | OPS-07 | Phase 6 | Pending |
 | TEST-01 | Phase 1 | Complete |
-| TEST-02 | Phase 3 | Pending |
+| TEST-02 | Phase 3 | Complete |
 | TEST-03 | Phase 4 | Pending |
 | TEST-04 | Phase 6 | Pending |
 | TEST-05 | Phase 6 | Pending |
