@@ -1,5 +1,7 @@
+import { useState } from "react";
 import type { Quote, Status } from "@/lib/usePriceStream";
 import Panel from "./Panel";
+import WatchlistAddForm from "./WatchlistAddForm";
 import WatchlistRow from "./WatchlistRow";
 
 const HEADERS = ["Symbol", "Price", "Day %", "Chart"];
@@ -30,6 +32,7 @@ export default function Watchlist({
   status,
   selected,
   onSelect,
+  onAdd,
 }: {
   tickers: string[];
   quotes: Record<string, Quote>;
@@ -37,9 +40,19 @@ export default function Watchlist({
   status: Status;
   selected: string;
   onSelect: (ticker: string) => void;
+  onAdd: (ticker: string) => Promise<string | null>;
 }) {
+  const [error, setError] = useState("");
   return (
     <Panel title="Watchlist" role="table">
+      <WatchlistAddForm onAdd={onAdd} onError={setError} />
+      <div className="h-6 px-2 text-xs">
+        {error && (
+          <p role="alert" data-testid="watchlist-add-error" className="text-down">
+            {error}
+          </p>
+        )}
+      </div>
       <Notice status={status} hasQuotes={Object.keys(quotes).length > 0} />
       <div
         role="row"

@@ -36,5 +36,24 @@ export function useWatchlist() {
     void load();
   }, [load]);
 
-  return { rows, loading, error, load };
+  const add = useCallback(
+    async (ticker: string): Promise<string | null> => {
+      try {
+        const res = await fetch("/api/watchlist", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticker }),
+        });
+        if (res.status === 422) return "Enter 1-5 letters, e.g. PYPL.";
+        if (!res.ok) return "Could not add the ticker. Try again.";
+        await load();
+        return null;
+      } catch {
+        return "Could not add the ticker. Try again.";
+      }
+    },
+    [load],
+  );
+
+  return { rows, loading, error, load, add };
 }
