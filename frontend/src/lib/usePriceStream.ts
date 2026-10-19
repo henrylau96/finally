@@ -12,7 +12,19 @@ export type Quote = {
 };
 export type Status = "connected" | "reconnecting" | "disconnected";
 
+export type ChartPoint = { time: number; value: number };
+
 const MAX_POINTS = 120;
+const CHART_POINTS = 1000;
+
+/** Append a tick as strictly ascending whole-second points, replacing a same-second value. */
+function appendPoint(arr: ChartPoint[], timestamp: number, value: number): ChartPoint[] {
+  const time = Math.floor(timestamp);
+  const last = arr[arr.length - 1];
+  if (last && time < last.time) return arr;
+  const base = last && time === last.time ? arr.slice(0, -1) : arr;
+  return [...base, { time, value }].slice(-CHART_POINTS);
+}
 
 /** Set each quote's direction against the last price the client rendered, not the server's last tick. */
 function withRenderedDirection(prev: Record<string, Quote>, next: Record<string, Quote>) {
@@ -32,6 +44,8 @@ export function usePriceStream() {
   const [quotes, setQuotes] = useState<Record<string, Quote>>({});
   const [history, setHistory] = useState<Record<string, number[]>>({});
 
+  const [chart, setChart] = useState<Record<string, ChartPoint[]>>({});
+
   useEffect(() => {
     const es = new EventSource("/api/stream/prices");
     es.onopen = () => {
@@ -48,9 +62,14 @@ export function usePriceStream() {
           Object.entries(next).map(([t, q]) => [t, [...(prev[t] ?? []), q.price].slice(-MAX_POINTS)]),
         ),
       );
+      setChart((prev) =>
+        Object.fromEntries(
+          Object.entries(next).map(([t, q]) => [t, appendPoint(prev[t] ?? [], q.timestamp, q.price)]),
+        ),
+      );
     };
     return () => es.close();
   }, []);
 
-  return { status, hasConnected, quotes, history };
+  return { status, hasConnected, quotes, history, chart };
 }
