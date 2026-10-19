@@ -5,6 +5,7 @@ import { usePriceStream } from "@/lib/usePriceStream";
 import { useWatchlist } from "@/lib/useWatchlist";
 import ChatDock from "./ChatDock";
 import Header from "./Header";
+import MainChart from "./MainChart";
 import Panel from "./Panel";
 import Watchlist from "./Watchlist";
 
@@ -13,7 +14,7 @@ function Placeholder({ children }: { children: string }) {
 }
 
 export default function Terminal() {
-  const { status, hasConnected, quotes, history } = usePriceStream();
+  const { status, hasConnected, quotes, history, chart } = usePriceStream();
   const { rows, loading, error, add, remove } = useWatchlist();
   const [selected, setSelected] = useState("AAPL");
   useEffect(() => {
@@ -27,8 +28,8 @@ export default function Terminal() {
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,28%)_1fr_auto] gap-2">
         <Watchlist tickers={rows.map((r) => r.ticker)} quotes={quotes} history={history} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
         <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_1fr] gap-2">
-          <Panel title="Main chart" testId="main-chart" data-ticker={selected}>
-            <Placeholder>Select a ticker to see its chart. Coming soon.</Placeholder>
+          <Panel title="Main chart" bodyClassName="overflow-hidden">
+            <MainChart ticker={selected} points={chart[selected] ?? []} price={quotes[selected]?.price} live={status === "connected"} />
           </Panel>
           <div className="grid min-h-0 grid-cols-3 gap-2">
             <Panel title="Heatmap" testId="heatmap">
