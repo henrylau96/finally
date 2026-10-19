@@ -21,3 +21,28 @@ async def client(db_env):
         transport = httpx.ASGITransport(app=main.app)
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as c:
             yield c
+
+
+@pytest.fixture
+def seed_position(db_env):
+    """Return seed(ticker, quantity, avg_cost, cash=None) inserting a position into a fresh DB."""
+    from contextlib import closing
+    from datetime import UTC, datetime
+    from uuid import uuid4
+
+    from app import db
+
+    def seed(ticker, quantity, avg_cost, cash=None):
+        db.init_db()
+        with closing(db.connect(db.db_path())) as conn, conn:
+            conn.execute(
+                "INSERT INTO positions (id, user_id, ticker, quantity, avg_cost, updated_at) "
+                "VALUES (?, 'default', ?, ?, ?, ?) "
+                "ON CONFLICT(user_id, ticker) DO UPDATE SET quantity=excluded.quantity, "
+                "avg_cost=excluded.avg_cost, updated_at=excluded.updated_at",
+                (str(uuid4()), ticker, quantity, avg_cost, datetime.now(UTC).isoformat()),
+            )
+            if cash is not None:
+                conn.execute("UPDATE users_profile SET cash_balance = ?", (cash,))
+
+    return seed
