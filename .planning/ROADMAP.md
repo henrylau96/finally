@@ -82,6 +82,7 @@ Plans:
 **Wave 4** *(blocked on Wave 3 completion)*
 
 - [x] 02-04-PLAN.md — Phase gate: full suite, curl smoke, restart persistence, E2E, human browser verification (wave 4)
+
 **UI hint**: yes
 
 ### Phase 3: Trading & Portfolio
@@ -121,6 +122,7 @@ Plans:
 **Wave 5** *(blocked on Wave 4 completion)*
 
 - [x] 03-06-PLAN.md — Phase gate: full suite, curl smoke, restart persistence, E2E, human browser verification (wave 5)
+
 **UI hint**: yes
 
 ### Phase 4: AI Chat Copilot
@@ -138,7 +140,23 @@ Plans:
   5. With `LLM_MOCK=true` the chat returns a deterministic reply including a trade without an API key, and prices keep streaming during an LLM call
   6. Chat history persists across page reloads and malformed LLM output yields an error message rather than a crash
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Backend mock chat slice: lock-owning services, POST /api/chat + history, action execution, persistence
+- [ ] 04-02-PLAN.md — Phase 3 UI-audit fold-ins: Enter buys, selection survives sell-out, heatmap button semantics
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-03-PLAN.md — FinAlly AI chat dock: useChat, bubbles, action chips, loading, history, post-action refresh
+- [ ] 04-04-PLAN.md — Real LiteLLM/Cerebras structured call, grounded prompt, graceful failures, non-blocking proof
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-05-PLAN.md — Phase gate: suites, mock smoke, restart persistence, full E2E, human verify (optional live LLM)
+
 **UI hint**: yes
 
 ### Phase 5: Real Market Data (Massive)
@@ -179,6 +197,6 @@ Plans:
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
-| 4. AI Chat Copilot | 0/TBD | Not started | - |
+| 4. AI Chat Copilot | 0/5 | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
