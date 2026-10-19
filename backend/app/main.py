@@ -16,6 +16,7 @@ from app.api.health import router as health_router
 from app.api.portfolio import create_portfolio_router
 from app.api.stream import create_stream_router, shutdown
 from app.api.watchlist import create_watchlist_router
+from app.chat.router import create_chat_router
 from app.market import PriceCache, create_market_data_source
 
 STATIC_DIR = Path(os.environ.get("STATIC_DIR", Path(__file__).parent.parent / "static"))
@@ -66,5 +67,6 @@ app.include_router(health_router)
 app.include_router(create_stream_router(cache))
 app.include_router(create_watchlist_router(cache, source))
 app.include_router(create_portfolio_router(cache, source))
+app.include_router(create_chat_router(cache, source))
 STATIC_DIR.mkdir(parents=True, exist_ok=True)  # StaticFiles raises per request if missing
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True, check_dir=False), name="static")
