@@ -146,7 +146,7 @@ Plans:
 **Wave 1**
 
 - [x] 04-01-PLAN.md — Backend mock chat slice: lock-owning services, POST /api/chat + history, action execution, persistence
-- [ ] 04-02-PLAN.md — Phase 3 UI-audit fold-ins: Enter buys, selection survives sell-out, heatmap button semantics
+- [x] 04-02-PLAN.md — Phase 3 UI-audit fold-ins: Enter buys, selection survives sell-out, heatmap button semantics
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -197,6 +197,6 @@ Plans:
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
-| 4. AI Chat Copilot | 1/5 | In Progress|  |
+| 4. AI Chat Copilot | 2/5 | In Progress|  |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
