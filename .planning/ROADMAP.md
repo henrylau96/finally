@@ -6,7 +6,7 @@ Vertical MVP: each phase ends with something the user can see and use in the bro
 
 ## Phases
 
-- [ ] **Phase 1: Live Price Terminal** - FastAPI serves a dark Next.js page where simulated prices stream into a flashing watchlist with sparklines
+- [x] **Phase 1: Live Price Terminal** - FastAPI serves a dark Next.js page where simulated prices stream into a flashing watchlist with sparklines (completed 2026-10-19)
 - [ ] **Phase 2: Persistent Watchlist & Charts** - SQLite-backed watchlist the user can edit, with a main chart for the selected ticker
 - [ ] **Phase 3: Trading & Portfolio** - Buy/sell at market, positions, heatmap, P&L chart and live header totals
 - [ ] **Phase 4: AI Chat Copilot** - Chat panel where the LLM analyzes the portfolio and executes trades and watchlist changes
@@ -47,7 +47,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 01-05-PLAN.md — Phase gate: documented local run, full suite + restart smoke, human browser verification (wave 4)
+- [x] 01-05-PLAN.md — Phase gate: documented local run, full suite + restart smoke, human browser verification (wave 4)
 
 **UI hint**: yes
 
@@ -137,7 +137,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Live Price Terminal | 4/5 | In Progress|  |
+| 1. Live Price Terminal | 5/5 | Complete   | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 0/TBD | Not started | - |
 | 3. Trading & Portfolio | 0/TBD | Not started | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
