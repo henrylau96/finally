@@ -513,15 +513,18 @@ testpaths = ["tests"]
 | A3 | Optional Playwright smoke (`BASE_URL`, browsers installed in `test/node_modules`) may work from WSL via the Windows wrappers | Validation | Low: it is optional; curl/grep checks are the primary gate |
 | A4 | slopcheck was not run; packages are tagged approved because they are named in official docs and the locked stack | Package Legitimacy Audit | Very low |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Should the `Dockerfile` CMD gain `--timeout-graceful-shutdown 2` in Phase 1 or Phase 6?**
    - What we know: needed for clean `docker stop`; Dockerfile is "scaffolding kept" but Phase 6 owns Docker.
    - Recommendation: add the flag in Phase 1 documentation/run commands; edit the Dockerfile in Phase 1 only if the planner wants a one-line task, else queue for Phase 6.
+   - RESOLVED: flag goes in Phase 1 run/verify commands and the README (01-05); the Dockerfile is not edited until Phase 6.
 2. **What to do with the stale `finally` container on port 8000?**
    - Recommendation: do not stop it automatically (user's); verify on port 8010. Mention in the plan's verification notes.
+   - RESOLVED: container left alone; all Phase 1 verification uses ports 8010/8011 (01-01, 01-02, 01-03, 01-05).
 3. **Whether `PriceUpdate` keeps the old `change`/`change_percent` extras.**
    - Recommendation: drop them; contract is `ticker, price, previous_price, timestamp, direction, day_change_pct` and later phases use `day_change_pct`.
+   - RESOLVED: dropped; `PriceUpdate.to_dict()` emits exactly the six locked keys (01-01).
 
 ## Environment Availability
 
