@@ -17,8 +17,8 @@ import Watchlist from "./Watchlist";
 
 export default function Terminal() {
   const { status, hasConnected, quotes, history, chart } = usePriceStream();
-  const { rows, loading, error, add, remove } = useWatchlist();
-  const { portfolio, version, trade } = usePortfolio();
+  const { rows, loading, error, load, add, remove } = useWatchlist();
+  const { portfolio, version, refresh, trade } = usePortfolio();
   const { rows: positionRows, total } = useMemo(() => derivePositions(portfolio, quotes), [portfolio, quotes]);
   const [selected, setSelected] = useState("");
   useEffect(() => {
@@ -46,7 +46,7 @@ export default function Terminal() {
             <PnlChart version={version} />
           </div>
         </div>
-        <ChatDock />
+        <ChatDock onActions={() => { void refresh(); void load(); }} />
       </div>
     </div>
   );
