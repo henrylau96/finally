@@ -23,9 +23,9 @@ export default function WatchlistAddForm({
     setPending(true);
     const err = await onAdd(ticker);
     setPending(false);
+    setTimeout(() => input.current?.focus());
     if (err) return onError(err);
     setValue("");
-    setTimeout(() => input.current?.focus());
   }
 
   return (

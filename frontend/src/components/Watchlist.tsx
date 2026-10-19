@@ -48,7 +48,7 @@ export default function Watchlist({
   const waiting = tickers.length > 0 && !tickers.some((t) => quotes[t]);
   const text = notice(status, loading, loadError, waiting);
   return (
-    <Panel title="Watchlist">
+    <Panel title="Watchlist" active>
       <WatchlistAddForm onAdd={onAdd} onError={setError} />
       <div className="h-6 px-2 text-xs">
         {error && (
@@ -73,7 +73,7 @@ export default function Watchlist({
             role="row"
             className={
               GRID +
-              " h-6 items-center border-b border-border px-2 pl-[10px] text-xs font-semibold uppercase tracking-[0.05em] text-text-muted"
+              " h-6 items-center border-b border-border border-l-2 border-l-transparent px-2 text-xs font-semibold uppercase tracking-[0.05em] text-text-muted"
             }
           >
             <span role="columnheader">{HEADERS[0]}</span>
