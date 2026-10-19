@@ -54,9 +54,10 @@ async def run_actions(
     out = []
     for i, (kind, item) in enumerate(items):
         if i >= MAX_ACTIONS:
-            base = {"type": "watchlist", "ticker": item.ticker}
             if kind == "t":
                 base = {"type": "trade", "ticker": item.ticker, "side": item.side, "quantity": item.quantity}
+            else:
+                base = {"type": "watchlist", "ticker": item.ticker, "action": item.action}
             out.append({**base, "ok": False, "error": SKIPPED})
         elif kind == "w":
             out.append(await _watchlist(app, source, item))

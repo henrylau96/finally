@@ -35,3 +35,15 @@ async def test_failures_are_graceful(client, llm_reply, kwargs):
     assert msg["actions"] == []
     hist = (await client.get("/api/chat/history")).json()
     assert [h["role"] for h in hist] == ["user", "assistant"]
+
+
+async def test_skipped_watchlist_action_keeps_next_turn_working(client, llm_reply):
+    """A capped (skipped) watchlist action is replayable in the next turn's prompt."""
+    adds = ",".join(f'{{"ticker":"A{c}","action":"add"}}' for c in "ABCDEFGHIJK")
+    llm_reply(content=f'{{"message":"Added","watchlist_changes":[{adds}]}}')
+    first = (await client.post("/api/chat", json={"message": "add 11"})).json()["message"]
+    skipped = first["actions"][-1]
+    assert skipped["action"] == "add" and skipped["ok"] is False and skipped["error"].startswith("Skipped")
+    calls = llm_reply(content='{"message":"Fine"}')
+    second = (await client.post("/api/chat", json={"message": "how am I doing?"})).json()["message"]
+    assert second["content"] == "Fine" and len(calls) == 1
