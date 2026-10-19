@@ -46,3 +46,43 @@ def seed_position(db_env):
                 conn.execute("UPDATE users_profile SET cash_balance = ?", (cash,))
 
     return seed
+
+
+@pytest.fixture(autouse=True)
+def no_network(monkeypatch):
+    """Fail any test that reaches the real LLM; pytest.fail is not caught by `except Exception`."""
+    try:
+        from app.chat import llm
+    except ImportError:
+        return
+
+    async def guard(*args, **kwargs):
+        pytest.fail("network call in test")
+
+    monkeypatch.setattr(llm, "acompletion", guard)
+
+
+@pytest.fixture
+def llm_reply(monkeypatch):
+    """Return reply(content, exc, delay) that fakes litellm and returns the recorded call kwargs."""
+    import asyncio
+    from types import SimpleNamespace
+
+    monkeypatch.setenv("LLM_MOCK", "false")
+
+    def reply(content=None, exc=None, delay=0.0):
+        calls = []
+
+        async def fake(**kwargs):
+            calls.append(kwargs)
+            await asyncio.sleep(delay)
+            if exc:
+                raise exc
+            return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
+
+        from app.chat import llm
+
+        monkeypatch.setattr(llm, "acompletion", fake)
+        return calls
+
+    return reply
