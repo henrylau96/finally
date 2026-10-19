@@ -69,7 +69,7 @@
 - [x] **UI-03**: Watchlist panel shows each ticker's symbol, current price, daily change % and a sparkline accumulated from SSE since page load
 - [x] **UI-04**: Prices flash green on uptick or red on downtick, fading over ~500ms via CSS transition
 - [x] **UI-05**: User can add and remove watchlist tickers from the watchlist panel
-- [ ] **UI-06**: Clicking a ticker shows a larger price-over-time chart for it in the main chart area
+- [x] **UI-06**: Clicking a ticker shows a larger price-over-time chart for it in the main chart area
 - [ ] **UI-07**: Trade bar has ticker and quantity fields plus buy and sell buttons; orders fill instantly with no confirmation and errors are shown inline
 - [ ] **UI-08**: Positions table shows ticker, quantity, average cost, current price, unrealized P&L and % change
 - [ ] **UI-09**: Portfolio heatmap (treemap) sizes positions by weight and colors them by P&L (green profit, red loss)
@@ -168,7 +168,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 1 | Complete |
 | UI-04 | Phase 1 | Complete |
 | UI-05 | Phase 2 | Complete |
-| UI-06 | Phase 2 | Pending |
+| UI-06 | Phase 2 | Complete |
 | UI-07 | Phase 3 | Pending |
 | UI-08 | Phase 3 | Pending |
 | UI-09 | Phase 3 | Pending |
