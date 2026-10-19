@@ -64,7 +64,24 @@ Plans:
   3. User can remove a ticker and it disappears and stops streaming, staying removed after a restart
   4. Clicking a ticker shows a larger price-over-time chart for it in the main chart area
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — SQLite schema/seed + watchlist REST API driving the stream; browser rows from GET /api/watchlist (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — Add/remove tickers from the panel; grid semantics, fixed notice slot, empty state (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-03-PLAN.md — Lightweight Charts main chart for the selected ticker from a 1000-point SSE buffer (wave 3)
+
+**Wave 4** *(blocked on Wave 3 completion)*
+
+- [ ] 02-04-PLAN.md — Phase gate: full suite, curl smoke, restart persistence, E2E, human browser verification (wave 4)
 **UI hint**: yes
 
 ### Phase 3: Trading & Portfolio
@@ -138,7 +155,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
-| 2. Persistent Watchlist & Charts | 0/TBD | Not started | - |
+| 2. Persistent Watchlist & Charts | 0/4 | Not started | - |
 | 3. Trading & Portfolio | 0/TBD | Not started | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
