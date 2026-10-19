@@ -155,7 +155,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 04-05-PLAN.md — Phase gate: suites, mock smoke, restart persistence, full E2E, human verify (optional live LLM)
+- [x] 04-05-PLAN.md — Phase gate: suites, mock smoke, restart persistence, full E2E, human verify (optional live LLM)
 
 **UI hint**: yes
 
@@ -197,6 +197,6 @@ Plans:
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
-| 4. AI Chat Copilot | 4/5 | In Progress|  |
+| 4. AI Chat Copilot | 5/5 | Complete   | 2026-10-19 |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
