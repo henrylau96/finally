@@ -24,5 +24,32 @@ export function usePortfolio() {
     void refresh();
   }, [refresh]);
 
-  return { portfolio, version, refresh };
+  /** Place a market order; resolves to an error message, or null on success. */
+  const trade = useCallback(
+    async (ticker: string, quantity: number, side: "buy" | "sell"): Promise<string | null> => {
+      const generic = "Could not place the trade. Try again.";
+      try {
+        const res = await fetch("/api/portfolio/trade", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ticker, quantity, side }),
+        });
+        if (res.ok) {
+          await refresh();
+          setVersion((v) => v + 1);
+          return null;
+        }
+        const body = await res.json();
+        if (res.status === 400 && typeof body.detail === "string") return body.detail;
+        if (res.status === 422) {
+          const onTicker = Array.isArray(body.detail) && body.detail.some((d: { loc?: unknown[] }) => d.loc?.includes("ticker"));
+          return onTicker ? "Enter a ticker of 1-5 letters." : "Enter a quantity above 0 (up to 4 decimals).";
+        }
+      } catch {}
+      return generic;
+    },
+    [refresh],
+  );
+
+  return { portfolio, version, refresh, trade };
 }
