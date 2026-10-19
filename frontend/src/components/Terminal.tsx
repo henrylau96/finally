@@ -24,9 +24,9 @@ export default function Terminal() {
   useEffect(() => {
     if (loading) return;
     const tickers = rows.map((r) => r.ticker);
-    const valid = [...tickers, ...(portfolio?.positions.map((p) => p.ticker) ?? [])];
-    if (selected && valid.includes(selected)) return;
-    const next = tickers.includes("AAPL") ? "AAPL" : (tickers[0] ?? valid[0] ?? "");
+    if (selected) return;
+    const held = portfolio?.positions.map((p) => p.ticker) ?? [];
+    const next = tickers.includes("AAPL") ? "AAPL" : (tickers[0] ?? held[0] ?? "");
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelected(next);
   }, [rows, loading, selected, portfolio]);

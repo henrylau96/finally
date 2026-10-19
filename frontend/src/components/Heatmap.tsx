@@ -44,7 +44,8 @@ export default function Heatmap({
               data-testid={"heatmap-cell-" + row.ticker}
               data-pnl={pnlState(pct)}
               data-selected={row.ticker === selected}
-              role="img"
+              role="button"
+              aria-pressed={row.ticker === selected}
               aria-label={`${row.ticker}: ${formatPct(pct)}, market value ${formatPrice(row.market_value)}`}
               title={`${row.ticker} ${formatPct(pct)}`}
               tabIndex={0}
@@ -55,7 +56,7 @@ export default function Heatmap({
                 select();
               }}
               style={{ left: r.x, top: r.y, width: r.w, height: r.h, backgroundColor: fill(pct) }}
-              className="absolute box-border cursor-pointer overflow-hidden border border-bg p-2 transition-[background-color] duration-300 hover:outline hover:outline-1 hover:-outline-offset-1 hover:outline-text-muted motion-reduce:transition-none"
+              className="absolute box-border cursor-pointer overflow-hidden border border-bg p-2 data-[selected=true]:shadow-[inset_0_0_0_2px_var(--color-primary)] transition-[background-color] duration-300 hover:outline hover:outline-1 hover:-outline-offset-1 hover:outline-text-muted motion-reduce:transition-none"
             >
               {r.w >= 56 && r.h >= 28 && (
                 <>

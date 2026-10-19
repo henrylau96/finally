@@ -39,6 +39,13 @@ export default function TradeBar({
     setTimeout(() => qtyInput.current?.focus());
   }
 
+  function buyOnEnter(e: React.KeyboardEvent): boolean {
+    if (e.key !== "Enter") return false;
+    e.preventDefault();
+    void submit("buy");
+    return true;
+  }
+
   const input = "h-8 border border-border bg-bg px-2 font-mono text-sm uppercase disabled:cursor-progress disabled:opacity-50";
   return (
     <form
@@ -64,6 +71,7 @@ export default function TradeBar({
             setTicker(e.target.value.toUpperCase());
             setError("");
           }}
+          onKeyDown={buyOnEnter}
           className={input + " w-20"}
         />
         <input
@@ -81,7 +89,7 @@ export default function TradeBar({
             setError("");
           }}
           onKeyDown={(e) => {
-            if (e.key !== "Escape") return;
+            if (buyOnEnter(e) || e.key !== "Escape") return;
             setQuantity("");
             setError("");
           }}
