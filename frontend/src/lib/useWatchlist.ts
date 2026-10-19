@@ -55,5 +55,19 @@ export function useWatchlist() {
     [load],
   );
 
-  return { rows, loading, error, load, add };
+  const remove = useCallback(
+    async (ticker: string): Promise<string | null> => {
+      try {
+        const res = await fetch("/api/watchlist/" + ticker, { method: "DELETE" });
+        if (res.status !== 204 && res.status !== 404) return "Could not remove " + ticker + ". Try again.";
+        await load();
+        return null;
+      } catch {
+        return "Could not remove " + ticker + ". Try again.";
+      }
+    },
+    [load],
+  );
+
+  return { rows, loading, error, load, add, remove };
 }

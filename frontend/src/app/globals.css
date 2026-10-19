@@ -63,3 +63,15 @@ body {
     transition-duration: 150ms;
   }
 }
+
+@media (hover: none) {
+  .remove-btn {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .remove-btn {
+    transition: none;
+  }
+}

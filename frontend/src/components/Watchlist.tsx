@@ -4,25 +4,21 @@ import Panel from "./Panel";
 import WatchlistAddForm from "./WatchlistAddForm";
 import WatchlistRow from "./WatchlistRow";
 
+const GRID = "grid grid-cols-[72px_1fr_72px_72px_24px] gap-2";
 const HEADERS = ["Symbol", "Price", "Day %", "Chart"];
-const NOTE = "px-2 py-1 text-xs text-text-muted";
 
-function Notice({ status, hasQuotes }: { status: Status; hasQuotes: boolean }) {
-  if (status === "disconnected") {
-    return <p className={NOTE}>Price stream closed. Reload the page to retry.</p>;
-  }
-  if (!hasQuotes) {
-    return (
-      <div className={NOTE}>
-        <p className="font-semibold">Waiting for prices</p>
-        <p>Prices appear as soon as the stream connects. No action needed.</p>
-      </div>
-    );
-  }
-  if (status === "reconnecting") {
-    return <p className={NOTE}>Reconnecting to price stream. Prices shown may be stale.</p>;
-  }
-  return null;
+function notice(
+  status: Status,
+  loading: boolean,
+  loadError: boolean,
+  waiting: boolean,
+): string {
+  if (loadError) return "Could not load the watchlist. Reload the page.";
+  if (status === "disconnected") return "Price stream closed. Reload the page to retry.";
+  if (status === "reconnecting") return "Reconnecting to price stream. Prices may be stale.";
+  if (loading) return "Loading watchlist...";
+  if (status === "connected" && waiting) return "Waiting for prices...";
+  return "";
 }
 
 export default function Watchlist({
@@ -33,6 +29,9 @@ export default function Watchlist({
   selected,
   onSelect,
   onAdd,
+  onRemove,
+  loading,
+  loadError,
 }: {
   tickers: string[];
   quotes: Record<string, Quote>;
@@ -41,10 +40,15 @@ export default function Watchlist({
   selected: string;
   onSelect: (ticker: string) => void;
   onAdd: (ticker: string) => Promise<string | null>;
+  onRemove: (ticker: string) => Promise<string | null>;
+  loading: boolean;
+  loadError: boolean;
 }) {
   const [error, setError] = useState("");
+  const waiting = tickers.length > 0 && !tickers.some((t) => quotes[t]);
+  const text = notice(status, loading, loadError, waiting);
   return (
-    <Panel title="Watchlist" role="table">
+    <Panel title="Watchlist">
       <WatchlistAddForm onAdd={onAdd} onError={setError} />
       <div className="h-6 px-2 text-xs">
         {error && (
@@ -53,27 +57,53 @@ export default function Watchlist({
           </p>
         )}
       </div>
-      <Notice status={status} hasQuotes={Object.keys(quotes).length > 0} />
       <div
-        role="row"
-        className="flex h-6 items-center gap-2 border-b border-border px-2 pl-[10px] text-xs font-semibold uppercase tracking-[0.05em] text-text-muted"
+        role="status"
+        aria-live="polite"
+        title={text}
+        className={
+          "h-6 overflow-hidden truncate px-2 text-xs " + (loadError ? "text-down" : "text-text-muted")
+        }
       >
-        <span className="w-[72px]">{HEADERS[0]}</span>
-        <span className="min-w-[88px] flex-1 text-right">{HEADERS[1]}</span>
-        <span className="w-[72px] text-right">{HEADERS[2]}</span>
-        <span className="w-16 text-center">{HEADERS[3]}</span>
+        {text}
       </div>
-      {tickers.map((t) => (
-        <WatchlistRow
-          key={t}
-          ticker={t}
-          quote={quotes[t]}
-          history={history[t] ?? []}
-          live={status === "connected"}
-          selected={selected === t}
-          onSelect={onSelect}
-        />
-      ))}
+      <div role="grid" aria-label="Watchlist">
+        <div role="rowgroup">
+          <div
+            role="row"
+            className={
+              GRID +
+              " h-6 items-center border-b border-border px-2 pl-[10px] text-xs font-semibold uppercase tracking-[0.05em] text-text-muted"
+            }
+          >
+            <span role="columnheader">{HEADERS[0]}</span>
+            <span role="columnheader" className="text-right">{HEADERS[1]}</span>
+            <span role="columnheader" className="text-right">{HEADERS[2]}</span>
+            <span role="columnheader" className="text-center">{HEADERS[3]}</span>
+            <span role="columnheader" aria-label="Actions" />
+          </div>
+        </div>
+        <div role="rowgroup">
+          {tickers.map((t) => (
+            <WatchlistRow
+              key={t}
+              ticker={t}
+              quote={quotes[t]}
+              history={history[t] ?? []}
+              live={status === "connected"}
+              selected={selected === t}
+              onSelect={onSelect}
+              onRemove={onRemove}
+              onError={setError}
+            />
+          ))}
+        </div>
+      </div>
+      {!loading && !loadError && tickers.length === 0 && (
+        <p data-testid="watchlist-empty" className="p-4 text-center text-sm text-text-muted">
+          No tickers yet. Add one above.
+        </p>
+      )}
     </Panel>
   );
 }
