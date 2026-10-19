@@ -2,7 +2,7 @@
 
 import asyncio
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from app import db
@@ -38,19 +38,21 @@ def create_watchlist_router(cache: PriceCache, source: MarketDataSource) -> APIR
         return [item(r) for r in rows]
 
     @router.post("/api/watchlist", status_code=201)
-    async def add(body: AddTicker, response: Response) -> dict:
-        row, created = await asyncio.to_thread(db.add_ticker, body.ticker)
-        if created:
-            await source.add_ticker(body.ticker)
-        else:
+    async def add(body: AddTicker, request: Request, response: Response) -> dict:
+        async with request.app.state.trade_lock:
+            row, created = await asyncio.to_thread(db.add_ticker, body.ticker)
+            if created:
+                await source.add_ticker(body.ticker)
+        if not created:
             response.status_code = 200
         return item(row)
 
     @router.delete("/api/watchlist/{ticker}", status_code=204)
-    async def remove(ticker: str) -> None:
+    async def remove(ticker: str, request: Request) -> None:
         t = ticker.strip().upper()
-        if not await asyncio.to_thread(db.remove_ticker, t):
-            raise HTTPException(404, "Ticker not on watchlist")
-        await reconcile_stream(source, t)
+        async with request.app.state.trade_lock:
+            if not await asyncio.to_thread(db.remove_ticker, t):
+                raise HTTPException(404, "Ticker not on watchlist")
+            await reconcile_stream(source, t)
 
     return router

@@ -30,7 +30,7 @@ def is_watched_or_held(ticker: str) -> bool:
 
 
 async def reconcile_stream(source: MarketDataSource, ticker: str) -> None:
-    """Stream the ticker if watched or held, otherwise stop streaming it."""
+    """Stream the ticker if watched or held, otherwise stop streaming it. Call under trade_lock."""
     if await asyncio.to_thread(is_watched_or_held, ticker):
         await source.add_ticker(ticker)
     else:

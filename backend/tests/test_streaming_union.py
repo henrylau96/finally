@@ -1,3 +1,7 @@
+import asyncio
+
+import pytest
+
 from app import db, main, streaming
 from app.market.seed_prices import DEFAULT_TICKERS
 
@@ -71,3 +75,12 @@ async def test_failed_unwatched_trade_stops(client):
     assert (await buy(client, "QQQQ", 1000000)).status_code == 400
     assert "QQQQ" not in main.source.get_tickers()
     assert main.cache.get("QQQQ") is None
+
+
+async def test_concurrent_trades_keep_fill_price(client):
+    """A failing trade racing a buy on a new ticker must not re-seed the held ticker's price."""
+    for ticker in ("QAXX", "QBXX", "QCXX", "QDXX", "QEXX"):
+        fail, ok = await asyncio.gather(buy(client, ticker, 1000000), buy(client, ticker))
+        assert fail.status_code == 400 and ok.status_code == 200
+        assert streaming_now(ticker)
+        assert main.cache.get(ticker).price == pytest.approx(ok.json()["trade"]["price"], rel=0.1)

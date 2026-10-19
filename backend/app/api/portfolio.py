@@ -24,10 +24,10 @@ def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIR
 
     @router.post("/api/portfolio/trade")
     async def trade(body: TradeRequest, request: Request) -> dict:
-        try:
-            if cache.get(body.ticker) is None:
-                await source.add_ticker(body.ticker)
-            async with request.app.state.trade_lock:
+        async with request.app.state.trade_lock:
+            try:
+                if cache.get(body.ticker) is None:
+                    await source.add_ticker(body.ticker)
                 update = cache.get(body.ticker)
                 if update is None:
                     raise HTTPException(400, f"No price available for {body.ticker}")
@@ -37,9 +37,9 @@ def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIR
                     )
                 except portfolio.TradeError as e:
                     raise HTTPException(400, str(e)) from e
-            await asyncio.to_thread(snapshots.record_snapshot, cache)
-            return result
-        finally:
-            await reconcile_stream(source, body.ticker)
+            finally:
+                await reconcile_stream(source, body.ticker)
+        await asyncio.to_thread(snapshots.record_snapshot, cache)
+        return result
 
     return router
