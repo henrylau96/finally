@@ -75,6 +75,8 @@ export default function MainChart({
       chart.remove();
       chartRef.current = null;
       seriesRef.current = null;
+      shown.current = "";
+      lastTime.current = 0;
     };
   }, []);
 
