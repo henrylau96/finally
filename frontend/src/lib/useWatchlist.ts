@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type WatchlistItem = {
   ticker: string;
@@ -16,18 +16,18 @@ export function useWatchlist() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const seq = useRef(0);
+
   const load = useCallback(async () => {
+    const id = ++seq.current;
+    let data: WatchlistItem[] | null = null;
     try {
       const res = await fetch("/api/watchlist");
-      if (res.ok) {
-        setRows(await res.json());
-        setError(false);
-      } else {
-        setError(true);
-      }
-    } catch {
-      setError(true);
-    }
+      if (res.ok) data = await res.json();
+    } catch {}
+    if (id !== seq.current) return;
+    if (data) setRows(data);
+    setError(!data);
     setLoading(false);
   }, []);
 
