@@ -93,3 +93,15 @@ async def test_concurrent_buys(client):
 async def test_unknown_ticker_trade(client):
     r = await trade(client, ticker="ZZZZ", side="buy", quantity=1)
     assert r.status_code == 200 and r.json()["trade"]["price"] > 0
+
+
+async def test_snapshot_failure_keeps_trade_ok(client, monkeypatch):
+    """A post-commit snapshot error must not turn a committed trade into a 500."""
+    from app import snapshots
+
+    def boom(cache):
+        raise RuntimeError("disk full")
+
+    monkeypatch.setattr(snapshots, "record_snapshot", boom)
+    r = await trade(client, ticker="AAPL", side="buy", quantity=1)
+    assert r.status_code == 200

@@ -46,6 +46,7 @@ export function usePortfolio() {
           return onTicker ? "Enter a ticker of 1-5 letters." : "Enter a quantity above 0 (up to 4 decimals).";
         }
       } catch {}
+      await refresh();
       return generic;
     },
     [refresh],

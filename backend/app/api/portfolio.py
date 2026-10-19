@@ -1,6 +1,7 @@
 """Portfolio and trade REST endpoints."""
 
 import asyncio
+import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -9,6 +10,8 @@ from app.api.schemas import TradeRequest
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
 from app.streaming import reconcile_stream
+
+logger = logging.getLogger(__name__)
 
 
 def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIRouter:
@@ -39,7 +42,10 @@ def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIR
                     raise HTTPException(400, str(e)) from e
             finally:
                 await reconcile_stream(source, body.ticker)
-        await asyncio.to_thread(snapshots.record_snapshot, cache)
+        try:
+            await asyncio.to_thread(snapshots.record_snapshot, cache)
+        except Exception:
+            logger.exception("post-trade snapshot failed")
         return result
 
     return router
