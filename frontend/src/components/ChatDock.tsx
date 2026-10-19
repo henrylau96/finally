@@ -4,6 +4,8 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { useChat } from "@/lib/useChat";
 import ChatMessage from "./ChatMessage";
 
+const EXAMPLES = ["How is my portfolio doing?", "Buy 5 NVDA", "Add PYPL"];
+
 function Loading() {
   return (
     <div
@@ -78,6 +80,35 @@ export default function ChatDock({ onActions }: { onActions: () => void }) {
         aria-live="polite"
         className={"min-h-0 flex-1 flex-col gap-2 overflow-y-auto p-2 " + (collapsed ? "hidden" : "flex")}
       >
+        {messages.length === 0 && !pending && (
+          <div
+            data-testid="chat-empty"
+            className="flex h-full flex-col items-center justify-center gap-4 p-4 text-center"
+          >
+            <div>
+              <p className="text-sm text-text-muted">Ask FinAlly about your portfolio.</p>
+              <p className="text-xs text-text-muted">
+                It can analyze positions, place trades and manage your watchlist.
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-1">
+              {EXAMPLES.map((text) => (
+                <button
+                  key={text}
+                  type="button"
+                  data-testid="chat-example"
+                  onClick={() => {
+                    setDraft(text);
+                    inputRef.current?.focus();
+                  }}
+                  className="h-8 w-full border border-border px-2 text-left text-xs text-text hover:bg-row-hover"
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         {messages.map((m) => (
           <ChatMessage key={m.id} entry={m} />
         ))}
