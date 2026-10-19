@@ -12,7 +12,13 @@ From one command, the user lands in a live, dark trading terminal where prices s
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ GBM market simulator (correlated sectors, 2-5% shocks, realistic seeds) behind the `MarketDataSource` interface — Phase 1 (MKT-01..05)
+- ✓ Shared in-memory price cache written by one background task — Phase 1 (MKT-08)
+- ✓ SSE stream `GET /api/stream/prices` at ~500ms with auto-reconnect — Phase 1 (STRM-01..04)
+- ✓ `GET /api/health` and FastAPI serving the Next.js static export from one origin — Phase 1 (OPS-01, OPS-02)
+- ✓ Dark terminal shell with live watchlist: flashing prices, signed day change %, sparklines — Phase 1 (UI-01, UI-03, UI-04)
+
+Validated in Phase 1: Live Price Terminal (2026-10-19).
 
 ### Active
 
@@ -87,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-19 after initialization*
+*Last updated: 2026-10-19 after Phase 1*
