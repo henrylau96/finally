@@ -40,8 +40,8 @@
 - [x] **PORT-04**: Fractional quantities are supported; average cost updates correctly on repeated buys
 - [x] **PORT-05**: A buy with insufficient cash or a sell exceeding held shares is rejected with a clear error and no state change
 - [x] **PORT-06**: Every trade is appended to the `trades` log
-- [ ] **PORT-07**: Portfolio value is snapshotted every 30 seconds and immediately after each trade
-- [ ] **PORT-08**: `GET /api/portfolio/history` returns snapshots for the P&L chart in bounded size
+- [x] **PORT-07**: Portfolio value is snapshotted every 30 seconds and immediately after each trade
+- [x] **PORT-08**: `GET /api/portfolio/history` returns snapshots for the P&L chart in bounded size
 
 ### Watchlist (§8)
 
@@ -73,7 +73,7 @@
 - [x] **UI-07**: Trade bar has ticker and quantity fields plus buy and sell buttons; orders fill instantly with no confirmation and errors are shown inline
 - [x] **UI-08**: Positions table shows ticker, quantity, average cost, current price, unrealized P&L and % change
 - [ ] **UI-09**: Portfolio heatmap (treemap) sizes positions by weight and colors them by P&L (green profit, red loss)
-- [ ] **UI-10**: P&L chart plots total portfolio value over time from `/api/portfolio/history`
+- [x] **UI-10**: P&L chart plots total portfolio value over time from `/api/portfolio/history`
 - [ ] **UI-11**: Collapsible AI chat panel with message input, scrolling history, a loading indicator while waiting, and inline confirmations of executed trades and watchlist changes
 - [x] **UI-12**: Portfolio, positions and charts refresh after manual or AI-executed trades
 - [ ] **UI-13**: Layout is dense and desktop-first and remains functional at tablet width
@@ -148,8 +148,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-04 | Phase 3 | Complete |
 | PORT-05 | Phase 3 | Complete |
 | PORT-06 | Phase 3 | Complete |
-| PORT-07 | Phase 3 | Pending |
-| PORT-08 | Phase 3 | Pending |
+| PORT-07 | Phase 3 | Complete |
+| PORT-08 | Phase 3 | Complete |
 | WATCH-01 | Phase 2 | Complete |
 | WATCH-02 | Phase 2 | Complete |
 | WATCH-03 | Phase 2 | Complete |
@@ -172,7 +172,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-07 | Phase 3 | Complete |
 | UI-08 | Phase 3 | Complete |
 | UI-09 | Phase 3 | Pending |
-| UI-10 | Phase 3 | Pending |
+| UI-10 | Phase 3 | Complete |
 | UI-11 | Phase 4 | Pending |
 | UI-12 | Phase 3 | Complete |
 | UI-13 | Phase 6 | Pending |

@@ -112,7 +112,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 03-04-PLAN.md — Snapshots (startup, after trade, 30 s) + bounded history; P&L line chart and shared chart theme (wave 3)
+- [x] 03-04-PLAN.md — Snapshots (startup, after trade, 30 s) + bounded history; P&L line chart and shared chart theme (wave 3)
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
@@ -178,7 +178,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
-| 3. Trading & Portfolio | 3/6 | In Progress|  |
+| 3. Trading & Portfolio | 4/6 | In Progress|  |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
