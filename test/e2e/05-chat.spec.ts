@@ -77,12 +77,21 @@ test("history survives reload", async ({ page }) => {
 });
 
 test("input is disabled while a reply is pending", async ({ page }) => {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => (release = resolve));
+  await page.route("**/api/chat", async (route) => {
+    await held;
+    await route.continue();
+  });
   await openApp(page);
-  await page.getByTestId("chat-input").fill("hello there");
+  const input = page.getByTestId("chat-input");
+  await input.fill("hello there");
   await page.getByTestId("chat-send").click();
-  await expect(page.getByTestId("chat-send")).toBeDisabled();
+  await expect(page.getByTestId("chat-loading")).toBeVisible();
+  await expect(input).toBeDisabled();
+  release();
   await expect(page.getByTestId("chat-loading")).toHaveCount(0);
-  await expect(page.getByTestId("chat-input")).toBeEnabled();
+  await expect(input).toBeEnabled();
 });
 
 test("a late history load keeps a message sent before it", async ({ page }) => {
