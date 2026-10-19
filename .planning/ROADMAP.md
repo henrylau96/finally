@@ -69,7 +69,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 02-01-PLAN.md — SQLite schema/seed + watchlist REST API driving the stream; browser rows from GET /api/watchlist (wave 1)
+- [x] 02-01-PLAN.md — SQLite schema/seed + watchlist REST API driving the stream; browser rows from GET /api/watchlist (wave 1)
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -155,7 +155,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
-| 2. Persistent Watchlist & Charts | 0/4 | Not started | - |
+| 2. Persistent Watchlist & Charts | 1/4 | In Progress|  |
 | 3. Trading & Portfolio | 0/TBD | Not started | - |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |

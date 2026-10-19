@@ -27,9 +27,9 @@
 
 ### Database (§7)
 
-- [ ] **DATA-01**: SQLite file at `db/finally.db` is created with schema and seed data on first start or first request if missing or empty; no manual migration step
-- [ ] **DATA-02**: Schema has tables `users_profile`, `watchlist`, `positions`, `trades`, `portfolio_snapshots`, `chat_messages` with the PLAN.md columns; every table carries `user_id` defaulting to `"default"`
-- [ ] **DATA-03**: Seed creates user `default` with $10,000 cash and watchlist AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX
+- [x] **DATA-01**: SQLite file at `db/finally.db` is created with schema and seed data on first start or first request if missing or empty; no manual migration step
+- [x] **DATA-02**: Schema has tables `users_profile`, `watchlist`, `positions`, `trades`, `portfolio_snapshots`, `chat_messages` with the PLAN.md columns; every table carries `user_id` defaulting to `"default"`
+- [x] **DATA-03**: Seed creates user `default` with $10,000 cash and watchlist AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX
 - [ ] **DATA-04**: Data persists across container restarts via the mounted `db/` volume
 
 ### Portfolio (§8)
@@ -45,10 +45,10 @@
 
 ### Watchlist (§8)
 
-- [ ] **WATCH-01**: `GET /api/watchlist` returns watched tickers with latest prices
-- [ ] **WATCH-02**: User can add a ticker via `POST /api/watchlist {ticker}`; it starts streaming
-- [ ] **WATCH-03**: User can remove a ticker via `DELETE /api/watchlist/{ticker}`
-- [ ] **WATCH-04**: Duplicate adds are handled gracefully (unique per user and ticker)
+- [x] **WATCH-01**: `GET /api/watchlist` returns watched tickers with latest prices
+- [x] **WATCH-02**: User can add a ticker via `POST /api/watchlist {ticker}`; it starts streaming
+- [x] **WATCH-03**: User can remove a ticker via `DELETE /api/watchlist/{ticker}`
+- [x] **WATCH-04**: Duplicate adds are handled gracefully (unique per user and ticker)
 
 ### AI Chat (§9)
 
@@ -138,9 +138,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | STRM-02 | Phase 1 | Complete |
 | STRM-03 | Phase 1 | Complete |
 | STRM-04 | Phase 1 | Complete |
-| DATA-01 | Phase 2 | Pending |
-| DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
+| DATA-01 | Phase 2 | Complete |
+| DATA-02 | Phase 2 | Complete |
+| DATA-03 | Phase 2 | Complete |
 | DATA-04 | Phase 6 | Pending |
 | PORT-01 | Phase 3 | Pending |
 | PORT-02 | Phase 3 | Pending |
@@ -150,10 +150,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PORT-06 | Phase 3 | Pending |
 | PORT-07 | Phase 3 | Pending |
 | PORT-08 | Phase 3 | Pending |
-| WATCH-01 | Phase 2 | Pending |
-| WATCH-02 | Phase 2 | Pending |
-| WATCH-03 | Phase 2 | Pending |
-| WATCH-04 | Phase 2 | Pending |
+| WATCH-01 | Phase 2 | Complete |
+| WATCH-02 | Phase 2 | Complete |
+| WATCH-03 | Phase 2 | Complete |
+| WATCH-04 | Phase 2 | Complete |
 | CHAT-01 | Phase 4 | Pending |
 | CHAT-02 | Phase 4 | Pending |
 | CHAT-03 | Phase 4 | Pending |
