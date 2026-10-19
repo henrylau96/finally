@@ -4,13 +4,13 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-10-19T08:36:03.137Z"
-last_activity: 2026-10-19 -- Phase 1 execution started
+last_updated: "2026-10-19T08:42:37.969Z"
+last_activity: 2026-10-19
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 5
-  completed_plans: 0
+  completed_plans: 1
   percent: 0
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-10-19)
 ## Current Position
 
 Phase: 1 (Live Price Terminal) — EXECUTING
-Plan: 1 of 5
-Status: Executing Phase 1
-Last activity: 2026-10-19 -- Phase 1 execution started
+Plan: 2 of 5
+Status: Ready to execute
+Last activity: 2026-10-19
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01 P01 | 25min | 2 tasks | 20 files |
 
 ## Accumulated Context
 
@@ -62,6 +63,7 @@ Recent decisions affecting current work:
 
 - [Roadmap]: Vertical MVP slices; Massive poller deferred to Phase 5 so the simulator path ships first
 - [Roadmap]: Docker/scripts/full test suite consolidated in Phase 6; Phase 1 already served by FastAPI on port 8000
+- [Phase 01]: [01-01]: to_dict drops change/change_percent; main.py mkdirs STATIC_DIR since StaticFiles raises per request if missing
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-19T08:03:58.593Z
+Last session: 2026-10-19T08:42:23.342Z
 Stopped at: Phase 1 UI-SPEC approved
-Resume file: .planning/phases/01-live-price-terminal/01-UI-SPEC.md
+Resume file: None

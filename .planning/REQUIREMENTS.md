@@ -9,20 +9,20 @@
 ### Market Data (§6)
 
 - [ ] **MKT-01**: Simulator and Massive client implement one abstract market-data interface; downstream code is agnostic to the source
-- [ ] **MKT-02**: Simulator generates prices by geometric Brownian motion with per-ticker drift and volatility, updating ~every 500ms
+- [x] **MKT-02**: Simulator generates prices by geometric Brownian motion with per-ticker drift and volatility, updating ~every 500ms
 - [ ] **MKT-03**: Simulator moves related tickers together (correlated moves, e.g. tech stocks)
 - [ ] **MKT-04**: Simulator occasionally applies a sudden 2-5% move to a ticker
 - [ ] **MKT-05**: Simulator starts from realistic seed prices (e.g. AAPL ~$190, GOOGL ~$175)
 - [ ] **MKT-06**: When `MASSIVE_API_KEY` is set and non-empty the backend uses the Massive REST poller; otherwise it uses the simulator
 - [ ] **MKT-07**: Massive poller fetches the union of watched tickers on a configurable interval (free tier: grouped daily bars every 15 min; paid: 2-15s) and parses responses into the simulator's format
-- [ ] **MKT-08**: A single background task writes to an in-memory price cache holding latest price, previous price and timestamp per ticker
+- [x] **MKT-08**: A single background task writes to an in-memory price cache holding latest price, previous price and timestamp per ticker
 - [ ] **MKT-09**: A newly added ticker gets a price in the cache without waiting for the next long poll cycle, and prices carry their true source timestamp (no stale price shown as live)
 
 ### Streaming (§6)
 
-- [ ] **STRM-01**: `GET /api/stream/prices` is a long-lived SSE stream consumable by native `EventSource`
-- [ ] **STRM-02**: The stream pushes updates for all tickers known to the system at ~500ms cadence
-- [ ] **STRM-03**: Each event contains ticker, price, previous price, timestamp and change direction
+- [x] **STRM-01**: `GET /api/stream/prices` is a long-lived SSE stream consumable by native `EventSource`
+- [x] **STRM-02**: The stream pushes updates for all tickers known to the system at ~500ms cadence
+- [x] **STRM-03**: Each event contains ticker, price, previous price, timestamp and change direction
 - [ ] **STRM-04**: Clients reconnect automatically after a dropped connection (EventSource retry)
 
 ### Database (§7)
@@ -81,8 +81,8 @@
 
 ### Deployment (§3, §4, §11)
 
-- [ ] **OPS-01**: FastAPI serves the static frontend and all `/api/*` routes on port 8000 from one origin
-- [ ] **OPS-02**: `GET /api/health` returns healthy status for Docker and deployment checks
+- [x] **OPS-01**: FastAPI serves the static frontend and all `/api/*` routes on port 8000 from one origin
+- [x] **OPS-02**: `GET /api/health` returns healthy status for Docker and deployment checks
 - [ ] **OPS-03**: Multi-stage Dockerfile builds the frontend (Node 20) and runs the backend (Python 3.14 + uv sync from lockfile)
 - [ ] **OPS-04**: `docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally` starts a working app
 - [ ] **OPS-05**: `scripts/start_mac.sh` and `scripts/start_windows.ps1` build if needed (or on `--build`), run the container with volume, port and `.env`, and print the URL; they are idempotent
@@ -126,17 +126,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | MKT-01 | Phase 1 | Pending |
-| MKT-02 | Phase 1 | Pending |
+| MKT-02 | Phase 1 | Complete |
 | MKT-03 | Phase 1 | Pending |
 | MKT-04 | Phase 1 | Pending |
 | MKT-05 | Phase 1 | Pending |
 | MKT-06 | Phase 5 | Pending |
 | MKT-07 | Phase 5 | Pending |
-| MKT-08 | Phase 1 | Pending |
+| MKT-08 | Phase 1 | Complete |
 | MKT-09 | Phase 5 | Pending |
-| STRM-01 | Phase 1 | Pending |
-| STRM-02 | Phase 1 | Pending |
-| STRM-03 | Phase 1 | Pending |
+| STRM-01 | Phase 1 | Complete |
+| STRM-02 | Phase 1 | Complete |
+| STRM-03 | Phase 1 | Complete |
 | STRM-04 | Phase 1 | Pending |
 | DATA-01 | Phase 2 | Pending |
 | DATA-02 | Phase 2 | Pending |
@@ -177,8 +177,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-12 | Phase 3 | Pending |
 | UI-13 | Phase 6 | Pending |
 | UI-14 | Phase 6 | Pending |
-| OPS-01 | Phase 1 | Pending |
-| OPS-02 | Phase 1 | Pending |
+| OPS-01 | Phase 1 | Complete |
+| OPS-02 | Phase 1 | Complete |
 | OPS-03 | Phase 6 | Pending |
 | OPS-04 | Phase 6 | Pending |
 | OPS-05 | Phase 6 | Pending |
