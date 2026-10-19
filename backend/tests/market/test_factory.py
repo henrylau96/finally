@@ -30,6 +30,21 @@ class TestFactory:
 
         assert isinstance(source, SimulatorDataSource)
 
+    def test_massive_poll_interval_default(self):
+        """Test that the Massive poll interval defaults to 15 seconds."""
+        with patch.dict(os.environ, {"MASSIVE_API_KEY": "key"}, clear=True):
+            source = create_market_data_source(PriceCache())
+
+        assert source._interval == 15.0
+
+    def test_massive_poll_interval_from_env(self):
+        """Test that MASSIVE_POLL_INTERVAL overrides the poll interval."""
+        env = {"MASSIVE_API_KEY": "key", "MASSIVE_POLL_INTERVAL": "3"}
+        with patch.dict(os.environ, env, clear=True):
+            source = create_market_data_source(PriceCache())
+
+        assert source._interval == 3.0
+
     def test_creates_simulator_when_api_key_whitespace(self):
         """Test that simulator is created when MASSIVE_API_KEY is whitespace."""
         cache = PriceCache()
