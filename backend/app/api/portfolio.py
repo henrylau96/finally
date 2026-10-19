@@ -1,17 +1,13 @@
 """Portfolio and trade REST endpoints."""
 
 import asyncio
-import logging
 
 from fastapi import APIRouter, HTTPException, Request
 
-from app import portfolio, snapshots
+from app import portfolio, services, snapshots
 from app.api.schemas import TradeRequest
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
-from app.streaming import reconcile_stream
-
-logger = logging.getLogger(__name__)
 
 
 def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIRouter:
@@ -27,25 +23,11 @@ def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIR
 
     @router.post("/api/portfolio/trade")
     async def trade(body: TradeRequest, request: Request) -> dict:
-        async with request.app.state.trade_lock:
-            try:
-                if cache.get(body.ticker) is None:
-                    await source.add_ticker(body.ticker)
-                update = cache.get(body.ticker)
-                if update is None:
-                    raise HTTPException(400, f"No price available for {body.ticker}")
-                try:
-                    result = await asyncio.to_thread(
-                        portfolio.execute_trade, body.ticker, body.side, body.quantity, update.price
-                    )
-                except portfolio.TradeError as e:
-                    raise HTTPException(400, str(e)) from e
-            finally:
-                await reconcile_stream(source, body.ticker)
         try:
-            await asyncio.to_thread(snapshots.record_snapshot, cache)
-        except Exception:
-            logger.exception("post-trade snapshot failed")
-        return result
+            return await services.place_trade(
+                request.app, cache, source, body.ticker, body.side, body.quantity
+            )
+        except portfolio.TradeError as e:
+            raise HTTPException(400, str(e)) from e
 
     return router
