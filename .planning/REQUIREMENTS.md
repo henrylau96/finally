@@ -72,7 +72,7 @@
 - [x] **UI-06**: Clicking a ticker shows a larger price-over-time chart for it in the main chart area
 - [x] **UI-07**: Trade bar has ticker and quantity fields plus buy and sell buttons; orders fill instantly with no confirmation and errors are shown inline
 - [x] **UI-08**: Positions table shows ticker, quantity, average cost, current price, unrealized P&L and % change
-- [ ] **UI-09**: Portfolio heatmap (treemap) sizes positions by weight and colors them by P&L (green profit, red loss)
+- [x] **UI-09**: Portfolio heatmap (treemap) sizes positions by weight and colors them by P&L (green profit, red loss)
 - [x] **UI-10**: P&L chart plots total portfolio value over time from `/api/portfolio/history`
 - [ ] **UI-11**: Collapsible AI chat panel with message input, scrolling history, a loading indicator while waiting, and inline confirmations of executed trades and watchlist changes
 - [x] **UI-12**: Portfolio, positions and charts refresh after manual or AI-executed trades
@@ -171,7 +171,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-06 | Phase 2 | Complete |
 | UI-07 | Phase 3 | Complete |
 | UI-08 | Phase 3 | Complete |
-| UI-09 | Phase 3 | Pending |
+| UI-09 | Phase 3 | Complete |
 | UI-10 | Phase 3 | Complete |
 | UI-11 | Phase 4 | Pending |
 | UI-12 | Phase 3 | Complete |

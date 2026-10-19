@@ -116,7 +116,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3 completion)*
 
-- [ ] 03-05-PLAN.md — Squarified heatmap colored by P&L; folded Phase 2 UI fixes; 04-portfolio-viz E2E (wave 4)
+- [x] 03-05-PLAN.md — Squarified heatmap colored by P&L; folded Phase 2 UI fixes; 04-portfolio-viz E2E (wave 4)
 
 **Wave 5** *(blocked on Wave 4 completion)*
 
@@ -178,7 +178,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Live Price Terminal | 5/5 | Complete    | 2026-10-19 |
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
-| 3. Trading & Portfolio | 4/6 | In Progress|  |
+| 3. Trading & Portfolio | 5/6 | In Progress|  |
 | 4. AI Chat Copilot | 0/TBD | Not started | - |
 | 5. Real Market Data (Massive) | 0/TBD | Not started | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
