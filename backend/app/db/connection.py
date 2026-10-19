@@ -40,9 +40,14 @@ def connect() -> sqlite3.Connection:
 
 @contextmanager
 def transaction() -> Iterator[sqlite3.Connection]:
-    """Yield a connection; commit on success, roll back on error, always close."""
+    """Yield a connection holding the write lock (BEGIN IMMEDIATE).
+
+    Commits on success, rolls back on error, always closes. Taking the lock up front
+    serializes read-modify-write sequences such as a trade's cash check.
+    """
     conn = connect()
     try:
+        conn.execute("BEGIN IMMEDIATE")
         with conn:
             yield conn
     finally:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import sqlite3
 
 from app import db
@@ -22,6 +23,8 @@ def execute_trade(
     side = side.lower().strip()
     if side not in ("buy", "sell"):
         raise TradeError(f"Invalid side '{side}': must be 'buy' or 'sell'")
+    if not math.isfinite(quantity):
+        raise TradeError("Quantity must be a finite number")
     if quantity <= 0:
         raise TradeError("Quantity must be greater than 0")
     price = price_cache.get_price(ticker)

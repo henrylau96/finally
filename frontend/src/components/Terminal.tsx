@@ -42,7 +42,15 @@ export function Terminal() {
     setWatchlist(tickers);
     setSelected((s) => s || tickers[0] || "");
     setTradeTicker((t) => t || tickers[0] || "");
+    return tickers;
   }, []);
+
+  /** Move selection and trade ticker off tickers that left the watchlist. */
+  const dropRemoved = (removed: string[], remaining: string[]) => {
+    const next = (t: string) => (removed.includes(t) ? remaining[0] ?? "" : t);
+    setSelected(next);
+    setTradeTicker(next);
+  };
 
   useEffect(() => {
     refreshPortfolio();
@@ -76,7 +84,7 @@ export function Terminal() {
     setWatchError("");
     try {
       await api.removeTicker(ticker);
-      await refreshWatchlist();
+      dropRemoved([ticker], await refreshWatchlist());
     } catch (e) {
       setWatchError((e as Error).message);
     }
@@ -89,7 +97,11 @@ export function Terminal() {
       const res = await api.chat(text);
       const actions = { trades: res.trades, watchlist_changes: res.watchlist_changes };
       setMessages((m) => [...m, { role: "assistant", content: res.message, actions }]);
-      await Promise.all([refreshPortfolio(), refreshWatchlist()]);
+      const [, remaining] = await Promise.all([refreshPortfolio(), refreshWatchlist()]);
+      const removed = res.watchlist_changes
+        .filter((w) => w.action === "remove" && w.status === "executed")
+        .map((w) => w.ticker);
+      dropRemoved(removed, remaining);
     } catch (e) {
       setMessages((m) => [...m, { role: "assistant", content: `Request failed: ${(e as Error).message}`, actions: null }]);
     } finally {

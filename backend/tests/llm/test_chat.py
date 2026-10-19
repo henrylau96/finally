@@ -5,6 +5,8 @@ import pytest
 from app import db
 from app.llm import chat
 from app.llm.schema import ChatResponse, TradeAction, WatchlistAction
+from app.market import PriceCache
+from app.market.simulator import SimulatorDataSource
 
 
 @pytest.fixture
@@ -95,3 +97,16 @@ async def test_llm_error_returns_friendly_message(monkeypatch, cache, source):
     assert body == {"message": chat.UNAVAILABLE_MESSAGE, "trades": [], "watchlist_changes": []}
     assert db.get_cash() == 10000.0
     assert [m["role"] for m in db.get_chat_messages()] == ["user", "assistant"]
+
+
+async def test_add_then_buy_new_ticker(mock_mode):
+    cache = PriceCache()
+    simulator = SimulatorDataSource(cache)
+    await simulator.start(db.get_watchlist())
+    try:
+        body = await chat.handle_chat("add PYPL and buy 5 PYPL", cache, simulator)
+    finally:
+        await simulator.stop()
+    assert body["watchlist_changes"][0]["status"] == "executed"
+    assert body["trades"][0]["status"] == "executed", body["trades"][0]["error"]
+    assert db.get_position("PYPL")["quantity"] == 5.0

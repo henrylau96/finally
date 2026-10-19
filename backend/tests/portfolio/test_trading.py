@@ -120,3 +120,9 @@ def test_get_portfolio_falls_back_to_avg_cost(cache):
     pos = get_portfolio(cache)["positions"][0]
     assert pos["current_price"] == 100.0
     assert pos["unrealized_pnl"] == 0.0
+
+
+@pytest.mark.parametrize("qty", [float("nan"), float("inf")])
+def test_non_finite_quantity(cache, qty):
+    with pytest.raises(TradeError, match="finite"):
+        execute_trade("AAPL", "buy", qty, cache)

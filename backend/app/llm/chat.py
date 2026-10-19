@@ -84,13 +84,16 @@ async def handle_chat(
     message: str, price_cache: PriceCache, market_source: MarketDataSource,
     user_id: str = "default",
 ) -> dict:
-    """Handle a user chat message end to end and return the POST /api/chat body."""
+    """Handle a user chat message end to end and return the POST /api/chat body.
+
+    Watchlist changes run before trades so a just-added ticker has a price to trade at.
+    """
     response = await get_response(message, price_cache, user_id)
     db.add_chat_message("user", message, None, user_id)
-    trades = [run_trade(t, price_cache, user_id) for t in response.trades]
     changes = [
         await run_watchlist_change(c, market_source, user_id) for c in response.watchlist_changes
     ]
+    trades = [run_trade(t, price_cache, user_id) for t in response.trades]
     actions = {"trades": trades, "watchlist_changes": changes}
     db.add_chat_message("assistant", response.message, actions, user_id)
     return {"message": response.message, **actions}

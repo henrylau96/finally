@@ -116,3 +116,11 @@ def test_add_watchlist_invalid(client):
 def test_remove_watchlist(client):
     assert client.delete("/api/watchlist/aapl").status_code == 204
     assert client.delete("/api/watchlist/AAPL").status_code == 404
+
+
+@pytest.mark.parametrize("qty", ["NaN", "Infinity", "-Infinity"])
+def test_trade_non_finite_quantity(client, qty):
+    body = f'{{"ticker": "AAPL", "quantity": {qty}, "side": "buy"}}'
+    r = client.post("/api/portfolio/trade", content=body, headers={"content-type": "application/json"})
+    assert r.status_code == 400
+    assert "finite" in r.json()["detail"]

@@ -56,6 +56,15 @@ def test_transaction_commits():
     assert len(db.get_trades()) == 1
 
 
+def test_transaction_holds_write_lock_immediately(tmp_db):
+    with db.transaction() as conn:
+        assert conn.in_transaction
+        other = sqlite3.connect(tmp_db, timeout=0)
+        with pytest.raises(sqlite3.OperationalError, match="locked"):
+            other.execute("BEGIN IMMEDIATE")
+        other.close()
+
+
 def test_transaction_rolls_back_on_error():
     with pytest.raises(RuntimeError):
         with db.transaction() as conn:
