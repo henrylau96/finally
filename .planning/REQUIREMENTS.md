@@ -66,8 +66,8 @@
 
 - [x] **UI-01**: Single-page Next.js TypeScript app built as a static export, styled with Tailwind using the PLAN.md dark theme and colors
 - [ ] **UI-02**: Header shows live portfolio total value, cash balance and a connection dot (green connected, yellow reconnecting, red disconnected)
-- [ ] **UI-03**: Watchlist panel shows each ticker's symbol, current price, daily change % and a sparkline accumulated from SSE since page load
-- [ ] **UI-04**: Prices flash green on uptick or red on downtick, fading over ~500ms via CSS transition
+- [x] **UI-03**: Watchlist panel shows each ticker's symbol, current price, daily change % and a sparkline accumulated from SSE since page load
+- [x] **UI-04**: Prices flash green on uptick or red on downtick, fading over ~500ms via CSS transition
 - [ ] **UI-05**: User can add and remove watchlist tickers from the watchlist panel
 - [ ] **UI-06**: Clicking a ticker shows a larger price-over-time chart for it in the main chart area
 - [ ] **UI-07**: Trade bar has ticker and quantity fields plus buy and sell buttons; orders fill instantly with no confirmation and errors are shown inline
@@ -165,8 +165,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHAT-09 | Phase 4 | Pending |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 3 | Pending |
-| UI-03 | Phase 1 | Pending |
-| UI-04 | Phase 1 | Pending |
+| UI-03 | Phase 1 | Complete |
+| UI-04 | Phase 1 | Complete |
 | UI-05 | Phase 2 | Pending |
 | UI-06 | Phase 2 | Pending |
 | UI-07 | Phase 3 | Pending |
