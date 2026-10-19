@@ -11,7 +11,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from app import db
+from app import db, streaming
 from app.api.health import router as health_router
 from app.api.portfolio import create_portfolio_router
 from app.api.stream import create_stream_router, shutdown
@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
     end_streams_on_exit_signal()
     await asyncio.to_thread(db.init_db)
     app.state.trade_lock = asyncio.Lock()
-    tickers = await asyncio.to_thread(db.list_tickers)
+    tickers = await asyncio.to_thread(streaming.streamed_tickers)
     await source.start(tickers)
     yield
     await source.stop()
