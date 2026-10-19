@@ -2,46 +2,23 @@
 
 import {
   AreaSeries,
-  CrosshairMode,
-  LineStyle,
-  createChart,
   type IChartApi,
   type ISeriesApi,
   type UTCTimestamp,
 } from "lightweight-charts";
 import { useEffect, useRef } from "react";
+import { CHART, createBaseChart } from "@/lib/chartTheme";
 import { formatPrice } from "@/lib/format";
 import type { ChartPoint } from "@/lib/usePriceStream";
 
-const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-const clock = (t: number) => new Date(t * 1000).toLocaleTimeString("en-GB");
 const asData = (pts: ChartPoint[]) => pts as { time: UTCTimestamp; value: number }[];
 
 function createAreaChart(container: HTMLElement) {
-  const label = { color: "#8b949e", style: LineStyle.Dashed, labelBackgroundColor: "#161b22" };
-  const chart = createChart(container, {
-    autoSize: true,
-    layout: { background: { color: "transparent" }, textColor: "#8b949e", fontSize: 12, fontFamily: MONO },
-    grid: { vertLines: { color: "rgba(48,54,61,0.5)" }, horzLines: { color: "rgba(48,54,61,0.5)" } },
-    crosshair: { mode: CrosshairMode.Normal, vertLine: label, horzLine: label },
-    rightPriceScale: { borderColor: "#30363d", scaleMargins: { top: 0.1, bottom: 0.1 } },
-    timeScale: {
-      borderColor: "#30363d",
-      timeVisible: true,
-      secondsVisible: true,
-      rightOffset: 4,
-      tickMarkFormatter: (t: number) => clock(t),
-    },
-    localization: {
-      timeFormatter: (t: number) => clock(t),
-      priceFormatter: (p: number) =>
-        "$" + p.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    },
-  });
+  const chart = createBaseChart(container, { secondsVisible: true });
   const series = chart.addSeries(AreaSeries, {
-    lineColor: "#209dd7",
-    topColor: "rgba(32,157,215,0.28)",
-    bottomColor: "rgba(32,157,215,0)",
+    lineColor: CHART.primary,
+    topColor: CHART.primaryFill,
+    bottomColor: CHART.primaryFillEnd,
     lineWidth: 2,
     priceLineVisible: true,
     lastValueVisible: true,

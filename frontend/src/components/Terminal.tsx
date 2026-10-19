@@ -9,6 +9,7 @@ import ChatDock from "./ChatDock";
 import Header from "./Header";
 import MainChart from "./MainChart";
 import Panel from "./Panel";
+import PnlChart from "./PnlChart";
 import PositionsTable from "./PositionsTable";
 import TradeBar from "./TradeBar";
 import Watchlist from "./Watchlist";
@@ -20,7 +21,7 @@ function Placeholder({ children }: { children: string }) {
 export default function Terminal() {
   const { status, hasConnected, quotes, history, chart } = usePriceStream();
   const { rows, loading, error, add, remove } = useWatchlist();
-  const { portfolio, trade } = usePortfolio();
+  const { portfolio, version, trade } = usePortfolio();
   const { rows: positionRows, total } = useMemo(() => derivePositions(portfolio, quotes), [portfolio, quotes]);
   const [selected, setSelected] = useState("");
   useEffect(() => {
@@ -47,9 +48,7 @@ export default function Terminal() {
               <Placeholder>Portfolio heatmap. Coming soon.</Placeholder>
             </Panel>
             <PositionsTable rows={positionRows} quotes={quotes} live={status === "connected"} selected={selected} onSelect={setSelected} />
-            <Panel title="P&L" testId="pnl-chart">
-              <Placeholder>P&L chart. Coming soon.</Placeholder>
-            </Panel>
+            <PnlChart version={version} />
           </div>
         </div>
         <ChatDock />

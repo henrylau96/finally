@@ -1,3 +1,4 @@
+import type { UTCTimestamp } from "lightweight-charts";
 import type { Quote } from "./usePriceStream";
 
 export type Position = {
@@ -45,4 +46,17 @@ export function derivePositions(
 export function pnlState(pct: number): "positive" | "negative" | "flat" {
   if (Number(Math.abs(pct).toFixed(2)) === 0) return "flat";
   return pct > 0 ? "positive" : "negative";
+}
+
+/** ISO snapshots oldest-first to strictly ascending whole seconds; last value wins per second. */
+export function toSeries(h: { total_value: number; recorded_at: string }[]) {
+  const out: { time: UTCTimestamp; value: number }[] = [];
+  for (const s of h) {
+    const time = Math.floor(Date.parse(s.recorded_at) / 1000) as UTCTimestamp;
+    const last = out[out.length - 1];
+    if (last && time < last.time) continue;
+    if (last && time === last.time) last.value = s.total_value;
+    else out.push({ time, value: s.total_value });
+  }
+  return out;
 }
