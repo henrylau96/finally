@@ -215,3 +215,5 @@ backend/static/
 test/node_modules/
 test/test-results/
 test/playwright-report/
+# The Python template rule lib/ above must not hide frontend source
+!frontend/src/lib/
