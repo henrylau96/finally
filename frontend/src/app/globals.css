@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0d1117;
+  --color-panel: #131a25;
+  --color-raised: #1a2331;
+  --color-rule: #253246;
+  --color-text: #d7dee9;
+  --color-muted: #7d8899;
+  --color-up: #26b26f;
+  --color-down: #e5484d;
+  --color-accent: #ecad0a;
+  --color-primary: #209dd7;
+  --color-secondary: #753991;
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--color-ink);
+  color: var(--color-text);
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 13px;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.flash-fade {
+  transition: background-color 500ms ease-out;
+}
+.flash-up,
+.flash-down {
+  transition: none;
+}
+.flash-up {
+  background-color: rgb(38 178 111 / 0.3);
+}
+.flash-down {
+  background-color: rgb(229 72 77 / 0.3);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+
+@keyframes pulse-dot {
+  50% { opacity: 0.35; }
+}
+.loading-dot {
+  animation: pulse-dot 1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flash-fade { transition: none; }
+  .loading-dot { animation: none; }
+}
