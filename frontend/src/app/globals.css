@@ -42,3 +42,24 @@ body {
   outline: 2px solid var(--color-primary);
   outline-offset: -2px;
 }
+
+.price-cell {
+  transition: background-color 500ms ease-out;
+  font-variant-numeric: tabular-nums;
+}
+
+.price-cell[data-flash="up"] {
+  background-color: rgba(63, 185, 80, 0.3);
+  transition: none;
+}
+
+.price-cell[data-flash="down"] {
+  background-color: rgba(248, 81, 73, 0.3);
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .price-cell {
+    transition-duration: 150ms;
+  }
+}

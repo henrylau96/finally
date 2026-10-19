@@ -1,45 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { DEFAULT_TICKERS } from "@/lib/tickers";
 import { usePriceStream } from "@/lib/usePriceStream";
 import ChatDock from "./ChatDock";
 import Header from "./Header";
 import Panel from "./Panel";
-
-function formatPrice(price: number) {
-  return "$" + price.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
+import Watchlist from "./Watchlist";
 
 function Placeholder({ children }: { children: string }) {
   return <p className="p-4 text-center text-text-muted">{children}</p>;
 }
 
 export default function Terminal() {
-  const { status, hasConnected, quotes } = usePriceStream();
+  const { status, hasConnected, quotes, history } = usePriceStream();
   const [selected, setSelected] = useState("AAPL");
   return (
     <div className="flex h-full flex-col gap-2 p-2">
       <Header status={status} hasConnected={hasConnected} />
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,28%)_1fr_auto] gap-2">
-        <Panel title="Watchlist">
-          {DEFAULT_TICKERS.map((t) => (
-            <div
-              key={t}
-              data-testid={"watchlist-row-" + t}
-              onClick={() => setSelected(t)}
-              className={
-                "flex items-center justify-between border-b border-border px-2 py-1 hover:bg-row-hover " +
-                (selected === t ? "border-l-2 border-l-primary bg-row-hover" : "")
-              }
-            >
-              <span className="font-mono font-semibold">{t}</span>
-              <span data-testid={"price-" + t} className="font-mono">
-                {quotes[t] ? formatPrice(quotes[t].price) : "--"}
-              </span>
-            </div>
-          ))}
-        </Panel>
+        <Watchlist quotes={quotes} history={history} status={status} selected={selected} onSelect={setSelected} />
         <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_1fr] gap-2">
           <Panel title="Main chart" testId="main-chart" data-ticker="">
             <Placeholder>Select a ticker to see its chart. Coming soon.</Placeholder>
