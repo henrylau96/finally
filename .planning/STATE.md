@@ -4,8 +4,8 @@ milestone: v1.0
 milestone_name: milestone
 status: executing
 stopped_at: Phase 1 UI-SPEC approved
-last_updated: "2026-10-19T10:41:34.293Z"
-last_activity: 2026-10-19 -- Phase 2 planning complete
+last_updated: "2026-10-19T10:41:43.910Z"
+last_activity: 2026-10-19 -- Phase 2 execution started
 progress:
   total_phases: 6
   completed_phases: 1
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-10-19)
 
 **Core value:** From one command, the user lands in a live, dark trading terminal where prices stream, trades fill instantly, and the AI copilot can trade for them through chat.
-**Current focus:** Phase 2 — persistent watchlist & charts
+**Current focus:** Phase 2 — Persistent Watchlist & Charts
 
 ## Current Position
 
-Phase: 2
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-10-19 -- Phase 2 planning complete
+Phase: 2 (Persistent Watchlist & Charts) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 2
+Last activity: 2026-10-19 -- Phase 2 execution started
 
 Progress: [██████████] 100%
 
