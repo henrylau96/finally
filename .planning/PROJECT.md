@@ -26,7 +26,10 @@ From one command, the user lands in a live, dark trading terminal where prices s
 - ✓ Portfolio snapshots (startup, after trades, every 30 s) with bounded history; streamed set = watchlist ∪ positions — Phase 3 (PORT-07, PORT-08)
 - ✓ Live header totals, trade bar, positions table, treemap heatmap and P&L chart refreshing after trades — Phase 3 (UI-02, UI-07..10, UI-12, TEST-02)
 
-Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19). Validated in Phase 3: Trading & Portfolio (2026-10-19).
+- ✓ AI chat copilot: LiteLLM -> OpenRouter gpt-oss-120b (Cerebras) with structured output, auto-executed trades and watchlist changes, persisted history, deterministic `LLM_MOCK` mode, non-blocking — Phase 4 (CHAT-01..09, TEST-03)
+- ✓ Collapsible FinAlly AI chat dock with loading state, inline action chips and portfolio refresh — Phase 4 (UI-11)
+
+Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19). Validated in Phase 3: Trading & Portfolio (2026-10-19). Validated in Phase 4: AI Chat Copilot (2026-10-20).
 
 ### Active
 
@@ -38,7 +41,7 @@ The full specification is `planning/PLAN.md` (the source of truth). Summary:
 - [ ] SQLite at `db/finally.db`, lazily created and seeded (default user with $10,000 cash; 10 default tickers: AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX); every table has `user_id` defaulting to `"default"`
 - [ ] Portfolio API: positions, cash, total value, unrealized P&L; market-order trades with instant fill (fractional shares, cash and share validation); portfolio history snapshots every 30s and after each trade
 - [ ] Watchlist API: list with latest prices, add ticker, remove ticker
-- [ ] Chat API: LiteLLM -> OpenRouter `openrouter/openai/gpt-oss-120b` with Cerebras provider and structured outputs (`message`, `trades`, `watchlist_changes`); auto-executes actions; persists history; deterministic mock when `LLM_MOCK=true`
+- [x] Chat API: LiteLLM -> OpenRouter `openrouter/openai/gpt-oss-120b` with Cerebras provider and structured outputs (`message`, `trades`, `watchlist_changes`); auto-executes actions; persists history; deterministic mock when `LLM_MOCK=true`
 - [ ] Health check at `GET /api/health`
 - [ ] Frontend (Next.js + TypeScript static export, Tailwind dark theme): watchlist with flashing prices and sparklines, main chart for the selected ticker, portfolio heatmap (treemap), P&L chart, positions table, trade bar, collapsible AI chat panel, header with live total value, cash and connection status dot
 - [ ] FastAPI serves the static frontend and the API on one port
@@ -101,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-19 after Phase 3*
+*Last updated: 2026-10-20 after Phase 4*
