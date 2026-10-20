@@ -84,9 +84,9 @@
 - [x] **OPS-01**: FastAPI serves the static frontend and all `/api/*` routes on port 8000 from one origin
 - [x] **OPS-02**: `GET /api/health` returns healthy status for Docker and deployment checks
 - [x] **OPS-03**: Multi-stage Dockerfile builds the frontend (Node 20) and runs the backend (Python 3.14 + uv sync from lockfile)
-- [ ] **OPS-04**: `docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally` starts a working app
-- [ ] **OPS-05**: `scripts/start_mac.sh` and `scripts/start_windows.ps1` build if needed (or on `--build`), run the container with volume, port and `.env`, and print the URL; they are idempotent
-- [ ] **OPS-06**: `scripts/stop_mac.sh` and `scripts/stop_windows.ps1` stop and remove the container but keep the volume; they are idempotent
+- [x] **OPS-04**: `docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally` starts a working app
+- [x] **OPS-05**: `scripts/start_mac.sh` and `scripts/start_windows.ps1` build if needed (or on `--build`), run the container with volume, port and `.env`, and print the URL; they are idempotent
+- [x] **OPS-06**: `scripts/stop_mac.sh` and `scripts/stop_windows.ps1` stop and remove the container but keep the volume; they are idempotent
 - [x] **OPS-07**: `.env.example` documents `OPENROUTER_API_KEY`, `MASSIVE_API_KEY` and `LLM_MOCK`; `.env` is gitignored and read from the project root
 
 ### Testing (§12)
@@ -96,7 +96,7 @@
 - [x] **TEST-03**: Backend pytest covers LLM structured-output parsing, malformed responses and trade validation in the chat flow
 - [x] **TEST-04**: Backend pytest covers API routes (status codes, response shapes, errors)
 - [x] **TEST-05**: Frontend tests cover component rendering with mock data, price flash triggering, watchlist CRUD, portfolio calculations, and chat rendering with loading state
-- [ ] **TEST-06**: `test/docker-compose.test.yml` runs the app container plus a Playwright container with `LLM_MOCK=true`
+- [x] **TEST-06**: `test/docker-compose.test.yml` runs the app container plus a Playwright container with `LLM_MOCK=true`
 - [x] **TEST-07**: E2E scenarios pass: fresh start, watchlist add/remove, buy, sell, portfolio visualization, mocked AI chat trade, SSE reconnection
 
 ## v2 Requirements
@@ -180,16 +180,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPS-01 | Phase 1 | Complete |
 | OPS-02 | Phase 1 | Complete |
 | OPS-03 | Phase 6 | Complete |
-| OPS-04 | Phase 6 | Pending |
-| OPS-05 | Phase 6 | Pending |
-| OPS-06 | Phase 6 | Pending |
+| OPS-04 | Phase 6 | Complete |
+| OPS-05 | Phase 6 | Complete |
+| OPS-06 | Phase 6 | Complete |
 | OPS-07 | Phase 6 | Complete |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 3 | Complete |
 | TEST-03 | Phase 4 | Complete |
 | TEST-04 | Phase 6 | Complete |
 | TEST-05 | Phase 6 | Complete |
-| TEST-06 | Phase 6 | Pending |
+| TEST-06 | Phase 6 | Complete |
 | TEST-07 | Phase 6 | Complete |
 
 **Coverage:**
