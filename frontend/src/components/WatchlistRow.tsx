@@ -75,7 +75,7 @@ export default function WatchlistRow({
           disabled={pending}
           onClick={remove}
           onKeyDown={(e) => e.stopPropagation()}
-          className="remove-btn h-6 w-6 text-base text-text-muted opacity-0 transition-opacity duration-100 hover:text-down focus-visible:text-down focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100"
+          className="remove-btn max-lg:opacity-100 h-6 w-6 text-base text-text-muted opacity-0 transition-opacity duration-100 hover:text-down focus-visible:text-down focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100"
         >
           ×
         </button>

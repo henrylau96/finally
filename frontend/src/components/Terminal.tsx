@@ -31,22 +31,24 @@ export default function Terminal() {
     setSelected(next);
   }, [rows, loading, selected, portfolio]);
   return (
-    <div className="flex h-full flex-col gap-2 p-2">
+    <div className="flex h-full flex-col gap-2 p-2 max-lg:overflow-y-auto">
       <Header status={status} hasConnected={hasConnected} total={total} cash={portfolio?.cash_balance} asOf={asOf} />
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,28%)_1fr_auto] gap-2">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(240px,30%)_1fr_48px] gap-2 max-lg:flex-none lg:grid-cols-[minmax(240px,26%)_1fr_48px] xl:grid-cols-[minmax(320px,28%)_1fr_auto]">
         <Watchlist tickers={rows.map((r) => r.ticker)} quotes={quotes} history={history} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
-        <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2">
+        <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2 max-lg:grid-rows-[auto_auto_auto] max-lg:[&>*:first-child]:min-h-[240px]">
           <Panel title="Main chart" active bodyClassName="overflow-hidden">
             <MainChart ticker={selected} points={chart[selected] ?? []} price={quotes[selected]?.price} live={status === "connected"} />
           </Panel>
           <TradeBar selected={selected} onTrade={trade} />
-          <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] gap-2">
+          <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] gap-2 max-lg:grid-cols-2 max-lg:*:min-h-[240px] max-lg:[&>*:nth-child(2)]:order-first max-lg:[&>*:nth-child(2)]:col-span-2">
             <Heatmap rows={positionRows} selected={selected} onSelect={setSelected} />
             <PositionsTable rows={positionRows} quotes={quotes} live={status === "connected"} selected={selected} onSelect={setSelected} />
             <PnlChart version={version} />
           </div>
         </div>
-        <ChatDock onActions={() => { void refresh(); void load(); }} />
+        <div className="relative flex min-h-0 max-xl:w-12">
+          <ChatDock onActions={() => { void refresh(); void load(); }} />
+        </div>
       </div>
     </div>
   );

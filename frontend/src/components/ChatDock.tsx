@@ -35,6 +35,11 @@ export default function ChatDock({ onActions }: { onActions: () => void }) {
   const label = collapsed ? "Expand chat panel" : "Collapse chat panel";
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setCollapsed(!window.matchMedia("(min-width: 1280px)").matches);
+  }, []);
+
+  useEffect(() => {
     const el = listRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, pending, collapsed]);
@@ -55,7 +60,7 @@ export default function ChatDock({ onActions }: { onActions: () => void }) {
     <aside
       data-testid="chat-panel"
       data-collapsed={collapsed ? "true" : "false"}
-      className={"flex min-h-0 flex-col border border-border bg-surface " + (collapsed ? "w-12" : "w-[360px]")}
+      className={"flex min-h-0 flex-col border border-border bg-surface " + (collapsed ? "w-12" : "w-[360px] max-xl:absolute max-xl:inset-y-0 max-xl:right-0 max-xl:z-10")}
     >
       <div className={"flex items-center px-2 py-1 " + (collapsed ? "justify-center" : "justify-between border-b border-border")}>
         {!collapsed && (
