@@ -16,7 +16,7 @@ function nyDate(seconds: number): string {
 
 export default function Header({ status, hasConnected, total, cash, asOf }: Props) {
   return (
-    <header className="flex h-12 shrink-0 items-center gap-6 border border-border bg-surface px-4">
+    <header data-testid="app-header" className="flex h-12 shrink-0 items-center gap-6 border border-border bg-surface px-4">
       <span className="text-base font-semibold text-accent">FinAlly</span>
       <div className="flex items-baseline gap-2">
         <span className="text-xs font-semibold uppercase tracking-[0.05em] text-text-muted">Total value</span>

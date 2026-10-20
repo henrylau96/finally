@@ -64,7 +64,7 @@ export default function WatchlistRow({
         {formatPct(pct)}
       </span>
       <span role="gridcell">
-        <Sparkline points={history} up={(pct ?? 0) >= 0} />
+        <Sparkline ticker={ticker} points={history} up={(pct ?? 0) >= 0} />
       </span>
       <span role="gridcell">
         <button

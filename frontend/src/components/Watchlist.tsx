@@ -48,7 +48,7 @@ export default function Watchlist({
   const waiting = tickers.length > 0 && !tickers.some((t) => quotes[t]);
   const text = notice(status, loading, loadError, waiting);
   return (
-    <Panel title="Watchlist" active>
+    <Panel title="Watchlist" active testId="watchlist">
       <WatchlistAddForm onAdd={onAdd} onError={setError} />
       <div className="h-6 px-2 text-xs">
         {error && (

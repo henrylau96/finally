@@ -63,6 +63,7 @@ export default function ChatDock({ onActions }: { onActions: () => void }) {
         )}
         <button
           type="button"
+          data-testid="chat-toggle"
           aria-expanded={!collapsed}
           aria-label={label}
           onClick={() => setCollapsed(!collapsed)}

@@ -8,6 +8,7 @@ import PriceCell from "./PriceCell";
 
 const GRID = "grid grid-cols-[64px_minmax(56px,1fr)_80px_80px_80px_72px] gap-2 px-2";
 const COLORS = { positive: "text-up", negative: "text-down", flat: "text-text-muted" };
+const PNL_ATTR = { positive: "up", negative: "down", flat: "flat" };
 
 export default function PositionsTable({
   rows,
@@ -70,12 +71,12 @@ export default function PositionsTable({
                   }
                 >
                   <span role="gridcell" className="font-mono font-semibold">{r.ticker}</span>
-                  <span role="gridcell" className="text-right font-mono tabular-nums">{formatQty(r.quantity)}</span>
+                  <span role="gridcell" data-testid={"position-qty-" + r.ticker} className="text-right font-mono tabular-nums">{formatQty(r.quantity)}</span>
                   <span role="gridcell" className="text-right font-mono tabular-nums">{formatPrice(r.avg_cost)}</span>
                   <span role="gridcell" className="text-right">
                     <PriceCell ticker={"pos-" + r.ticker} price={r.current_price} direction={quotes[r.ticker]?.direction} live={live} />
                   </span>
-                  <span role="gridcell" className={"text-right font-mono tabular-nums " + color}>{formatSignedMoney(r.unrealized_pnl)}</span>
+                  <span role="gridcell" data-testid={"position-pnl-" + r.ticker} data-pnl={PNL_ATTR[pnlState(r.pnl_pct)]} className={"text-right font-mono tabular-nums " + color}>{formatSignedMoney(r.unrealized_pnl)}</span>
                   <span role="gridcell" className={"text-right font-mono tabular-nums " + color}>{formatPct(r.pnl_pct)}</span>
                 </div>
               );

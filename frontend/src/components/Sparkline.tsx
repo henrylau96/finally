@@ -13,9 +13,9 @@ function toPoints(points: number[]) {
     .join(" ");
 }
 
-export default function Sparkline({ points, up }: { points: number[]; up: boolean }) {
+export default function Sparkline({ ticker, points, up }: { ticker: string; points: number[]; up: boolean }) {
   return (
-    <svg width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
+    <svg data-testid={"sparkline-" + ticker} data-points={points.length} width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
       {points.length >= 2 && (
         <polyline
           points={toPoints(points)}
