@@ -4,7 +4,12 @@ from abc import ABC, abstractmethod
 
 
 class MarketDataSource(ABC):
-    """Produces price updates into a PriceCache for a dynamic set of tickers."""
+    """Produces price updates into a PriceCache for a dynamic set of tickers.
+
+    `name` labels the source (e.g. "simulator", "massive").
+    """
+
+    name: str
 
     @abstractmethod
     async def start(self, tickers: list[str]) -> None:

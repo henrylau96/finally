@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 class SimulatorDataSource(MarketDataSource):
     """Runs GBMSimulator on an interval and writes each step to the cache."""
 
+    name = "simulator"
+
     def __init__(
         self, cache: PriceCache, update_interval: float = 0.5, event_probability: float = 0.001
     ) -> None:

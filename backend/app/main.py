@@ -1,4 +1,4 @@
-"""FastAPI application: API routes, simulator lifespan, static frontend."""
+"""FastAPI application: API routes, market data lifespan, static frontend."""
 
 import asyncio
 import os
@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 from app import db, snapshots, streaming
-from app.api.health import router as health_router
+from app.api.health import create_health_router
 from app.api.portfolio import create_portfolio_router
 from app.api.stream import create_stream_router, shutdown
 from app.api.watchlist import create_watchlist_router
@@ -66,7 +66,7 @@ async def validation_error(request: Request, exc: RequestValidationError) -> JSO
     return JSONResponse({"detail": errors}, status_code=422)
 
 
-app.include_router(health_router)
+app.include_router(create_health_router(source))
 app.include_router(create_stream_router(cache))
 app.include_router(create_watchlist_router(cache, source))
 app.include_router(create_portfolio_router(cache, source))
