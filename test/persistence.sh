@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Prove data survives a container restart on a named volume. Uses its own
-# container, volume and port; never touches the user's finally container.
+# container, volume and port; refuses the real finally-data volume and finally container.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -10,6 +10,10 @@ CONTAINER="${CONTAINER:-finally-p}"
 VOLUME="${VOLUME:-finally-test-data}"
 PORT="${PORT:-8001}"
 URL="http://localhost:$PORT"
+if [ "$VOLUME" = finally-data ] || [ "$CONTAINER" = finally ]; then
+  echo "Refusing: finally-data and finally are the real app volume and container and would be deleted." >&2
+  exit 2
+fi
 
 cleanup() {
   "$DOCKER" rm -f "$CONTAINER" >/dev/null 2>&1 || true
