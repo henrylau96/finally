@@ -9,6 +9,8 @@ from massive.rest.models import GroupedDailyAgg, TickerSnapshot
 NY = ZoneInfo("America/New_York")
 EOD_MIN_INTERVAL = 900
 HISTORY_DAYS = 180
+# Seconds between history calls in EOD mode: 4/min under the free tier's 5/min.
+HISTORY_SPACING = 15
 
 Quote = tuple[float, float, float | None]
 

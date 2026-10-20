@@ -3,6 +3,7 @@
 import asyncio
 import contextlib
 import logging
+import time
 from datetime import date, datetime
 
 from massive.exceptions import BadResponse
@@ -11,6 +12,7 @@ from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
 from app.market.massive_parse import (
     EOD_MIN_INTERVAL,
+    HISTORY_SPACING,
     NY,
     Quote,
     bar_quote,
@@ -42,6 +44,8 @@ class MassiveDataSource(MarketDataSource):
         self._tickers: list[str] = []
         self._bars: dict = {}
         self._history: dict[str, tuple[date, list[dict]]] = {}
+        self._history_lock = asyncio.Lock()
+        self._last_history = float("-inf")
         self._task: asyncio.Task | None = None
 
     async def start(self, tickers: list[str]) -> None:
@@ -80,11 +84,33 @@ class MassiveDataSource(MarketDataSource):
         self._cache.remove(ticker)
 
     async def history(self, ticker: str) -> list[dict]:
-        """Daily closes, fetched once per ticker per NY day; a failed fetch returns [] uncached."""
+        """Daily closes, cached per ticker per NY day and throttled in EOD mode.
+
+        A failed fetch returns [] uncached.
+        """
         today = ny_today()
+        cached = self._cached_history(ticker, today)
+        if cached is not None:
+            return cached
+        async with self._history_lock:
+            cached = self._cached_history(ticker, today)
+            if cached is not None:
+                return cached
+            await self._history_gap()
+            self._last_history = time.monotonic()
+            return await self._fetch_history(ticker, today)
+
+    def _cached_history(self, ticker: str, today: date) -> list[dict] | None:
         cached = self._history.get(ticker)
-        if cached and cached[0] == today:
-            return cached[1]
+        return cached[1] if cached and cached[0] == today else None
+
+    async def _history_gap(self) -> None:
+        """In EOD mode, wait until HISTORY_SPACING has passed since the last history call."""
+        wait = self._last_history + HISTORY_SPACING - time.monotonic()
+        if self._mode == "eod" and wait > 0:
+            await asyncio.sleep(wait)
+
+    async def _fetch_history(self, ticker: str, today: date) -> list[dict]:
         start, end = history_window(today)
         try:
             aggs = await asyncio.to_thread(
