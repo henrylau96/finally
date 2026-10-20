@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { derivePositions } from "@/lib/portfolio";
 import { usePortfolio } from "@/lib/usePortfolio";
 import { usePriceStream } from "@/lib/usePriceStream";
+import { useHistory } from "@/lib/useHistory";
 import { useWatchlist } from "@/lib/useWatchlist";
 import ChatDock from "./ChatDock";
 import Header from "./Header";
@@ -21,6 +22,7 @@ export default function Terminal() {
   const { portfolio, version, refresh, trade } = usePortfolio();
   const { rows: positionRows, total } = useMemo(() => derivePositions(portfolio, quotes), [portfolio, quotes]);
   const [selected, setSelected] = useState("");
+  const seed = useHistory(selected);
   useEffect(() => {
     if (loading) return;
     const tickers = rows.map((r) => r.ticker);
@@ -37,7 +39,7 @@ export default function Terminal() {
         <Watchlist tickers={rows.map((r) => r.ticker)} quotes={quotes} history={history} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
         <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2 max-lg:grid-rows-[auto_auto_auto] max-lg:[&>*:first-child]:min-h-[240px]">
           <Panel title="Main chart" active bodyClassName="overflow-hidden">
-            <MainChart ticker={selected} points={chart[selected] ?? []} price={quotes[selected]?.price} live={status === "connected"} />
+            <MainChart ticker={selected} points={chart[selected] ?? []} history={seed} price={quotes[selected]?.price} live={status === "connected"} />
           </Panel>
           <TradeBar selected={selected} onTrade={trade} />
           <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] gap-2 max-lg:grid-cols-2 max-lg:*:min-h-[240px] max-lg:[&>*:nth-child(2)]:order-first max-lg:[&>*:nth-child(2)]:col-span-2">

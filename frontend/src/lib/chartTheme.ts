@@ -1,4 +1,4 @@
-import { CrosshairMode, LineStyle, createChart, type IChartApi } from "lightweight-charts";
+import { CrosshairMode, LineStyle, TickMarkType, createChart, type IChartApi } from "lightweight-charts";
 
 export const CHART = {
   text: "#8b949e",
@@ -12,6 +12,7 @@ export const CHART = {
 };
 
 export const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
+export const day = (t: number) => new Date(t * 1000).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 export const clock = (t: number) => new Date(t * 1000).toLocaleTimeString("en-GB");
 
 /** Create a dark-themed chart shared by the main chart and the P&L chart. */
@@ -28,7 +29,7 @@ export function createBaseChart(container: HTMLElement, opts: { secondsVisible: 
       timeVisible: true,
       secondsVisible: opts.secondsVisible,
       rightOffset: 4,
-      tickMarkFormatter: (t: number) => clock(t),
+      tickMarkFormatter: (t: number, type: TickMarkType) => (type < TickMarkType.Time ? day(t) : clock(t)),
     },
     localization: {
       timeFormatter: (t: number) => clock(t),

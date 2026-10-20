@@ -6,8 +6,9 @@ import {
   type ISeriesApi,
   type UTCTimestamp,
 } from "lightweight-charts";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { CHART, createBaseChart } from "@/lib/chartTheme";
+import { mergePoints } from "@/lib/chartPoints";
 import { formatPrice } from "@/lib/format";
 import type { ChartPoint } from "@/lib/usePriceStream";
 
@@ -30,11 +31,13 @@ function createAreaChart(container: HTMLElement) {
 export default function MainChart({
   ticker,
   points,
+  history,
   price,
   live,
 }: {
   ticker: string;
   points: ChartPoint[];
+  history: ChartPoint[];
   price?: number;
   live: boolean;
 }) {
@@ -43,6 +46,8 @@ export default function MainChart({
   const seriesRef = useRef<ISeriesApi<"Area"> | null>(null);
   const lastTime = useRef(0);
   const shown = useRef("");
+  const shownHistory = useRef<ChartPoint[] | null>(null);
+  const merged = useMemo(() => mergePoints(history, points), [history, points]);
 
   useEffect(() => {
     const { chart, series } = createAreaChart(host.current!);
@@ -53,23 +58,25 @@ export default function MainChart({
       chartRef.current = null;
       seriesRef.current = null;
       shown.current = "";
+      shownHistory.current = null;
       lastTime.current = 0;
     };
   }, []);
 
   useEffect(() => {
     const series = seriesRef.current!;
-    const last = points[points.length - 1];
-    if (shown.current !== ticker) {
+    const last = merged[merged.length - 1];
+    if (shown.current !== ticker || shownHistory.current !== history) {
       shown.current = ticker;
-      series.setData(asData(points));
+      shownHistory.current = history;
+      series.setData(asData(merged));
       chartRef.current!.timeScale().fitContent();
       lastTime.current = last?.time ?? 0;
     } else if (last && last.time >= lastTime.current) {
       series.update(asData([last])[0]);
       lastTime.current = last.time;
     }
-  }, [ticker, points]);
+  }, [ticker, history, merged]);
 
   return (
     <div data-testid="main-chart" data-ticker={ticker} className="flex h-full flex-col">
@@ -91,7 +98,7 @@ export default function MainChart({
             Add a ticker to see its chart.
           </p>
         )}
-        {ticker !== "" && points.length < 2 && (
+        {ticker !== "" && merged.length < 2 && (
           <div
             data-testid="main-chart-empty"
             role="status"
