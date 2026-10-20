@@ -1,7 +1,12 @@
+import os
+
 import httpx
 import pytest
 
-from app import main
+# The repo .env holds a real key and load_dotenv does not override, so blank it first.
+os.environ["MASSIVE_API_KEY"] = ""
+
+from app import main  # noqa: E402
 
 
 @pytest.fixture

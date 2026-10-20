@@ -43,3 +43,15 @@ def test_price_rounded_and_version_bumps():
 def test_to_dict_keys():
     """to_dict exposes exactly the locked six keys."""
     assert set(PriceCache().update("AAPL", 1.0).to_dict()) == KEYS
+
+
+def test_reference_sets_day_change():
+    """A reference close sets the day-change base and a later one moves it."""
+    cache = PriceCache()
+    assert cache.update("AAPL", 101.0, timestamp=1.0, reference=100.0).day_change_pct == 1.0
+    assert cache.update("AAPL", 105.0, timestamp=2.0, reference=105.0).day_change_pct == 0.0
+
+
+def test_timestamp_preserved():
+    """An explicit timestamp is stored as given."""
+    assert PriceCache().update("AAPL", 1.0, timestamp=123.0).timestamp == 123.0

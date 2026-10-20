@@ -1,0 +1,180 @@
+import asyncio
+from datetime import date
+
+import pytest
+from massive.exceptions import BadResponse
+from massive.rest.models import GroupedDailyAgg, PreviousCloseAgg, TickerSnapshot
+
+from app.market import MassiveDataSource, PriceCache
+from app.market import massive_source
+
+NOT_AUTH = '{"status":"NOT_AUTHORIZED","message":"You are not entitled to this data."}'
+TODAY = "2026-10-19"
+BAR_T = 1760731200000
+
+
+class FakeClient:
+    """Records calls; each attribute is a value or an exception to raise."""
+
+    def __init__(self, snapshots=None, grouped=None, single=None, prev=None):
+        self.snapshots, self.grouped, self.single, self.prev = snapshots, grouped or {}, single, prev
+        self.calls: list[tuple] = []
+
+    def _ret(self, value):
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+    def get_snapshot_all(self, market_type, tickers=None):
+        self.calls.append(("all", market_type, tuple(tickers)))
+        return self._ret(self.snapshots)
+
+    def get_snapshot_ticker(self, market_type, ticker):
+        self.calls.append(("one", ticker))
+        return self._ret(self.single)
+
+    def get_grouped_daily_aggs(self, date, adjusted=None):
+        self.calls.append(("grouped", date))
+        return self._ret(self.grouped.get(date, []))
+
+    def get_previous_close_agg(self, ticker, adjusted=None):
+        self.calls.append(("prev", ticker))
+        return self._ret(self.prev or [])
+
+
+def snapshot(ticker, price, ns, prev):
+    return TickerSnapshot.from_dict({"ticker": ticker, "lastTrade": {"p": price, "t": ns}, "prevDay": {"c": prev}})
+
+
+def bar(ticker, open_, close, cls=GroupedDailyAgg):
+    return cls.from_dict({"T": ticker, "o": open_, "c": close, "t": BAR_T})
+
+
+@pytest.fixture(autouse=True)
+def fixed_today(monkeypatch):
+    """Pin the NY date the source asks for."""
+    monkeypatch.setattr(massive_source, "ny_today", lambda: date(2026, 10, 19))
+
+
+def eod_client(**kwargs):
+    grouped = {TODAY: [bar("AAPL", 188.0, 190.2), bar("MSFT", 400.0, 404.0), bar("ZZZZ", 1.0, 2.0)]}
+    return FakeClient(snapshots=BadResponse(NOT_AUTH), grouped=grouped, **kwargs)
+
+
+async def started(client, tickers=("AAPL", "MSFT"), interval=15.0):
+    cache = PriceCache()
+    source = MassiveDataSource(cache, client, interval)
+    await source.start(list(tickers))
+    return cache, source
+
+
+async def test_snapshot_mode_timestamp_and_reference():
+    """Snapshot prices carry the source time and day change against the prev close."""
+    client = FakeClient(snapshots=[snapshot("AAPL", 190.0, 1760790000_000000000, 200.0)])
+    cache, source = await started(client, ["AAPL"])
+    u = cache.get("AAPL")
+    assert u.timestamp == 1760790000.0
+    assert u.day_change_pct == -5.0
+    assert client.calls[0] == ("all", "stocks", ("AAPL",))
+    assert source._mode == "snapshot"
+    await source.stop()
+
+
+async def test_fallback_to_eod_on_not_authorized():
+    """A snapshot 403 switches to EOD; only tracked tickers are cached with bar times."""
+    cache, source = await started(eod_client())
+    assert source._mode == "eod"
+    assert source._interval >= 900
+    assert cache.get("AAPL").price == 190.2
+    assert cache.get("AAPL").timestamp == BAR_T / 1e3
+    assert cache.get("MSFT").day_change_pct == 1.0
+    assert cache.get("ZZZZ") is None
+    await source.stop()
+
+
+async def test_eod_poll_does_not_retry_snapshot():
+    """Once in EOD mode a poll makes no snapshot call."""
+    client = eod_client()
+    _, source = await started(client)
+    before = len(client.calls)
+    await source._poll_once()
+    assert all(c[0] != "all" for c in client.calls[before:])
+    await source.stop()
+
+
+async def test_add_ticker_snapshot_fetches_one():
+    """In snapshot mode a new ticker is fetched alone before add_ticker returns."""
+    client = FakeClient(snapshots=[], single=snapshot("PYPL", 70.0, 1760790000_000000000, 69.0))
+    cache, source = await started(client, ["AAPL"])
+    await source.add_ticker("PYPL")
+    assert client.calls[-1] == ("one", "PYPL")
+    assert cache.get("PYPL").price == 70.0
+    assert "PYPL" in source.get_tickers()
+    await source.stop()
+
+
+async def test_add_ticker_eod_uses_cached_bar():
+    """In EOD mode a ticker present in the grouped bars costs no call."""
+    client = eod_client()
+    cache, source = await started(client)
+    before = len(client.calls)
+    await source.add_ticker("ZZZZ")
+    assert len(client.calls) == before
+    assert cache.get("ZZZZ").price == 2.0
+    await source.stop()
+
+
+async def test_add_ticker_eod_prev_close():
+    """In EOD mode a ticker missing from the bars uses its previous close."""
+    client = eod_client(prev=[bar("PYPL", 69.0, 70.0, PreviousCloseAgg)])
+    cache, source = await started(client)
+    await source.add_ticker("PYPL")
+    assert client.calls[-1] == ("prev", "PYPL")
+    assert cache.get("PYPL").timestamp == BAR_T / 1e3
+    await source.stop()
+
+
+async def test_add_ticker_tracked_is_noop():
+    """An already tracked ticker makes no client call."""
+    client = FakeClient(snapshots=[])
+    _, source = await started(client, ["AAPL"])
+    before = len(client.calls)
+    await source.add_ticker("AAPL")
+    assert len(client.calls) == before
+    await source.stop()
+
+
+async def test_add_ticker_failure_leaves_no_entry():
+    """A failed or empty fetch leaves no cache entry and raises nothing."""
+    client = FakeClient(snapshots=[], single=BadResponse('{"status":"ERROR"}'))
+    cache, source = await started(client, ["AAPL"])
+    await source.add_ticker("PYPL")
+    assert cache.get("PYPL") is None
+    await source.stop()
+    cache, source = await started(eod_client())
+    await source.add_ticker("QQQQ")
+    assert cache.get("QQQQ") is None
+    await source.stop()
+
+
+async def test_remove_ticker_drops_cache():
+    """Removing a ticker stops tracking it and clears its price."""
+    cache, source = await started(eod_client())
+    await source.remove_ticker("AAPL")
+    assert "AAPL" not in source.get_tickers()
+    assert cache.get("AAPL") is None
+    await source.stop()
+
+
+async def test_poll_survives_errors(caplog):
+    """A failing poll is logged and the loop polls again."""
+    client = FakeClient(snapshots=[snapshot("AAPL", 190.0, 1760790000_000000000, 188.0)])
+    _, source = await started(client, ["AAPL"], interval=0.02)
+    client.snapshots = RuntimeError("boom")
+    await asyncio.sleep(0.06)
+    count = len(client.calls)
+    await asyncio.sleep(0.06)
+    assert "Massive poll failed" in caplog.text
+    assert len(client.calls) > count
+    await source.stop()
+    await source.stop()

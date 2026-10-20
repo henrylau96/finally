@@ -1,0 +1,102 @@
+from datetime import date
+
+import pytest
+from massive.exceptions import BadResponse
+from massive.rest.models import GroupedDailyAgg, TickerSnapshot
+
+from app.market.massive_parse import bar_quote, latest_grouped_bars, not_authorized, snapshot_quote
+
+NOT_AUTH = '{"status":"NOT_AUTHORIZED","message":"You are not entitled to this data."}'
+
+
+class GroupedClient:
+    """Returns grouped bars per ISO date; exceptions are raised."""
+
+    def __init__(self, by_date):
+        self.by_date = by_date
+        self.calls = []
+
+    def get_grouped_daily_aggs(self, day, adjusted=None):
+        self.calls.append(day)
+        value = self.by_date.get(day, [])
+        if isinstance(value, Exception):
+            raise value
+        return value
+
+
+def snap(**data):
+    return TickerSnapshot.from_dict({"ticker": "AAPL", **data})
+
+
+def test_quote_prefers_last_trade():
+    """Last trade wins, with its ns timestamp in seconds and the prev close as reference."""
+    s = snap(lastTrade={"p": 190.5, "t": 1760790000_000000000}, min={"c": 189.0, "t": 1}, prevDay={"c": 188.0})
+    assert snapshot_quote(s) == (190.5, 1760790000.0, 188.0)
+
+
+def test_quote_falls_back_to_minute_bar():
+    """Without a last trade the minute bar close is used, ms to seconds."""
+    s = snap(min={"c": 189.0, "t": 1760790000000}, prevDay={"c": 188.0})
+    assert snapshot_quote(s) == (189.0, 1760790000.0, 188.0)
+
+
+def test_quote_day_close_uses_updated_timestamp():
+    """Day close carries no time, so the snapshot updated time (ns) is used."""
+    s = snap(day={"c": 191.0}, updated=1760790000_000000000)
+    assert snapshot_quote(s) == (191.0, 1760790000.0, None)
+
+
+def test_quote_prev_day_only_uses_updated():
+    """Prev close alone is a price, timed by the snapshot updated field."""
+    s = snap(prevDay={"c": 188.0}, updated=1760790000_000000000)
+    assert snapshot_quote(s) == (188.0, 1760790000.0, 188.0)
+
+
+def test_quote_none_without_timestamp():
+    """No source time means no quote, never an invented one."""
+    assert snapshot_quote(snap(day={"c": 191.0})) is None
+
+
+def test_quote_skips_zero_minute_bar():
+    """A pre-market zero minute bar falls through to the day close."""
+    s = snap(min={"c": 0, "t": 0}, day={"c": 191.0}, updated=1760790000_000000000)
+    assert snapshot_quote(s) == (191.0, 1760790000.0, None)
+
+
+def test_bar_quote_timestamp():
+    """A bar gives close, ms timestamp in seconds, and open as reference."""
+    bar = GroupedDailyAgg.from_dict({"T": "AAPL", "o": 188.0, "c": 190.2, "t": 1760731200000})
+    assert bar_quote(bar) == (190.2, 1760731200.0, 188.0)
+
+
+def test_grouped_steps_back_over_403_and_weekend():
+    """Today 403 and two empty days are skipped; the third day's bars are keyed by ticker."""
+    bars = [
+        GroupedDailyAgg.from_dict({"T": "AAPL", "o": 1.0, "c": 2.0, "t": 1}),
+        GroupedDailyAgg.from_dict({"T": "MSFT", "o": 3.0, "c": 4.0, "t": 1}),
+    ]
+    client = GroupedClient({"2026-10-19": BadResponse(NOT_AUTH), "2026-10-16": bars})
+    result = latest_grouped_bars(client, date(2026, 10, 19))
+    assert set(result) == {"AAPL", "MSFT"}
+    assert client.calls == ["2026-10-19", "2026-10-18", "2026-10-17", "2026-10-16"]
+
+
+def test_grouped_gives_up_after_five():
+    """Five empty days give an empty dict."""
+    client = GroupedClient({})
+    assert latest_grouped_bars(client, date(2026, 10, 19)) == {}
+    assert len(client.calls) == 5
+
+
+def test_grouped_other_bad_response_raises():
+    """A BadResponse that is not an entitlement error propagates."""
+    client = GroupedClient({"2026-10-19": BadResponse('{"status":"ERROR"}')})
+    with pytest.raises(BadResponse):
+        latest_grouped_bars(client, date(2026, 10, 19))
+
+
+def test_not_authorized_detection():
+    """Only a BadResponse whose body says NOT_AUTHORIZED counts."""
+    assert not_authorized(BadResponse(NOT_AUTH))
+    assert not not_authorized(BadResponse('{"status":"ERROR"}'))
+    assert not not_authorized(RuntimeError("NOT_AUTHORIZED"))
