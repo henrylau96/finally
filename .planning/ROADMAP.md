@@ -209,7 +209,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 06-01-PLAN.md — Responsive E2E spec, six data-testid hooks, tablet layout with collapsible chat overlay (wave 1)
+- [x] 06-01-PLAN.md — Responsive E2E spec, six data-testid hooks, tablet layout with collapsible chat overlay (wave 1)
 - [ ] 06-03-PLAN.md — Backend: prove and fix flaky seeded-cache test; route coverage audit and smoke tests (wave 1)
 - [ ] 06-04-PLAN.md — test/persistence.sh restart proof on a real image and volume; env and secrets hygiene (wave 1)
 
@@ -232,4 +232,4 @@ Plans:
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
 | 5. Real Market Data (Massive) | 4/4 | Complete   | 2026-10-20 |
-| 6. Packaging, Persistence & Test Suite | 0/5 | Not started | - |
+| 6. Packaging, Persistence & Test Suite | 1/5 | In Progress|  |

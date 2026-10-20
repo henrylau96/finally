@@ -76,8 +76,8 @@
 - [x] **UI-10**: P&L chart plots total portfolio value over time from `/api/portfolio/history`
 - [x] **UI-11**: Collapsible AI chat panel with message input, scrolling history, a loading indicator while waiting, and inline confirmations of executed trades and watchlist changes
 - [x] **UI-12**: Portfolio, positions and charts refresh after manual or AI-executed trades
-- [ ] **UI-13**: Layout is dense and desktop-first and remains functional at tablet width
-- [ ] **UI-14**: UI elements expose the `data-testid` hooks used by the E2E suite
+- [x] **UI-13**: Layout is dense and desktop-first and remains functional at tablet width
+- [x] **UI-14**: UI elements expose the `data-testid` hooks used by the E2E suite
 
 ### Deployment (§3, §4, §11)
 
@@ -97,7 +97,7 @@
 - [ ] **TEST-04**: Backend pytest covers API routes (status codes, response shapes, errors)
 - [ ] **TEST-05**: Frontend tests cover component rendering with mock data, price flash triggering, watchlist CRUD, portfolio calculations, and chat rendering with loading state
 - [ ] **TEST-06**: `test/docker-compose.test.yml` runs the app container plus a Playwright container with `LLM_MOCK=true`
-- [ ] **TEST-07**: E2E scenarios pass: fresh start, watchlist add/remove, buy, sell, portfolio visualization, mocked AI chat trade, SSE reconnection
+- [x] **TEST-07**: E2E scenarios pass: fresh start, watchlist add/remove, buy, sell, portfolio visualization, mocked AI chat trade, SSE reconnection
 
 ## v2 Requirements
 
@@ -175,8 +175,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-10 | Phase 3 | Complete |
 | UI-11 | Phase 4 | Complete |
 | UI-12 | Phase 3 | Complete |
-| UI-13 | Phase 6 | Pending |
-| UI-14 | Phase 6 | Pending |
+| UI-13 | Phase 6 | Complete |
+| UI-14 | Phase 6 | Complete |
 | OPS-01 | Phase 1 | Complete |
 | OPS-02 | Phase 1 | Complete |
 | OPS-03 | Phase 6 | Pending |
@@ -190,7 +190,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-04 | Phase 6 | Pending |
 | TEST-05 | Phase 6 | Pending |
 | TEST-06 | Phase 6 | Pending |
-| TEST-07 | Phase 6 | Pending |
+| TEST-07 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 66 total
