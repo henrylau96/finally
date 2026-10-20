@@ -34,6 +34,7 @@ export default function Header({ status, hasConnected, total, cash, asOf }: Prop
       <div className="ml-auto flex items-center gap-3">
         {asOf != null && (
           <span data-testid="stale-badge" className="text-xs text-text-muted">
+            <span className="lg:hidden">EOD</span>
             <span className="hidden lg:inline">EOD · as of {nyDate(asOf)}</span>
           </span>
         )}

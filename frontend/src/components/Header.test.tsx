@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import Header from "./Header";
 
@@ -14,6 +14,6 @@ describe("Header", () => {
     const { rerender } = render(<Header status="connected" hasConnected asOf={null} />);
     expect(screen.queryByTestId("stale-badge")).not.toBeInTheDocument();
     rerender(<Header status="connected" hasConnected asOf={1760000000} />);
-    expect(screen.getByTestId("stale-badge")).toBeInTheDocument();
+    expect(within(screen.getByTestId("stale-badge")).getByText("EOD")).toHaveClass("lg:hidden");
   });
 });
