@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-20)
 Phase: Milestone v1.0 complete
 Plan: —
 Status: Awaiting next milestone
-Last activity: 2026-10-20 — Milestone v1.0 completed and archived
+Last activity: 2026-10-20 - Completed quick task 261020-o5o: Fix WR-05 grouped-bar timestamps
 
 ## Performance Metrics
 
@@ -103,6 +103,7 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 261020-nml | Pre-milestone check: persistence guard and E2E rerun on final HEAD | 2026-10-20 | 7be4ee3 | [261020-nml-pre-milestone-check-persistence-guard-an](./quick/261020-nml-pre-milestone-check-persistence-guard-an/) |
+| 261020-o5o | Fix WR-05: align Massive grouped-bar timestamps with daily history | 2026-10-20 | f55e36f | [261020-o5o-fix-wr-05-align-massive-grouped-bar-time](./quick/261020-o5o-fix-wr-05-align-massive-grouped-bar-time/) |
 
 ## Deferred Items
 

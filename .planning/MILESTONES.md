@@ -38,7 +38,7 @@
 
 **Tech debt carried forward** (see milestones/v1.0-MILESTONE-AUDIT.md):
 
-- WR-05: possible timestamp mismatch between live grouped bars and daily history bars. Unproven; needs a 2-call check with a real Massive key.
+- ~~WR-05: timestamp mismatch between live grouped bars and daily history bars~~ — proven with a real key and fixed after the tag in quick task 261020-o5o (f55e36f).
 - All six VALIDATION.md files are still drafts (Nyquist partial).
 - Snapshot failures are only logged.
 - Phase 6 review info items IN-01..04 and IN-06.
