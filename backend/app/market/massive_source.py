@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import logging
 import time
+from collections import deque
 from datetime import date, datetime
 
 from massive.exceptions import BadResponse
@@ -11,9 +12,10 @@ from massive.exceptions import BadResponse
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
 from app.market.massive_parse import (
+    EOD_CALLS,
     EOD_MIN_INTERVAL,
-    HISTORY_SPACING,
     NY,
+    RATE_WINDOW,
     Quote,
     bar_quote,
     daily_points,
@@ -45,7 +47,8 @@ class MassiveDataSource(MarketDataSource):
         self._bars: dict = {}
         self._history: dict[str, tuple[date, list[dict]]] = {}
         self._history_lock = asyncio.Lock()
-        self._last_history = float("-inf")
+        self._api_lock = asyncio.Lock()
+        self._calls: deque[float] = deque(maxlen=EOD_CALLS)
         self._task: asyncio.Task | None = None
 
     async def start(self, tickers: list[str]) -> None:
@@ -84,7 +87,7 @@ class MassiveDataSource(MarketDataSource):
         self._cache.remove(ticker)
 
     async def history(self, ticker: str) -> list[dict]:
-        """Daily closes, cached per ticker per NY day and throttled in EOD mode.
+        """Daily closes, cached per ticker per NY day.
 
         A failed fetch returns [] uncached.
         """
@@ -96,24 +99,24 @@ class MassiveDataSource(MarketDataSource):
             cached = self._cached_history(ticker, today)
             if cached is not None:
                 return cached
-            await self._history_gap()
-            self._last_history = time.monotonic()
             return await self._fetch_history(ticker, today)
 
     def _cached_history(self, ticker: str, today: date) -> list[dict] | None:
         cached = self._history.get(ticker)
         return cached[1] if cached and cached[0] == today else None
 
-    async def _history_gap(self) -> None:
-        """In EOD mode, wait until HISTORY_SPACING has passed since the last history call."""
-        wait = self._last_history + HISTORY_SPACING - time.monotonic()
-        if self._mode == "eod" and wait > 0:
-            await asyncio.sleep(wait)
+    async def _call(self, fn, *args, **kwargs):
+        """Run one Massive request; in EOD mode keep to EOD_CALLS per RATE_WINDOW seconds."""
+        async with self._api_lock:
+            if self._mode == "eod" and len(self._calls) == EOD_CALLS:
+                await asyncio.sleep(max(0.0, self._calls[0] + RATE_WINDOW - time.monotonic()))
+            self._calls.append(time.monotonic())
+            return await asyncio.to_thread(fn, *args, **kwargs)
 
     async def _fetch_history(self, ticker: str, today: date) -> list[dict]:
         start, end = history_window(today)
         try:
-            aggs = await asyncio.to_thread(
+            aggs = await self._call(
                 self._client.get_aggs, ticker, 1, "day", start, end, adjusted=True, sort="asc"
             )
         except BadResponse as e:
@@ -136,7 +139,7 @@ class MassiveDataSource(MarketDataSource):
         """
         if self._mode == "snapshot":
             try:
-                snap = await asyncio.to_thread(self._client.get_snapshot_ticker, "stocks", ticker)
+                snap = await self._call(self._client.get_snapshot_ticker, "stocks", ticker)
                 return snapshot_quote(snap)
             except Exception as e:
                 if not not_authorized(e):
@@ -144,7 +147,7 @@ class MassiveDataSource(MarketDataSource):
                 self._enter_eod()
         if ticker in self._bars:
             return bar_quote(self._bars[ticker])
-        bars = await asyncio.to_thread(self._client.get_previous_close_agg, ticker, adjusted=True)
+        bars = await self._call(self._client.get_previous_close_agg, ticker, adjusted=True)
         return bar_quote(bars[0]) if bars else None
 
     def _enter_eod(self) -> None:
@@ -159,7 +162,7 @@ class MassiveDataSource(MarketDataSource):
             return
         if self._mode == "snapshot":
             try:
-                snaps = await asyncio.to_thread(
+                snaps = await self._call(
                     self._client.get_snapshot_all, "stocks", tickers=self._tickers
                 )
             except Exception as e:
@@ -176,10 +179,14 @@ class MassiveDataSource(MarketDataSource):
 
     async def _poll_eod(self) -> None:
         """Fetch the latest grouped bars and write the tracked tickers."""
-        self._bars = await asyncio.to_thread(latest_grouped_bars, self._client, ny_today())
+        self._bars = await latest_grouped_bars(self._grouped, ny_today())
         for ticker in self._tickers:
             if ticker in self._bars:
                 self._write(ticker, bar_quote(self._bars[ticker]))
+
+    async def _grouped(self, day: str) -> list:
+        """One rate-limited grouped daily bars request."""
+        return await self._call(self._client.get_grouped_daily_aggs, day, adjusted=True)
 
     def _write(self, ticker: str, quote: Quote) -> None:
         """Cache a quote unless it repeats the cached price and time."""

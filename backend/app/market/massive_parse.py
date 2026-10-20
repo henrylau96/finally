@@ -9,8 +9,9 @@ from massive.rest.models import GroupedDailyAgg, TickerSnapshot
 NY = ZoneInfo("America/New_York")
 EOD_MIN_INTERVAL = 900
 HISTORY_DAYS = 180
-# Seconds between history calls in EOD mode: 4/min under the free tier's 5/min.
-HISTORY_SPACING = 15
+# EOD mode (free tier, 5 calls/min): at most EOD_CALLS calls in any RATE_WINDOW seconds.
+EOD_CALLS = 5
+RATE_WINDOW = 61
 
 Quote = tuple[float, float, float | None]
 
@@ -38,12 +39,15 @@ def bar_quote(bar) -> Quote:
     return bar.close, bar.timestamp / 1e3, bar.open
 
 
-def latest_grouped_bars(client, today: date, tries: int = 5) -> dict[str, GroupedDailyAgg]:
-    """Bars for the newest NY trading day the plan may read, stepping back over 403/empty days."""
+async def latest_grouped_bars(fetch, today: date, tries: int = 5) -> dict[str, GroupedDailyAgg]:
+    """Bars for the newest NY trading day the plan may read, stepping back over 403/empty days.
+
+    `fetch` is an async callable taking an ISO date and returning that day's grouped bars.
+    """
     day = today
     for _ in range(tries):
         try:
-            bars = client.get_grouped_daily_aggs(day.isoformat(), adjusted=True)
+            bars = await fetch(day.isoformat())
         except BadResponse as e:
             if not not_authorized(e):
                 raise

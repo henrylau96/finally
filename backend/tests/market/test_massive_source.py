@@ -283,9 +283,10 @@ async def test_history_empty_success_is_cached():
     assert len(client.calls) == 1
 
 
-async def test_history_eod_spaces_calls(monkeypatch):
-    """In EOD mode, history calls for different tickers are spaced apart."""
-    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 0.2)
+async def test_history_eod_rate_limited(monkeypatch):
+    """In EOD mode, a call past EOD_CALLS in RATE_WINDOW waits for the window."""
+    monkeypatch.setattr(massive_source, "EOD_CALLS", 1)
+    monkeypatch.setattr(massive_source, "RATE_WINDOW", 0.2)
     source, client = history_source(aggs=AGGS)
     source._mode = "eod"
     start = time.monotonic()
@@ -295,9 +296,24 @@ async def test_history_eod_spaces_calls(monkeypatch):
     assert len(client.calls) == 2
 
 
+async def test_eod_limit_counts_poll_and_add_ticker_calls(monkeypatch):
+    """Poll, add-ticker and history calls share one EOD rate limit."""
+    monkeypatch.setattr(massive_source, "EOD_CALLS", 3)
+    monkeypatch.setattr(massive_source, "RATE_WINDOW", 0.3)
+    start = time.monotonic()
+    _, source = await started(eod_client(prev=[bar("PYPL", 69.0, 70.0, PreviousCloseAgg)], aggs=AGGS))
+    await source.add_ticker("PYPL")
+    assert time.monotonic() - start < 0.3
+    assert await source.history("AAPL") == POINTS
+    assert time.monotonic() - start >= 0.3
+    assert [c[0] for c in source._client.calls] == ["all", "grouped", "prev", "aggs"]
+    await source.stop()
+
+
 async def test_history_concurrent_same_ticker_single_call(monkeypatch):
     """Concurrent requests for one ticker make a single get_aggs call."""
-    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 0.2)
+    monkeypatch.setattr(massive_source, "EOD_CALLS", 1)
+    monkeypatch.setattr(massive_source, "RATE_WINDOW", 0.2)
     source, client = history_source(aggs=AGGS)
     source._mode = "eod"
     results = await asyncio.gather(source.history("AAPL"), source.history("AAPL"))
@@ -306,19 +322,21 @@ async def test_history_concurrent_same_ticker_single_call(monkeypatch):
 
 
 async def test_history_cached_skips_throttle(monkeypatch):
-    """A cached ticker returns immediately, without waiting on the throttle."""
-    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 1.0)
+    """A cached ticker returns immediately, without waiting on the limit."""
+    monkeypatch.setattr(massive_source, "EOD_CALLS", 1)
+    monkeypatch.setattr(massive_source, "RATE_WINDOW", 1.0)
     source, _ = history_source(aggs=AGGS)
     source._mode = "eod"
     await source.history("AAPL")
     start = time.monotonic()
     await source.history("AAPL")
-    assert time.monotonic() - start < 0.1
+    assert time.monotonic() - start < 0.5
 
 
 async def test_history_snapshot_mode_not_throttled(monkeypatch):
-    """Snapshot mode (paid tiers) does not space history calls."""
-    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 1.0)
+    """Snapshot mode (paid tiers) does not limit calls."""
+    monkeypatch.setattr(massive_source, "EOD_CALLS", 1)
+    monkeypatch.setattr(massive_source, "RATE_WINDOW", 1.0)
     source, _ = history_source(aggs=AGGS)
     start = time.monotonic()
     await asyncio.gather(source.history("AAPL"), source.history("MSFT"))

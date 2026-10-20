@@ -23,7 +23,7 @@ class GroupedClient:
         self.by_date = by_date
         self.calls = []
 
-    def get_grouped_daily_aggs(self, day, adjusted=None):
+    async def fetch(self, day):
         self.calls.append(day)
         value = self.by_date.get(day, [])
         if isinstance(value, Exception):
@@ -76,30 +76,30 @@ def test_bar_quote_timestamp():
     assert bar_quote(bar) == (190.2, 1760731200.0, 188.0)
 
 
-def test_grouped_steps_back_over_403_and_weekend():
+async def test_grouped_steps_back_over_403_and_weekend():
     """Today 403 and two empty days are skipped; the third day's bars are keyed by ticker."""
     bars = [
         GroupedDailyAgg.from_dict({"T": "AAPL", "o": 1.0, "c": 2.0, "t": 1}),
         GroupedDailyAgg.from_dict({"T": "MSFT", "o": 3.0, "c": 4.0, "t": 1}),
     ]
     client = GroupedClient({"2026-10-19": BadResponse(NOT_AUTH), "2026-10-16": bars})
-    result = latest_grouped_bars(client, date(2026, 10, 19))
+    result = await latest_grouped_bars(client.fetch, date(2026, 10, 19))
     assert set(result) == {"AAPL", "MSFT"}
     assert client.calls == ["2026-10-19", "2026-10-18", "2026-10-17", "2026-10-16"]
 
 
-def test_grouped_gives_up_after_five():
+async def test_grouped_gives_up_after_five():
     """Five empty days give an empty dict."""
     client = GroupedClient({})
-    assert latest_grouped_bars(client, date(2026, 10, 19)) == {}
+    assert await latest_grouped_bars(client.fetch, date(2026, 10, 19)) == {}
     assert len(client.calls) == 5
 
 
-def test_grouped_other_bad_response_raises():
+async def test_grouped_other_bad_response_raises():
     """A BadResponse that is not an entitlement error propagates."""
     client = GroupedClient({"2026-10-19": BadResponse('{"status":"ERROR"}')})
     with pytest.raises(BadResponse):
-        latest_grouped_bars(client, date(2026, 10, 19))
+        await latest_grouped_bars(client.fetch, date(2026, 10, 19))
 
 
 def test_not_authorized_detection():
