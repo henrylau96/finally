@@ -5,6 +5,8 @@ import contextlib
 import logging
 from datetime import date, datetime
 
+from massive.exceptions import BadResponse
+
 from app.market.cache import PriceCache
 from app.market.interface import MarketDataSource
 from app.market.massive_parse import (
@@ -42,10 +44,7 @@ class MassiveDataSource(MarketDataSource):
     async def start(self, tickers: list[str]) -> None:
         """Fill the cache with a first poll, then start the poll loop."""
         self._tickers = list(tickers)
-        try:
-            await self._poll_once()
-        except Exception:
-            logger.exception("Massive poll failed")
+        await self._safe_poll()
         self._task = asyncio.create_task(self._run_loop(), name="massive-loop")
 
     async def stop(self) -> None:
@@ -62,6 +61,9 @@ class MassiveDataSource(MarketDataSource):
         self._tickers.append(ticker)
         try:
             quote = await self._fetch_one(ticker)
+        except BadResponse as e:
+            logger.error("Massive fetch failed for %s: %s", ticker, e)
+            return
         except Exception:
             logger.exception("Massive fetch failed for %s", ticker)
             return
@@ -135,7 +137,13 @@ class MassiveDataSource(MarketDataSource):
     async def _run_loop(self) -> None:
         while True:
             await asyncio.sleep(self._interval)
-            try:
-                await self._poll_once()
-            except Exception:
-                logger.exception("Massive poll failed")
+            await self._safe_poll()
+
+    async def _safe_poll(self) -> None:
+        """Poll once; an API error logs one line, anything else a traceback."""
+        try:
+            await self._poll_once()
+        except BadResponse as e:
+            logger.error("Massive poll failed: %s", e)
+        except Exception:
+            logger.exception("Massive poll failed")

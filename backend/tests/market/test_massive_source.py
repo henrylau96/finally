@@ -193,3 +193,15 @@ async def test_poll_survives_errors(caplog):
     assert len(client.calls) > count
     await source.stop()
     await source.stop()
+
+
+async def test_bad_response_logs_one_line(caplog):
+    """An API error such as an unknown key is logged as one line, with no traceback."""
+    client = FakeClient(snapshots=BadResponse('{"status":"ERROR","error":"Unknown API Key"}'))
+    _, source = await started(client, ["AAPL"])
+    client.single = client.snapshots
+    await source.add_ticker("PYPL")
+    errors = [r for r in caplog.records if r.levelname == "ERROR"]
+    assert len(errors) == 2
+    assert all(r.exc_info is None and "Unknown API Key" in r.getMessage() for r in errors)
+    await source.stop()
