@@ -29,7 +29,9 @@ From one command, the user lands in a live, dark trading terminal where prices s
 - ✓ AI chat copilot: LiteLLM -> OpenRouter gpt-oss-120b (Cerebras) with structured output, auto-executed trades and watchlist changes, persisted history, deterministic `LLM_MOCK` mode, non-blocking — Phase 4 (CHAT-01..09, TEST-03)
 - ✓ Collapsible FinAlly AI chat dock with loading state, inline action chips and portfolio refresh — Phase 4 (UI-11)
 
-Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19). Validated in Phase 3: Trading & Portfolio (2026-10-19). Validated in Phase 4: AI Chat Copilot (2026-10-20).
+- ✓ Optional Massive REST poller behind the same interface (snapshot with EOD fallback for free tier), env-selected source, true timestamps, instant price for new tickers — Phase 5 (MKT-06, MKT-07, MKT-09)
+
+Validated in Phase 1: Live Price Terminal (2026-10-19). Validated in Phase 2: Persistent Watchlist & Charts (2026-10-19). Validated in Phase 3: Trading & Portfolio (2026-10-19). Validated in Phase 4: AI Chat Copilot (2026-10-20). Validated in Phase 5: Real Market Data (Massive) (2026-10-20).
 
 ### Active
 
@@ -104,4 +106,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-10-20 after Phase 4*
+*Last updated: 2026-10-20 after Phase 5*
