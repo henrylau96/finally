@@ -188,7 +188,7 @@ Plans:
 
 **Gap closure**
 
-- [ ] 05-04-PLAN.md — CR-01: `_enter_eod()` helper, single-snapshot 403 switches to EOD so empty-start free tier prices new tickers (gap closure)
+- [x] 05-04-PLAN.md — CR-01: `_enter_eod()` helper, single-snapshot 403 switches to EOD so empty-start free tier prices new tickers (gap closure)
 
 ### Phase 6: Packaging, Persistence & Test Suite
 
@@ -215,5 +215,5 @@ Plans:
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
-| 5. Real Market Data (Massive) | 3/3 | Complete   | 2026-10-20 |
+| 5. Real Market Data (Massive) | 4/4 | Complete   | 2026-10-20 |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
