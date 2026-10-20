@@ -12,6 +12,11 @@ test("heatmap and P&L chart render with data", async ({ page, request }) => {
   await expect(cell).toBeVisible();
   await expect(cell).toHaveAttribute("data-pnl", /^(positive|negative|flat)$/);
 
+  await expect(cell).toHaveAttribute("role", "button");
+  await cell.click();
+  await expect(cell).toHaveAttribute("aria-pressed", "true");
+  await expect(cell).toHaveAttribute("data-selected", "true");
+
   const pnlChart = page.getByTestId("pnl-chart");
   await expect(pnlChart).toBeVisible();
   await expect(pnlChart.locator("canvas, svg").first()).toBeVisible();

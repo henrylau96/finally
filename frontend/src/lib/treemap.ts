@@ -1,63 +1,53 @@
-export interface TreemapItem {
-  key: string;
-  value: number;
-}
+export type Rect = { id: string; x: number; y: number; w: number; h: number };
 
-export interface TreemapRect extends TreemapItem {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
+function worst(row: number[], side: number): number {
+  const s = row.reduce((a, b) => a + b, 0);
+  return Math.max((side * side * Math.max(...row)) / (s * s), (s * s) / (side * side * Math.min(...row)));
 }
 
 /**
- * Lay out items in a unit square (0..1) with a squarified treemap.
- * Rectangle areas are proportional to item values.
+ * Squarified treemap (Bruls, Huizing, van Wijk 2000).
+ * Items with value <= 0 are dropped; returns one rect per item, largest first.
  */
-export function squarify(items: TreemapItem[]): TreemapRect[] {
-  const total = items.reduce((s, i) => s + i.value, 0);
-  if (total <= 0) return [];
-  const sorted = [...items].filter((i) => i.value > 0).sort((a, b) => b.value - a.value);
-  const scaled = sorted.map((i) => ({ ...i, area: i.value / total }));
-  const out: TreemapRect[] = [];
-  let box = { x: 0, y: 0, w: 1, h: 1 };
-  let row: typeof scaled = [];
-
-  const worst = (r: typeof scaled, side: number) => {
-    const sum = r.reduce((s, i) => s + i.area, 0);
-    const max = Math.max(...r.map((i) => i.area));
-    const min = Math.min(...r.map((i) => i.area));
-    return Math.max((side * side * max) / (sum * sum), (sum * sum) / (side * side * min));
-  };
-
-  const placeRow = (r: typeof scaled) => {
-    const sum = r.reduce((s, i) => s + i.area, 0);
-    const horizontal = box.w >= box.h;
-    const thickness = horizontal ? sum / box.h : sum / box.w;
-    let offset = 0;
-    for (const i of r) {
-      const len = i.area / thickness;
-      out.push(
-        horizontal
-          ? { key: i.key, value: i.value, x: box.x, y: box.y + offset, w: thickness, h: len }
-          : { key: i.key, value: i.value, x: box.x + offset, y: box.y, w: len, h: thickness },
-      );
-      offset += len;
+export function squarify(items: { id: string; value: number }[], width: number, height: number): Rect[] {
+  const sorted = items.filter((i) => i.value > 0).sort((a, b) => b.value - a.value);
+  const total = sorted.reduce((s, i) => s + i.value, 0);
+  if (total === 0 || width <= 0 || height <= 0) return [];
+  const k = (width * height) / total;
+  const out: Rect[] = [];
+  let x = 0;
+  let y = 0;
+  let w = width;
+  let h = height;
+  let i = 0;
+  while (i < sorted.length) {
+    const side = Math.min(w, h);
+    const row = [sorted[i].value * k];
+    let j = i + 1;
+    while (j < sorted.length && worst([...row, sorted[j].value * k], side) <= worst(row, side)) {
+      row.push(sorted[j++].value * k);
     }
-    box = horizontal
-      ? { x: box.x + thickness, y: box.y, w: box.w - thickness, h: box.h }
-      : { x: box.x, y: box.y + thickness, w: box.w, h: box.h - thickness };
-  };
-
-  for (const item of scaled) {
-    const side = Math.min(box.w, box.h);
-    if (row.length === 0 || worst([...row, item], side) <= worst(row, side)) {
-      row.push(item);
+    const s = row.reduce((a, b) => a + b, 0);
+    if (w >= h) {
+      const cw = s / h;
+      let yy = y;
+      row.forEach((a, n) => {
+        out.push({ id: sorted[i + n].id, x, y: yy, w: cw, h: a / cw });
+        yy += a / cw;
+      });
+      x += cw;
+      w -= cw;
     } else {
-      placeRow(row);
-      row = [item];
+      const rh = s / w;
+      let xx = x;
+      row.forEach((a, n) => {
+        out.push({ id: sorted[i + n].id, x: xx, y, w: a / rh, h: rh });
+        xx += a / rh;
+      });
+      y += rh;
+      h -= rh;
     }
+    i = j;
   }
-  if (row.length) placeRow(row);
   return out;
 }

@@ -1,41 +1,54 @@
-"""Watchlist REST endpoints."""
+"""Watchlist REST endpoints backed by SQLite and the market data source."""
 
-from __future__ import annotations
+import asyncio
 
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel
 
-from app.market import MarketDataSource, PriceCache
-from app.portfolio import add_watchlist_ticker, get_watchlist_with_prices, remove_watchlist_ticker
+from app import db, services
+from app.api.schemas import Ticker
+from app.market.cache import PriceCache
+from app.market.interface import MarketDataSource
 
 
-class WatchlistAdd(BaseModel):
-    ticker: str
+class AddTicker(BaseModel):
+    ticker: Ticker
 
 
-def create_watchlist_router(price_cache: PriceCache, source: MarketDataSource) -> APIRouter:
-    """Create the /api/watchlist router bound to the price cache and market source."""
-    router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
+def create_watchlist_router(cache: PriceCache, source: MarketDataSource) -> APIRouter:
+    router = APIRouter()
 
-    @router.get("")
-    def read_watchlist() -> list[dict]:
-        return get_watchlist_with_prices(price_cache)
+    def item(row: dict) -> dict:
+        """Merge a watchlist row with its latest cached price."""
+        u = cache.get(row["ticker"])
+        prices = {"price": None, "previous_price": None, "direction": None, "day_change_pct": None}
+        if u is not None:
+            prices = {
+                "price": u.price,
+                "previous_price": u.previous_price,
+                "direction": u.direction,
+                "day_change_pct": u.day_change_pct,
+            }
+        return {"ticker": row["ticker"], **prices, "added_at": row["added_at"]}
 
-    @router.post("", status_code=201)
-    async def add(req: WatchlistAdd) -> dict:
+    @router.get("/api/watchlist")
+    async def list_watchlist() -> list[dict]:
+        rows = await asyncio.to_thread(db.list_watchlist)
+        return [item(r) for r in rows]
+
+    @router.post("/api/watchlist", status_code=201)
+    async def add(body: AddTicker, request: Request, response: Response) -> dict:
+        row, created = await services.add_to_watchlist(request.app, source, body.ticker)
+        if not created:
+            response.status_code = 200
+        return item(row)
+
+    @router.delete("/api/watchlist/{ticker}", status_code=204)
+    async def remove(ticker: str, request: Request) -> None:
+        t = ticker.strip().upper()
         try:
-            added = await add_watchlist_ticker(req.ticker, source)
-        except ValueError as e:
-            raise HTTPException(status_code=400, detail=str(e))
-        ticker = req.ticker.upper().strip()
-        if not added:
-            raise HTTPException(status_code=409, detail=f"{ticker} is already in the watchlist")
-        return {"ticker": ticker}
-
-    @router.delete("/{ticker}", status_code=204)
-    async def remove(ticker: str) -> Response:
-        if not await remove_watchlist_ticker(ticker, source):
-            raise HTTPException(status_code=404, detail=f"{ticker.upper()} is not in the watchlist")
-        return Response(status_code=204)
+            await services.remove_from_watchlist(request.app, source, t)
+        except services.WatchlistError as e:
+            raise HTTPException(404, str(e)) from e
 
     return router

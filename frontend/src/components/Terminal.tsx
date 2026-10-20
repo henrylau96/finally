@@ -1,148 +1,63 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { usePriceStream } from "@/hooks/usePriceStream";
-import { api } from "@/lib/api";
-import { revaluePortfolio } from "@/lib/portfolio";
-import type { ChatMessage as Message, Portfolio, Side, Snapshot } from "@/lib/types";
-import { ChatPanel } from "./ChatPanel";
-import { Header } from "./Header";
-import { Heatmap } from "./Heatmap";
-import { PnlChart } from "./PnlChart";
-import { PositionsTable } from "./PositionsTable";
-import { PriceChart } from "./PriceChart";
-import { TradeBar } from "./TradeBar";
-import { Watchlist } from "./Watchlist";
+import { useEffect, useMemo, useState } from "react";
+import { sparklineValues } from "@/lib/chartPoints";
+import { derivePositions } from "@/lib/portfolio";
+import { usePortfolio } from "@/lib/usePortfolio";
+import { usePriceStream } from "@/lib/usePriceStream";
+import { useHistory } from "@/lib/useHistory";
+import { useHistorySeeds } from "@/lib/useHistorySeeds";
+import { useWatchlist } from "@/lib/useWatchlist";
+import ChatDock from "./ChatDock";
+import Header from "./Header";
+import Heatmap from "./Heatmap";
+import MainChart from "./MainChart";
+import Panel from "./Panel";
+import PnlChart from "./PnlChart";
+import PositionsTable from "./PositionsTable";
+import TradeBar from "./TradeBar";
+import Watchlist from "./Watchlist";
 
-type Entry = Pick<Message, "role" | "content" | "actions">;
-
-const emptyPortfolio: Portfolio = { cash_balance: 0, total_value: 0, total_unrealized_pnl: 0, positions: [] };
-const REFRESH_MS = 30_000;
-
-/** The whole trading workstation: owns server state and wires panels together. */
-export function Terminal() {
-  const stream = usePriceStream();
-  const [portfolio, setPortfolio] = useState(emptyPortfolio);
-  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [watchError, setWatchError] = useState("");
+export default function Terminal() {
+  const { status, hasConnected, quotes, history, chart, asOf } = usePriceStream();
+  const { rows, loading, error, load, add, remove } = useWatchlist();
+  const { portfolio, version, refresh, trade } = usePortfolio();
+  const { rows: positionRows, total } = useMemo(() => derivePositions(portfolio, quotes), [portfolio, quotes]);
   const [selected, setSelected] = useState("");
-  const [tradeTicker, setTradeTicker] = useState("");
-  const [messages, setMessages] = useState<Entry[]>([]);
-  const [chatLoading, setChatLoading] = useState(false);
-
-  const refreshPortfolio = useCallback(async () => {
-    const [p, h] = await Promise.all([api.portfolio(), api.history()]);
-    setPortfolio(p);
-    setSnapshots(h);
-  }, []);
-
-  const refreshWatchlist = useCallback(async () => {
-    const tickers = (await api.watchlist()).map((w) => w.ticker);
-    setWatchlist(tickers);
-    setSelected((s) => s || tickers[0] || "");
-    setTradeTicker((t) => t || tickers[0] || "");
-    return tickers;
-  }, []);
-
-  /** Move selection and trade ticker off tickers that left the watchlist. */
-  const dropRemoved = (removed: string[], remaining: string[]) => {
-    const next = (t: string) => (removed.includes(t) ? remaining[0] ?? "" : t);
-    setSelected(next);
-    setTradeTicker(next);
-  };
-
+  const seed = useHistory(selected);
+  const tickers = useMemo(() => rows.map((r) => r.ticker), [rows]);
+  const seeds = useHistorySeeds(tickers);
+  const sparks = useMemo(
+    () => Object.fromEntries(tickers.map((t) => [t, sparklineValues(seeds[t] ?? [], chart[t] ?? [], history[t] ?? [])])),
+    [tickers, seeds, chart, history],
+  );
   useEffect(() => {
-    refreshPortfolio();
-    refreshWatchlist();
-    api.chatHistory().then(setMessages);
-    const id = setInterval(refreshPortfolio, REFRESH_MS);
-    return () => clearInterval(id);
-  }, [refreshPortfolio, refreshWatchlist]);
-
-  const select = (ticker: string) => {
-    setSelected(ticker);
-    setTradeTicker(ticker);
-  };
-
-  const trade = async (ticker: string, quantity: number, side: Side) => {
-    await api.trade(ticker, quantity, side);
-    await refreshPortfolio();
-  };
-
-  const addTicker = async (ticker: string) => {
-    setWatchError("");
-    try {
-      await api.addTicker(ticker);
-      await refreshWatchlist();
-    } catch (e) {
-      setWatchError((e as Error).message);
-    }
-  };
-
-  const removeTicker = async (ticker: string) => {
-    setWatchError("");
-    try {
-      await api.removeTicker(ticker);
-      dropRemoved([ticker], await refreshWatchlist());
-    } catch (e) {
-      setWatchError((e as Error).message);
-    }
-  };
-
-  const sendChat = async (text: string) => {
-    setMessages((m) => [...m, { role: "user", content: text, actions: null }]);
-    setChatLoading(true);
-    try {
-      const res = await api.chat(text);
-      const actions = { trades: res.trades, watchlist_changes: res.watchlist_changes };
-      setMessages((m) => [...m, { role: "assistant", content: res.message, actions }]);
-      const [, remaining] = await Promise.all([refreshPortfolio(), refreshWatchlist()]);
-      const removed = res.watchlist_changes
-        .filter((w) => w.action === "remove" && w.status === "executed")
-        .map((w) => w.ticker);
-      dropRemoved(removed, remaining);
-    } catch (e) {
-      setMessages((m) => [...m, { role: "assistant", content: `Request failed: ${(e as Error).message}`, actions: null }]);
-    } finally {
-      setChatLoading(false);
-    }
-  };
-
-  const live = revaluePortfolio(portfolio, stream.prices);
-
+    if (loading) return;
+    if (selected) return;
+    const held = portfolio?.positions.map((p) => p.ticker) ?? [];
+    const next = tickers.includes("AAPL") ? "AAPL" : (tickers[0] ?? held[0] ?? "");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelected(next);
+  }, [tickers, loading, selected, portfolio]);
   return (
-    <div className="flex h-screen flex-col">
-      <Header
-        totalValue={live.total_value}
-        cash={live.cash_balance}
-        pnl={live.total_unrealized_pnl}
-        status={stream.status}
-      />
-      <div className="flex min-h-0 flex-1">
-        <div className="grid min-h-0 flex-1 grid-cols-[340px_1fr] gap-px bg-rule">
-          <Watchlist
-            tickers={watchlist}
-            stream={stream}
-            selected={selected}
-            error={watchError}
-            onSelect={select}
-            onAdd={addTicker}
-            onRemove={removeTicker}
-          />
-          <div className="grid min-h-0 grid-rows-[minmax(260px,1fr)_minmax(200px,0.8fr)_minmax(150px,0.6fr)] gap-px">
-            <div className="flex min-h-0 flex-col bg-panel">
-              <PriceChart ticker={selected} points={stream.history[selected] ?? []} />
-              <TradeBar ticker={tradeTicker} onTickerChange={setTradeTicker} onTrade={trade} />
-            </div>
-            <div className="grid min-h-0 grid-cols-2 gap-px">
-              <Heatmap positions={live.positions} onSelect={select} />
-              <PnlChart snapshots={snapshots} />
-            </div>
-            <PositionsTable positions={live.positions} onSelect={select} />
+    <div className="flex h-full flex-col gap-2 p-2 max-lg:overflow-y-auto">
+      <Header status={status} hasConnected={hasConnected} total={total} cash={portfolio?.cash_balance} asOf={asOf} />
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(312px,30%)_1fr_48px] gap-2 max-lg:flex-none lg:grid-cols-[minmax(312px,26%)_1fr_48px] xl:grid-cols-[minmax(320px,28%)_1fr_auto]">
+        <Watchlist tickers={tickers} quotes={quotes} history={sparks} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
+        <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2 max-lg:grid-rows-[auto_auto_auto] max-lg:[&>*:first-child]:min-h-[240px]">
+          <Panel title="Main chart" active bodyClassName="overflow-hidden">
+            <MainChart ticker={selected} points={chart[selected] ?? []} history={seed} price={quotes[selected]?.price} live={status === "connected"} />
+          </Panel>
+          <TradeBar selected={selected} onTrade={trade} />
+          <div className="grid min-h-0 grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)_minmax(0,1fr)] gap-2 max-lg:grid-cols-2 max-lg:*:min-h-[240px] max-lg:[&>*:nth-child(2)]:order-first max-lg:[&>*:nth-child(2)]:col-span-2">
+            <Heatmap rows={positionRows} selected={selected} onSelect={setSelected} />
+            <PositionsTable rows={positionRows} quotes={quotes} live={status === "connected"} selected={selected} onSelect={setSelected} />
+            <PnlChart version={version} />
           </div>
         </div>
-        <ChatPanel messages={messages} loading={chatLoading} onSend={sendChat} />
+        <div className="relative flex min-h-0 max-xl:w-12">
+          <ChatDock onActions={() => { void refresh(); void load(); }} />
+        </div>
       </div>
     </div>
   );

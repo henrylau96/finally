@@ -1,23 +1,21 @@
-"""Market data subsystem for FinAlly.
+"""Market data package."""
 
-Public API:
-    PriceUpdate         - Immutable price snapshot dataclass
-    PriceCache          - Thread-safe in-memory price store
-    MarketDataSource    - Abstract interface for data providers
-    create_market_data_source - Factory that selects simulator or Massive
-    create_stream_router - FastAPI router factory for SSE endpoint
-"""
-
-from .cache import PriceCache
-from .factory import create_market_data_source
-from .interface import MarketDataSource
-from .models import PriceUpdate
-from .stream import create_stream_router
+from app.market.cache import PriceCache
+from app.market.factory import create_market_data_source
+from app.market.interface import MarketDataSource
+from app.market.massive_source import MassiveDataSource
+from app.market.models import PriceUpdate
+from app.market.seed_prices import DEFAULT_TICKERS
+from app.market.simulator import GBMSimulator
+from app.market.simulator_source import SimulatorDataSource
 
 __all__ = [
-    "PriceUpdate",
-    "PriceCache",
+    "DEFAULT_TICKERS",
+    "GBMSimulator",
     "MarketDataSource",
+    "MassiveDataSource",
+    "PriceCache",
+    "PriceUpdate",
+    "SimulatorDataSource",
     "create_market_data_source",
-    "create_stream_router",
 ]

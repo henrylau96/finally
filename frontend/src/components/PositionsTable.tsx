@@ -1,49 +1,89 @@
-import { money, percent, price, shares, signedMoney } from "@/lib/format";
-import type { Position } from "@/lib/types";
+"use client";
 
-const tone = (v: number) => (v > 0 ? "text-up" : v < 0 ? "text-down" : "");
+import { formatPct, formatPrice, formatQty, formatSignedMoney } from "@/lib/format";
+import { pnlState, type PositionRow } from "@/lib/portfolio";
+import type { Quote } from "@/lib/usePriceStream";
+import Panel from "./Panel";
+import PriceCell from "./PriceCell";
 
-/** Holdings with cost basis and unrealized P&L. */
-export function PositionsTable({ positions, onSelect }: { positions: Position[]; onSelect: (t: string) => void }) {
+const GRID = "grid grid-cols-[64px_minmax(56px,1fr)_80px_80px_80px_72px] gap-2 px-2";
+const COLORS = { positive: "text-up", negative: "text-down", flat: "text-text-muted" };
+const PNL_ATTR = { positive: "up", negative: "down", flat: "flat" };
+
+export default function PositionsTable({
+  rows,
+  quotes,
+  live,
+  selected,
+  onSelect,
+}: {
+  rows: PositionRow[] | null;
+  quotes: Record<string, Quote>;
+  live: boolean;
+  selected: string;
+  onSelect: (ticker: string) => void;
+}) {
   return (
-    <section className="flex min-h-0 flex-col bg-panel">
-      <h2 className="px-3 pt-2.5 pb-1.5 text-xs font-medium text-muted">Positions</h2>
-      <div className="min-h-0 flex-1 overflow-auto">
-        <table data-testid="positions-table" className="w-full text-right">
-          <thead className="sticky top-0 bg-panel text-xs text-muted">
-            <tr>
-              <th className="px-3 py-1 text-left font-normal">Ticker</th>
-              <th className="px-3 py-1 font-normal">Qty</th>
-              <th className="px-3 py-1 font-normal">Avg cost</th>
-              <th className="px-3 py-1 font-normal">Price</th>
-              <th className="px-3 py-1 font-normal">Market value</th>
-              <th className="px-3 py-1 font-normal">Unrealized P&amp;L</th>
-              <th className="px-3 py-1 font-normal">Change</th>
-            </tr>
-          </thead>
-          <tbody className="num">
-            {positions.map((p) => (
-              <tr
-                key={p.ticker}
-                data-testid={`position-row-${p.ticker}`}
-                onClick={() => onSelect(p.ticker)}
-                className="cursor-pointer border-t border-rule/60 hover:bg-raised"
-              >
-                <td className="px-3 py-1 text-left font-sans font-semibold">{p.ticker}</td>
-                <td className="px-3 py-1">{shares(p.quantity)}</td>
-                <td className="px-3 py-1">{price(p.avg_cost)}</td>
-                <td className="px-3 py-1">{price(p.current_price)}</td>
-                <td className="px-3 py-1">{money(p.market_value)}</td>
-                <td className={`px-3 py-1 ${tone(p.unrealized_pnl)}`}>{signedMoney(p.unrealized_pnl)}</td>
-                <td className={`px-3 py-1 ${tone(p.unrealized_pnl)}`}>{percent(p.unrealized_pnl_percent)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {positions.length === 0 && (
-          <p className="px-3 py-4 text-muted">No positions yet. Buy shares with the trade bar or ask the assistant.</p>
-        )}
-      </div>
-    </section>
+    <Panel title="Positions" testId="positions">
+      {rows && rows.length === 0 ? (
+        <div data-testid="positions-empty" className="flex h-full flex-col items-center justify-center">
+          <p className="text-sm text-text-muted">No positions yet.</p>
+          <p className="text-xs text-text-muted">Buy shares with the trade bar to see them here.</p>
+        </div>
+      ) : (
+        <div role="grid" aria-label="Positions">
+          <div role="rowgroup">
+            <div
+              role="row"
+              className={
+                GRID +
+                " sticky top-0 h-6 items-center border-b border-l-2 border-b-border border-l-transparent bg-surface text-xs font-semibold uppercase tracking-[0.05em] text-text-muted"
+              }
+            >
+              <span role="columnheader">Symbol</span>
+              <span role="columnheader" className="text-right">Qty</span>
+              <span role="columnheader" className="text-right">Avg cost</span>
+              <span role="columnheader" className="text-right">Price</span>
+              <span role="columnheader" className="text-right">P&amp;L</span>
+              <span role="columnheader" className="text-right">Chg %</span>
+            </div>
+          </div>
+          <div role="rowgroup">
+            {(rows ?? []).map((r) => {
+              const color = COLORS[pnlState(r.pnl_pct)];
+              return (
+                <div
+                  key={r.ticker}
+                  role="row"
+                  data-testid={"position-row-" + r.ticker}
+                  aria-selected={selected === r.ticker}
+                  tabIndex={0}
+                  onClick={() => onSelect(r.ticker)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
+                    onSelect(r.ticker);
+                  }}
+                  className={
+                    GRID +
+                    " h-8 cursor-pointer items-center border-b border-l-2 border-b-border text-sm hover:bg-row-hover " +
+                    (selected === r.ticker ? "border-l-primary bg-row-hover" : "border-l-transparent")
+                  }
+                >
+                  <span role="gridcell" className="font-mono font-semibold">{r.ticker}</span>
+                  <span role="gridcell" data-testid={"position-qty-" + r.ticker} className="text-right font-mono tabular-nums">{formatQty(r.quantity)}</span>
+                  <span role="gridcell" className="text-right font-mono tabular-nums">{formatPrice(r.avg_cost)}</span>
+                  <span role="gridcell" className="text-right">
+                    <PriceCell ticker={"pos-" + r.ticker} price={r.current_price} direction={quotes[r.ticker]?.direction} live={live} />
+                  </span>
+                  <span role="gridcell" data-testid={"position-pnl-" + r.ticker} data-pnl={PNL_ATTR[pnlState(r.pnl_pct)]} className={"text-right font-mono tabular-nums " + color}>{formatSignedMoney(r.unrealized_pnl)}</span>
+                  <span role="gridcell" className={"text-right font-mono tabular-nums " + color}>{formatPct(r.pnl_pct)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </Panel>
   );
 }

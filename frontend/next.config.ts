@@ -1,16 +1,13 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
-const nextConfig: NextConfig = {
-  output: "export",
-  images: { unoptimized: true },
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
+export default function config(phase: string): NextConfig {
+  if (phase === PHASE_DEVELOPMENT_SERVER) {
+    return {
+      async rewrites() {
+        return [{ source: "/api/:path*", destination: "http://localhost:8000/api/:path*" }];
       },
-    },
-  },
-};
-
-export default nextConfig;
+    };
+  }
+  return { output: "export" };
+}

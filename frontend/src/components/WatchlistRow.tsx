@@ -1,53 +1,85 @@
-"use client";
+import { useState } from "react";
+import { formatPct } from "@/lib/format";
+import type { Quote } from "@/lib/usePriceStream";
+import PriceCell from "./PriceCell";
+import Sparkline from "./Sparkline";
 
-import { useFlash } from "@/hooks/useFlash";
-import { percent, price } from "@/lib/format";
-import type { PricePoint } from "@/lib/types";
-import { Sparkline } from "./Sparkline";
-
-interface Props {
+export default function WatchlistRow({
+  ticker,
+  quote,
+  history,
+  live,
+  selected,
+  onSelect,
+  onRemove,
+  onError,
+}: {
   ticker: string;
-  last?: number;
-  change: number;
-  points: PricePoint[];
+  quote?: Quote;
+  history: number[];
+  live: boolean;
   selected: boolean;
   onSelect: (ticker: string) => void;
-  onRemove: (ticker: string) => void;
-}
+  onRemove: (ticker: string) => Promise<string | null>;
+  onError: (msg: string) => void;
+}) {
+  const [pending, setPending] = useState(false);
+  const pct = quote?.day_change_pct;
+  const color = !live || !pct ? "text-text-muted" : pct > 0 ? "text-up" : "text-down";
 
-/** One watchlist line: ticker, sparkline, flashing price, session change, remove. */
-export function WatchlistRow({ ticker, last, change, points, selected, onSelect, onRemove }: Props) {
-  const flash = useFlash(last);
-  const tone = change > 0 ? "text-up" : change < 0 ? "text-down" : "text-muted";
+  async function remove(e: React.MouseEvent) {
+    e.stopPropagation();
+    setPending(true);
+    const err = await onRemove(ticker);
+    setPending(false);
+    if (err) onError(err);
+  }
+
   return (
     <div
-      data-testid={`watchlist-row-${ticker}`}
-      role="button"
+      role="row"
+      aria-selected={selected}
+      data-testid={"watchlist-row-" + ticker}
       tabIndex={0}
-      aria-pressed={selected}
       onClick={() => onSelect(ticker)}
-      onKeyDown={(e) => e.key === "Enter" && onSelect(ticker)}
-      className={`group grid cursor-pointer grid-cols-[3.5rem_1fr_4.5rem_3.75rem_1rem] items-center gap-1.5 border-l-2 px-3 py-1.5 hover:bg-raised ${
-        selected ? "border-accent bg-raised" : "border-transparent"
-      }`}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        onSelect(ticker);
+      }}
+      className={
+        "group grid h-8 cursor-pointer grid-cols-[72px_1fr_72px_72px_24px] items-center gap-2 max-xl:grid-cols-[56px_1fr_56px_64px_24px] max-xl:gap-1 border-b border-l-2 border-b-border px-2 transition-colors duration-100 hover:bg-row-hover " +
+        (selected ? "border-l-primary bg-row-hover" : "border-l-transparent")
+      }
     >
-      <span className={`font-semibold ${selected ? "text-accent" : ""}`}>{ticker}</span>
-      <Sparkline points={points} color={change < 0 ? "var(--color-down)" : "var(--color-up)"} />
-      <span data-testid={`price-${ticker}`} className={`num flash-fade rounded-sm px-1 text-right ${flash}`}>
-        {last != null ? price(last) : "--"}
+      <span role="gridcell" className="font-mono font-semibold">{ticker}</span>
+      <span role="gridcell" className="text-right">
+        <PriceCell ticker={ticker} price={quote?.price} direction={quote?.direction} live={live} />
       </span>
-      <span className={`num text-right text-xs ${tone}`}>{last != null ? percent(change) : ""}</span>
-      <button
-        data-testid={`watchlist-remove-${ticker}`}
-        aria-label={`Remove ${ticker}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onRemove(ticker);
-        }}
-        className="text-muted opacity-0 hover:text-down focus:opacity-100 group-hover:opacity-100"
+      <span
+        role="gridcell"
+        data-testid={"day-change-" + ticker}
+        className={"text-right font-mono tabular-nums " + color}
       >
-        ×
-      </button>
+        {formatPct(pct)}
+      </span>
+      <span role="gridcell">
+        <Sparkline ticker={ticker} points={history} up={(pct ?? 0) >= 0} />
+      </span>
+      <span role="gridcell">
+        <button
+          type="button"
+          data-testid={"watchlist-remove-" + ticker}
+          aria-label={"Remove " + ticker + " from watchlist"}
+          title={"Remove " + ticker}
+          disabled={pending}
+          onClick={remove}
+          onKeyDown={(e) => e.stopPropagation()}
+          className="remove-btn max-lg:opacity-100 h-6 w-6 text-base text-text-muted opacity-0 transition-opacity duration-100 hover:text-down focus-visible:text-down focus-visible:opacity-100 group-focus-within:opacity-100 group-hover:opacity-100"
+        >
+          ×
+        </button>
+      </span>
     </div>
   );
 }

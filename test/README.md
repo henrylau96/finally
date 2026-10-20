@@ -25,3 +25,7 @@ cd test && npm install && npx playwright install chromium && npx playwright test
 ```
 
 Reports: `npx playwright show-report`; failure traces are in `test-results/`.
+
+## Persistence check
+
+`bash test/persistence.sh` (builds nothing; uses the `finally` image, port 8001 and a throwaway volume).

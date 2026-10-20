@@ -1,65 +1,77 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0d1117;
-  --color-panel: #131a25;
-  --color-raised: #1a2331;
-  --color-rule: #253246;
-  --color-text: #d7dee9;
-  --color-muted: #7d8899;
-  --color-up: #26b26f;
-  --color-down: #e5484d;
+  --color-bg: #0d1117;
+  --color-surface: #161b22;
+  --color-border: #30363d;
+  --color-row-hover: #1c2230;
+  --color-up: #3fb950;
+  --color-down: #f85149;
+  --color-warn: #d29922;
   --color-accent: #ecad0a;
   --color-primary: #209dd7;
-  --color-secondary: #753991;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+  --color-submit: #753991;
+  --color-text: #e6edf3;
+  --color-text-muted: #8b949e;
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
-html,
 body {
-  height: 100%;
-  background: var(--color-ink);
+  background: var(--color-bg);
   color: var(--color-text);
+  font: 14px/1.5 var(--font-sans);
 }
 
-body {
-  font-family: var(--font-sans);
-  font-size: 13px;
+@keyframes status-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
-.num {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
+.status-pulse {
+  animation: status-pulse 1s ease-in-out infinite;
 }
 
-.flash-fade {
-  transition: background-color 500ms ease-out;
-}
-.flash-up,
-.flash-down {
-  transition: none;
-}
-.flash-up {
-  background-color: rgb(38 178 111 / 0.3);
-}
-.flash-down {
-  background-color: rgb(229 72 77 / 0.3);
+@media (prefers-reduced-motion: reduce) {
+  .status-pulse {
+    animation: none;
+  }
 }
 
 :focus-visible {
   outline: 2px solid var(--color-primary);
-  outline-offset: 1px;
+  outline-offset: -2px;
 }
 
-@keyframes pulse-dot {
-  50% { opacity: 0.35; }
+.price-cell {
+  transition: background-color 500ms ease-out;
+  font-variant-numeric: tabular-nums;
 }
-.loading-dot {
-  animation: pulse-dot 1s ease-in-out infinite;
+
+.price-cell[data-flash="up"] {
+  background-color: rgba(63, 185, 80, 0.3);
+  transition: none;
+}
+
+.price-cell[data-flash="down"] {
+  background-color: rgba(248, 81, 73, 0.3);
+  transition: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .flash-fade { transition: none; }
-  .loading-dot { animation: none; }
+  .price-cell {
+    transition-duration: 150ms;
+  }
+}
+
+@media (hover: none) {
+  .remove-btn {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .remove-btn {
+    transition: none;
+  }
 }

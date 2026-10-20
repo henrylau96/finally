@@ -14,6 +14,7 @@ export async function readNumber(locator: Locator): Promise<number> {
 export async function openApp(page: Page): Promise<void> {
   await page.goto("/");
   await expect(page.getByTestId("connection-status")).toHaveAttribute("data-status", "connected");
+  await expect(page.getByTestId("cash-balance")).toContainText("$");
 }
 
 /** Remove a ticker from the watchlist via the API, ignoring 404. */

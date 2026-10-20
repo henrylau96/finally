@@ -1,41 +1,65 @@
-import type { Portfolio, Position, PriceUpdate } from "./types";
+import type { UTCTimestamp } from "lightweight-charts";
+import type { Quote } from "./usePriceStream";
 
-export type PnlSign = "positive" | "negative" | "flat";
+export type Position = {
+  ticker: string;
+  quantity: number;
+  avg_cost: number;
+  current_price: number;
+  market_value: number;
+  unrealized_pnl: number;
+  pnl_pct: number;
+};
 
-/** Re-price a position with the latest streamed price, if one exists. */
-export function revaluePosition(pos: Position, live?: PriceUpdate): Position {
-  const current = live?.price ?? pos.current_price;
-  const marketValue = pos.quantity * current;
-  const cost = pos.quantity * pos.avg_cost;
-  const pnl = marketValue - cost;
-  return {
-    ...pos,
-    current_price: current,
-    market_value: marketValue,
-    unrealized_pnl: pnl,
-    unrealized_pnl_percent: cost ? (pnl / cost) * 100 : 0,
-  };
+export type Portfolio = {
+  cash_balance: number;
+  total_value: number;
+  unrealized_pnl: number;
+  positions: Position[];
+};
+
+export type PositionRow = Position;
+
+/**
+ * Mark positions to live quotes; rows and total are unset until the portfolio has loaded.
+ * Rows are ordered by market value as of the last portfolio fetch, so live ticks never reorder them.
+ */
+export function derivePositions(
+  p: Portfolio | null,
+  quotes: Record<string, Quote>,
+): { rows: PositionRow[] | null; total: number | undefined } {
+  if (!p) return { rows: null, total: undefined };
+  const rows = [...p.positions]
+    .sort((a, b) => b.market_value - a.market_value)
+    .map((pos) => {
+      const price = quotes[pos.ticker]?.price ?? pos.current_price ?? pos.avg_cost;
+      return {
+        ...pos,
+        current_price: price,
+        market_value: price * pos.quantity,
+        unrealized_pnl: (price - pos.avg_cost) * pos.quantity,
+        pnl_pct: ((price - pos.avg_cost) / pos.avg_cost) * 100,
+      };
+    });
+  const total = p.cash_balance + rows.reduce((sum, r) => sum + r.market_value, 0);
+  return { rows, total };
 }
 
-/** Re-price the whole portfolio from live prices so totals update between fetches. */
-export function revaluePortfolio(
-  portfolio: Portfolio,
-  prices: Record<string, PriceUpdate>,
-): Portfolio {
-  const positions = portfolio.positions.map((p) => revaluePosition(p, prices[p.ticker]));
-  const invested = positions.reduce((sum, p) => sum + p.market_value, 0);
-  const pnl = positions.reduce((sum, p) => sum + p.unrealized_pnl, 0);
-  return {
-    ...portfolio,
-    positions,
-    total_value: portfolio.cash_balance + invested,
-    total_unrealized_pnl: pnl,
-  };
+/** Classify a P&L percent by its rounded display value, matching formatPct. */
+export function pnlState(pct: number): "positive" | "negative" | "flat" {
+  if (Number(Math.abs(pct).toFixed(2)) === 0) return "flat";
+  return pct > 0 ? "positive" : "negative";
 }
 
-/** Classify a P&L amount, treating sub-cent values as flat. */
-export function pnlSign(pnl: number): PnlSign {
-  if (pnl > 0.005) return "positive";
-  if (pnl < -0.005) return "negative";
-  return "flat";
+/** ISO snapshots oldest-first to strictly ascending whole seconds; last value wins per second. */
+export function toSeries(h: { total_value: number; recorded_at: string }[]) {
+  const out: { time: UTCTimestamp; value: number }[] = [];
+  for (const s of h) {
+    const time = Math.floor(Date.parse(s.recorded_at) / 1000) as UTCTimestamp;
+    const last = out[out.length - 1];
+    if (last && time < last.time) continue;
+    if (last && time === last.time) last.value = s.total_value;
+    else out.push({ time, value: s.total_value });
+  }
+  return out;
 }

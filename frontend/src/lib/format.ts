@@ -1,28 +1,23 @@
-const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
-
-/** Format a number as US dollars, e.g. $1,234.56. */
-export function money(value: number): string {
-  return usd.format(value);
+export function formatPrice(n?: number): string {
+  if (n === undefined) return "--";
+  return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-/** Format a price with two decimals and no currency sign. */
-export function price(value: number): string {
-  return value.toFixed(2);
+export function formatPct(n?: number): string {
+  if (n === undefined) return "--";
+  const text = Math.abs(n).toFixed(2);
+  if (Number(text) === 0) return "0.00%";
+  return (n > 0 ? "+" : "-") + text + "%";
 }
 
-/** Format a percent value (already in percent units) with a sign, e.g. +1.23%. */
-export function percent(value: number): string {
-  const sign = value > 0 ? "+" : "";
-  return `${sign}${value.toFixed(2)}%`;
+export function formatQty(n?: number): string {
+  if (n === undefined) return "--";
+  return n.toLocaleString("en-US", { maximumFractionDigits: 4 });
 }
 
-/** Format a dollar change with a sign, e.g. +$12.00 / -$3.50. */
-export function signedMoney(value: number): string {
-  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
-  return `${sign}${usd.format(Math.abs(value))}`;
-}
-
-/** Format a share quantity, trimming trailing zeros for fractional shares. */
-export function shares(value: number): string {
-  return Number(value.toFixed(4)).toString();
+export function formatSignedMoney(n?: number): string {
+  if (n === undefined) return "--";
+  const text = Math.abs(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (Number(text.replace(/,/g, "")) === 0) return "$0.00";
+  return (n > 0 ? "+$" : "-$") + text;
 }

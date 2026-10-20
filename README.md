@@ -35,6 +35,16 @@ Windows PowerShell: `.\scripts\start_windows.ps1` (`-Build` to rebuild) and `.\s
 
 Or with Docker Compose: `docker compose up --build`. Then open http://localhost:8000.
 
+## Development
+
+```bash
+cd backend && uv run pytest                     # backend tests
+cd frontend && npm install && npm run build     # static export to frontend/out
+cd backend && STATIC_DIR=../frontend/out uv run uvicorn app.main:app --port 8000 --timeout-graceful-shutdown 2
+```
+
+Then open http://localhost:8000 (API, SSE and UI on one origin). For UI iteration use `npm run dev` in `frontend/` (proxies `/api` to :8000).
+
 ## Environment Variables
 
 | Variable | Required | Description |

@@ -6,7 +6,7 @@ const DEFAULT_TICKERS = ["AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "NVDA", "META"
 test("health endpoint responds ok", async ({ request }) => {
   const res = await request.get("/api/health");
   expect(res.status()).toBe(200);
-  expect(await res.json()).toEqual({ status: "ok" });
+  expect(await res.json()).toEqual({ status: "ok", source: "simulator" });
 });
 
 test("fresh start shows default watchlist and $10,000 cash", async ({ page }) => {
@@ -16,6 +16,11 @@ test("fresh start shows default watchlist and $10,000 cash", async ({ page }) =>
   }
   await expect.poll(() => readNumber(page.getByTestId("cash-balance"))).toBe(10000);
   await expect.poll(() => readNumber(page.getByTestId("total-value"))).toBe(10000);
+  await expect(page.getByTestId("watchlist")).toBeVisible();
+  await expect(page.getByTestId("app-header")).toBeVisible();
+  await expect
+    .poll(async () => Number(await page.getByTestId("sparkline-AAPL").getAttribute("data-points")))
+    .toBeGreaterThanOrEqual(2);
 });
 
 test("prices stream and update", async ({ page }) => {
@@ -24,4 +29,5 @@ test("prices stream and update", async ({ page }) => {
   await expect.poll(() => readNumber(price)).toBeGreaterThan(0);
   const first = await price.textContent();
   await expect.poll(() => price.textContent(), { timeout: 15_000 }).not.toBe(first);
+  await expect(page.getByTestId("stale-badge")).toHaveCount(0);
 });

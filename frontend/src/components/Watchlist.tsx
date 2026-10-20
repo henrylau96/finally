@@ -1,69 +1,109 @@
-"use client";
+import { useState } from "react";
+import type { Quote, Status } from "@/lib/usePriceStream";
+import Panel from "./Panel";
+import WatchlistAddForm from "./WatchlistAddForm";
+import WatchlistRow from "./WatchlistRow";
 
-import { useState, type FormEvent } from "react";
-import { sessionChange, type PriceState } from "@/lib/prices";
-import { WatchlistRow } from "./WatchlistRow";
+const GRID = "grid grid-cols-[72px_1fr_72px_72px_24px] gap-2 max-xl:grid-cols-[56px_1fr_56px_64px_24px] max-xl:gap-1";
+const HEADERS = ["Symbol", "Price", "Day %", "Chart"];
 
-interface Props {
-  tickers: string[];
-  stream: PriceState;
-  selected: string;
-  error: string;
-  onSelect: (ticker: string) => void;
-  onAdd: (ticker: string) => void;
-  onRemove: (ticker: string) => void;
+function notice(
+  status: Status,
+  loading: boolean,
+  loadError: boolean,
+  waiting: boolean,
+): string {
+  if (loadError) return "Could not load the watchlist. Reload the page.";
+  if (status === "disconnected") return "Price stream closed. Reload the page to retry.";
+  if (status === "reconnecting") return "Reconnecting to price stream. Prices may be stale.";
+  if (loading) return "Loading watchlist...";
+  if (status === "connected" && waiting) return "Waiting for prices...";
+  return "";
 }
 
-/** Watched tickers with live prices, plus an input to add more. */
-export function Watchlist({ tickers, stream, selected, error, onSelect, onAdd, onRemove }: Props) {
-  const [input, setInput] = useState("");
-
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    const ticker = input.trim().toUpperCase();
-    if (!ticker) return;
-    onAdd(ticker);
-    setInput("");
-  };
-
+export default function Watchlist({
+  tickers,
+  quotes,
+  history,
+  status,
+  selected,
+  onSelect,
+  onAdd,
+  onRemove,
+  loading,
+  loadError,
+}: {
+  tickers: string[];
+  quotes: Record<string, Quote>;
+  history: Record<string, number[]>;
+  status: Status;
+  selected: string;
+  onSelect: (ticker: string) => void;
+  onAdd: (ticker: string) => Promise<string | null>;
+  onRemove: (ticker: string) => Promise<string | null>;
+  loading: boolean;
+  loadError: boolean;
+}) {
+  const [error, setError] = useState("");
+  const waiting = tickers.length > 0 && !tickers.some((t) => quotes[t]);
+  const text = notice(status, loading, loadError, waiting);
   return (
-    <section data-testid="watchlist" className="flex min-h-0 flex-col bg-panel">
-      <h2 className="px-3 pt-2.5 pb-1.5 text-xs font-medium text-muted">Watchlist</h2>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        {tickers.map((t) => {
-          const last = stream.prices[t]?.price;
-          return (
+    <Panel title="Watchlist" active testId="watchlist">
+      <WatchlistAddForm onAdd={onAdd} onError={setError} />
+      <div className="h-6 px-2 text-xs">
+        {error && (
+          <p role="alert" data-testid="watchlist-add-error" className="text-down">
+            {error}
+          </p>
+        )}
+      </div>
+      <div
+        role="status"
+        aria-live="polite"
+        title={text}
+        className={
+          "h-6 overflow-hidden truncate px-2 text-xs " + (loadError ? "text-down" : "text-text-muted")
+        }
+      >
+        {text}
+      </div>
+      <div role="grid" aria-label="Watchlist">
+        <div role="rowgroup">
+          <div
+            role="row"
+            className={
+              GRID +
+              " h-6 items-center border-b border-border border-l-2 border-l-transparent px-2 text-xs font-semibold uppercase tracking-[0.05em] text-text-muted"
+            }
+          >
+            <span role="columnheader">{HEADERS[0]}</span>
+            <span role="columnheader" className="text-right">{HEADERS[1]}</span>
+            <span role="columnheader" className="text-right">{HEADERS[2]}</span>
+            <span role="columnheader" className="text-center">{HEADERS[3]}</span>
+            <span role="columnheader" aria-label="Actions" />
+          </div>
+        </div>
+        <div role="rowgroup">
+          {tickers.map((t) => (
             <WatchlistRow
               key={t}
               ticker={t}
-              last={last}
-              change={last != null ? sessionChange(last, stream.open[t]) : 0}
-              points={stream.history[t] ?? []}
-              selected={t === selected}
+              quote={quotes[t]}
+              history={history[t] ?? []}
+              live={status === "connected"}
+              selected={selected === t}
               onSelect={onSelect}
               onRemove={onRemove}
+              onError={setError}
             />
-          );
-        })}
+          ))}
+        </div>
       </div>
-      <form onSubmit={submit} className="flex gap-1.5 border-t border-rule p-2">
-        <input
-          data-testid="watchlist-add-input"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Add ticker"
-          aria-label="Ticker to add"
-          className="min-w-0 flex-1 rounded-sm border border-rule bg-ink px-2 py-1 uppercase placeholder:normal-case placeholder:text-muted"
-        />
-        <button
-          data-testid="watchlist-add-button"
-          type="submit"
-          className="rounded-sm border border-primary px-2.5 py-1 text-primary hover:bg-primary hover:text-ink"
-        >
-          Add
-        </button>
-      </form>
-      {error && <p className="px-2 pb-2 text-xs text-down">{error}</p>}
-    </section>
+      {!loading && !loadError && tickers.length === 0 && (
+        <p data-testid="watchlist-empty" className="p-4 text-center text-sm text-text-muted">
+          No tickers yet. Add one above.
+        </p>
+      )}
+    </Panel>
   );
 }

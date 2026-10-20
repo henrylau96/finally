@@ -1,80 +1,128 @@
 "use client";
 
-import { useState } from "react";
-import type { Side } from "@/lib/types";
+import { useEffect, useRef, useState } from "react";
 
-interface Props {
-  ticker: string;
-  onTickerChange: (ticker: string) => void;
-  onTrade: (ticker: string, quantity: number, side: Side) => Promise<void>;
-}
+const BAD_TICKER = "Enter a ticker of 1-5 letters.";
+const BAD_QTY = "Enter a quantity above 0 (up to 4 decimals).";
+/** Plain decimal with at most 4 places; rejects hex, binary and exponent forms. */
+const QTY = /^(\d+(\.\d{1,4})?|\.\d{1,4})$/;
 
-/** Market order entry: ticker, quantity, buy and sell. */
-export function TradeBar({ ticker, onTickerChange, onTrade }: Props) {
+export default function TradeBar({
+  selected,
+  onTrade,
+}: {
+  selected: string;
+  onTrade: (ticker: string, quantity: number, side: "buy" | "sell") => Promise<string | null>;
+}) {
+  const [ticker, setTicker] = useState(selected);
   const [quantity, setQuantity] = useState("");
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
+  const [pending, setPending] = useState(false);
+  const qtyInput = useRef<HTMLInputElement>(null);
 
-  const submit = async (side: Side) => {
-    const qty = Number(quantity);
-    if (!ticker || !(qty > 0)) {
-      setError("Enter a ticker and a quantity above zero");
-      return;
-    }
-    setBusy(true);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTicker(selected);
+  }, [selected]);
+
+  async function submit(side: "buy" | "sell") {
+    const sym = ticker.trim().toUpperCase();
+    if (!/^[A-Z]{1,5}$/.test(sym)) return setError(BAD_TICKER);
+    const text = quantity.trim();
+    if (!QTY.test(text) || Number(text) <= 0) return setError(BAD_QTY);
     setError("");
-    try {
-      await onTrade(ticker, qty, side);
-      setQuantity("");
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
+    setPending(true);
+    const err = await onTrade(sym, Number(text), side);
+    setPending(false);
+    if (err) setError(err);
+    else setQuantity("");
+    setTimeout(() => qtyInput.current?.focus());
+  }
 
-  const input = "rounded-sm border border-rule bg-ink px-2 py-1.5";
+  function buyOnEnter(e: React.KeyboardEvent): boolean {
+    if (e.key !== "Enter") return false;
+    e.preventDefault();
+    void submit("buy");
+    return true;
+  }
+
+  const input = "h-8 border border-border bg-bg px-2 font-mono text-sm uppercase disabled:cursor-progress disabled:opacity-50";
   return (
-    <div className="flex flex-wrap items-center gap-2 border-t border-rule px-3 py-2">
-      <input
-        data-testid="trade-ticker"
-        aria-label="Trade ticker"
-        value={ticker}
-        onChange={(e) => onTickerChange(e.target.value.toUpperCase())}
-        className={`${input} w-24 uppercase`}
-      />
-      <input
-        data-testid="trade-quantity"
-        aria-label="Quantity"
-        type="number"
-        min="0"
-        step="any"
-        placeholder="Qty"
-        value={quantity}
-        onChange={(e) => setQuantity(e.target.value)}
-        className={`${input} num w-24 placeholder:text-muted`}
-      />
-      <button
-        data-testid="buy-button"
-        disabled={busy}
-        onClick={() => submit("buy")}
-        className="rounded-sm bg-secondary px-4 py-1.5 font-medium text-white hover:brightness-125 disabled:opacity-50"
-      >
-        Buy
-      </button>
-      <button
-        data-testid="sell-button"
-        disabled={busy}
-        onClick={() => submit("sell")}
-        className="rounded-sm border border-secondary px-4 py-1.5 font-medium hover:bg-secondary disabled:opacity-50"
-      >
-        Sell
-      </button>
-      {error && (
-        <span data-testid="trade-error" role="alert" className="text-xs text-down">
-          {error}
-        </span>
-      )}
-    </div>
+    <form
+      data-testid="trade-bar"
+      aria-busy={pending}
+      onSubmit={(e) => {
+        e.preventDefault();
+        void submit("buy");
+      }}
+    >
+      <div className="flex gap-1 border-y border-border bg-surface p-2">
+        <input
+          data-testid="trade-ticker"
+          type="text"
+          placeholder="Ticker"
+          aria-label="Trade ticker"
+          maxLength={5}
+          autoComplete="off"
+          spellCheck={false}
+          value={ticker}
+          disabled={pending}
+          onChange={(e) => {
+            setTicker(e.target.value.toUpperCase());
+            setError("");
+          }}
+          onKeyDown={buyOnEnter}
+          className={input + " w-20"}
+        />
+        <input
+          ref={qtyInput}
+          data-testid="trade-quantity"
+          type="text"
+          inputMode="decimal"
+          placeholder="Quantity"
+          aria-label="Trade quantity"
+          autoComplete="off"
+          value={quantity}
+          disabled={pending}
+          onChange={(e) => {
+            setQuantity(e.target.value);
+            setError("");
+          }}
+          onKeyDown={(e) => {
+            if (buyOnEnter(e) || e.key !== "Escape") return;
+            setQuantity("");
+            setError("");
+          }}
+          className={input + " w-24"}
+        />
+        <button
+          data-testid="buy-button"
+          type="button"
+          aria-label="Buy shares"
+          disabled={pending}
+          onClick={() => void submit("buy")}
+          className="h-8 w-14 bg-submit text-sm font-semibold text-text hover:brightness-110 disabled:cursor-progress disabled:opacity-50"
+        >
+          Buy
+        </button>
+        <button
+          data-testid="sell-button"
+          type="button"
+          aria-label="Sell shares"
+          disabled={pending}
+          onClick={() => void submit("sell")}
+          className="h-8 w-14 border border-submit text-sm font-semibold text-text hover:bg-[rgba(117,57,145,0.2)] disabled:cursor-progress disabled:opacity-50"
+        >
+          Sell
+        </button>
+      </div>
+      <div className="h-6 px-2 text-xs">
+        {error && (
+          <p data-testid="trade-error" role="alert" title={error} className="truncate text-down">
+            {error}
+          </p>
+        )}
+      </div>
+    </form>
   );
 }

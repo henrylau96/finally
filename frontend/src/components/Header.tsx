@@ -1,50 +1,44 @@
-import { money, signedMoney } from "@/lib/format";
-import type { ConnectionStatus } from "@/lib/types";
+import type { Status } from "@/lib/usePriceStream";
+import { formatPrice } from "@/lib/format";
+import ConnectionStatus from "./ConnectionStatus";
 
-const dotColor: Record<ConnectionStatus, string> = {
-  connected: "bg-up",
-  reconnecting: "bg-accent",
-  disconnected: "bg-down",
-};
+type Props = { status: Status; hasConnected: boolean; total?: number; cash?: number; asOf?: number | null };
 
-interface Props {
-  totalValue: number;
-  cash: number;
-  pnl: number;
-  status: ConnectionStatus;
+/** Format a unix-seconds timestamp as a New York calendar date, e.g. "Oct 17, 2026". */
+function nyDate(seconds: number): string {
+  return new Date(seconds * 1000).toLocaleDateString("en-US", {
+    timeZone: "America/New_York",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
-/** Top bar: brand, live portfolio value, cash, unrealized P&L, stream status. */
-export function Header({ totalValue, cash, pnl, status }: Props) {
+export default function Header({ status, hasConnected, total, cash, asOf }: Props) {
   return (
-    <header className="flex items-end gap-8 border-b border-rule bg-panel px-4 py-2">
-      <div className="pb-0.5 text-lg font-semibold tracking-tight">
-        Fin<span className="text-accent">Ally</span>
+    <header data-testid="app-header" className="flex h-12 shrink-0 items-center gap-6 border border-border bg-surface px-4">
+      <span className="text-base font-semibold text-accent">FinAlly</span>
+      <div className="flex items-baseline gap-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.05em] text-text-muted">Total value</span>
+        <span
+          data-testid="total-value"
+          className={"font-mono text-xl font-semibold" + (status === "connected" ? "" : " text-text-muted")}
+        >
+          {formatPrice(total)}
+        </span>
       </div>
-      <div>
-        <div className="text-xs text-muted">Portfolio value</div>
-        <div data-testid="total-value" className="num text-2xl leading-none text-accent">
-          {money(totalValue)}
-        </div>
+      <div className="flex items-baseline gap-2">
+        <span className="text-xs font-semibold uppercase tracking-[0.05em] text-text-muted">Cash</span>
+        <span data-testid="cash-balance" className="font-mono">{formatPrice(cash)}</span>
       </div>
-      <div>
-        <div className="text-xs text-muted">Cash</div>
-        <div data-testid="cash-balance" className="num text-base leading-tight">{money(cash)}</div>
-      </div>
-      <div>
-        <div className="text-xs text-muted">Unrealized P&amp;L</div>
-        <div className={`num text-base leading-tight ${pnl > 0 ? "text-up" : pnl < 0 ? "text-down" : ""}`}>
-          {signedMoney(pnl)}
-        </div>
-      </div>
-      <div
-        data-testid="connection-status"
-        data-status={status}
-        className="ml-auto flex items-center gap-1.5 pb-1 text-xs text-muted"
-        title={`Price stream ${status}`}
-      >
-        <span className={`h-2 w-2 rounded-full ${dotColor[status]}`} />
-        {status === "connected" ? "Live" : status === "reconnecting" ? "Reconnecting" : "Offline"}
+      <div className="ml-auto flex items-center gap-3">
+        {asOf != null && (
+          <span data-testid="stale-badge" className="text-xs text-text-muted">
+            <span className="lg:hidden">EOD</span>
+            <span className="hidden lg:inline">EOD · as of {nyDate(asOf)}</span>
+          </span>
+        )}
+        <ConnectionStatus status={status} hasConnected={hasConnected} />
       </div>
     </header>
   );

@@ -1,41 +1,33 @@
-"""Portfolio REST endpoints."""
+"""Portfolio and trade REST endpoints."""
 
-from __future__ import annotations
+import asyncio
 
-from typing import Literal
+from fastapi import APIRouter, HTTPException, Request
 
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
-from app import db
-from app.market import PriceCache
-from app.portfolio import TradeError, execute_trade, get_portfolio
+from app import portfolio, services, snapshots
+from app.api.schemas import TradeRequest
+from app.market.cache import PriceCache
+from app.market.interface import MarketDataSource
 
 
-class TradeRequest(BaseModel):
-    ticker: str
-    quantity: float
-    side: Literal["buy", "sell"]
+def create_portfolio_router(cache: PriceCache, source: MarketDataSource) -> APIRouter:
+    router = APIRouter()
 
+    @router.get("/api/portfolio")
+    async def get_portfolio() -> dict:
+        return await asyncio.to_thread(portfolio.portfolio_view, cache)
 
-def create_portfolio_router(price_cache: PriceCache) -> APIRouter:
-    """Create the /api/portfolio router bound to the price cache."""
-    router = APIRouter(prefix="/api/portfolio", tags=["portfolio"])
+    @router.get("/api/portfolio/history")
+    async def get_history() -> list[dict]:
+        return await asyncio.to_thread(snapshots.history)
 
-    @router.get("")
-    def read_portfolio() -> dict:
-        return get_portfolio(price_cache)
-
-    @router.post("/trade")
-    def trade(req: TradeRequest) -> dict:
+    @router.post("/api/portfolio/trade")
+    async def trade(body: TradeRequest, request: Request) -> dict:
         try:
-            result = execute_trade(req.ticker, req.side, req.quantity, price_cache)
-        except TradeError as e:
-            raise HTTPException(status_code=400, detail=str(e))
-        return {"trade": result, "portfolio": get_portfolio(price_cache)}
-
-    @router.get("/history")
-    def history() -> list[dict]:
-        return db.get_snapshots()
+            return await services.place_trade(
+                request.app, cache, source, body.ticker, body.side, body.quantity
+            )
+        except portfolio.TradeError as e:
+            raise HTTPException(400, str(e)) from e
 
     return router

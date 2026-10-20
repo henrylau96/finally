@@ -1,25 +1,31 @@
-import type { PricePoint } from "@/lib/types";
+const W = 64;
 
-interface Props {
-  points: PricePoint[];
-  width?: number;
-  height?: number;
-  color: string;
+function toPoints(points: number[]) {
+  const min = Math.min(...points);
+  const max = Math.max(...points);
+  const span = max - min;
+  return points
+    .map((p, i) => {
+      const x = (i * W) / (points.length - 1);
+      const y = span === 0 ? 10 : 18 - ((p - min) / span) * 16;
+      return x.toFixed(1) + "," + y.toFixed(1);
+    })
+    .join(" ");
 }
 
-/** Tiny SVG line of recent prices. */
-export function Sparkline({ points, width = 64, height = 22, color }: Props) {
-  if (points.length < 2) return <svg width={width} height={height} aria-hidden />;
-  const values = points.map((p) => p.value);
-  const min = Math.min(...values);
-  const span = Math.max(...values) - min || 1;
-  const step = width / (points.length - 1);
-  const d = values
-    .map((v, i) => `${(i * step).toFixed(1)},${(height - 1 - ((v - min) / span) * (height - 2)).toFixed(1)}`)
-    .join(" ");
+export default function Sparkline({ ticker, points, up }: { ticker: string; points: number[]; up: boolean }) {
   return (
-    <svg width={width} height={height} aria-hidden>
-      <polyline points={d} fill="none" stroke={color} strokeWidth={1.25} />
+    <svg data-testid={"sparkline-" + ticker} data-points={points.length} width="64" height="20" viewBox="0 0 64 20" aria-hidden="true">
+      {points.length >= 2 && (
+        <polyline
+          points={toPoints(points)}
+          fill="none"
+          stroke={up ? "var(--color-up)" : "var(--color-down)"}
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      )}
     </svg>
   );
 }
