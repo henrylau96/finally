@@ -2,9 +2,16 @@ from datetime import date
 
 import pytest
 from massive.exceptions import BadResponse
-from massive.rest.models import GroupedDailyAgg, TickerSnapshot
+from massive.rest.models import Agg, GroupedDailyAgg, TickerSnapshot
 
-from app.market.massive_parse import bar_quote, latest_grouped_bars, not_authorized, snapshot_quote
+from app.market.massive_parse import (
+    bar_quote,
+    daily_points,
+    history_window,
+    latest_grouped_bars,
+    not_authorized,
+    snapshot_quote,
+)
 
 NOT_AUTH = '{"status":"NOT_AUTHORIZED","message":"You are not entitled to this data."}'
 
@@ -100,3 +107,22 @@ def test_not_authorized_detection():
     assert not_authorized(BadResponse(NOT_AUTH))
     assert not not_authorized(BadResponse('{"status":"ERROR"}'))
     assert not not_authorized(RuntimeError("NOT_AUTHORIZED"))
+
+
+def test_daily_points_sorted_rounded_and_filtered():
+    """Seconds, 2 dp, ascending; bars without close or timestamp are skipped."""
+    aggs = [
+        Agg.from_dict({"c": 190.123, "t": 1760500000000}),
+        Agg.from_dict({"t": 1760450000000}),
+        Agg.from_dict({"c": 188.0}),
+        Agg.from_dict({"c": 188.0, "t": 1760400000000}),
+    ]
+    assert daily_points(aggs) == [
+        {"time": 1760400000, "value": 188.0},
+        {"time": 1760500000, "value": 190.12},
+    ]
+
+
+def test_history_window_is_180_days():
+    """The window ends today and starts 180 days earlier."""
+    assert history_window(date(2026, 10, 19)) == ("2026-04-22", "2026-10-19")

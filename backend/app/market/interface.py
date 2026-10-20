@@ -28,5 +28,9 @@ class MarketDataSource(ABC):
         """Stop tracking a ticker and drop it from the cache."""
 
     @abstractmethod
+    async def history(self, ticker: str) -> list[dict]:
+        """Recent daily closes as ascending {time, value} points (time in seconds); empty when the source has none."""
+
+    @abstractmethod
     def get_tickers(self) -> list[str]:
         """Return the currently tracked tickers."""

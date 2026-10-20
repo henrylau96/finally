@@ -14,6 +14,8 @@ from app.market.massive_parse import (
     NY,
     Quote,
     bar_quote,
+    daily_points,
+    history_window,
     latest_grouped_bars,
     not_authorized,
     snapshot_quote,
@@ -39,6 +41,7 @@ class MassiveDataSource(MarketDataSource):
         self._mode = "snapshot"
         self._tickers: list[str] = []
         self._bars: dict = {}
+        self._history: dict[str, tuple[date, list[dict]]] = {}
         self._task: asyncio.Task | None = None
 
     async def start(self, tickers: list[str]) -> None:
@@ -75,6 +78,27 @@ class MassiveDataSource(MarketDataSource):
         if ticker in self._tickers:
             self._tickers.remove(ticker)
         self._cache.remove(ticker)
+
+    async def history(self, ticker: str) -> list[dict]:
+        """Daily closes, fetched once per ticker per NY day; a failed fetch returns [] uncached."""
+        today = ny_today()
+        cached = self._history.get(ticker)
+        if cached and cached[0] == today:
+            return cached[1]
+        start, end = history_window(today)
+        try:
+            aggs = await asyncio.to_thread(
+                self._client.get_aggs, ticker, 1, "day", start, end, adjusted=True, sort="asc"
+            )
+        except BadResponse as e:
+            logger.error("Massive history failed for %s: %s", ticker, e)
+            return []
+        except Exception:
+            logger.exception("Massive history failed for %s", ticker)
+            return []
+        points = daily_points(aggs)
+        self._history[ticker] = (today, points)
+        return points
 
     def get_tickers(self) -> list[str]:
         return list(self._tickers)
