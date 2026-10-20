@@ -1,4 +1,5 @@
 import asyncio
+import time
 from datetime import date
 
 import pytest
@@ -280,3 +281,45 @@ async def test_history_empty_success_is_cached():
     assert await source.history("AAPL") == []
     assert await source.history("AAPL") == []
     assert len(client.calls) == 1
+
+
+async def test_history_eod_spaces_calls(monkeypatch):
+    """In EOD mode, history calls for different tickers are spaced apart."""
+    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 0.2)
+    source, client = history_source(aggs=AGGS)
+    source._mode = "eod"
+    start = time.monotonic()
+    results = await asyncio.gather(source.history("AAPL"), source.history("MSFT"))
+    assert time.monotonic() - start >= 0.2
+    assert results == [POINTS, POINTS]
+    assert len(client.calls) == 2
+
+
+async def test_history_concurrent_same_ticker_single_call(monkeypatch):
+    """Concurrent requests for one ticker make a single get_aggs call."""
+    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 0.2)
+    source, client = history_source(aggs=AGGS)
+    source._mode = "eod"
+    results = await asyncio.gather(source.history("AAPL"), source.history("AAPL"))
+    assert results == [POINTS, POINTS]
+    assert len(client.calls) == 1
+
+
+async def test_history_cached_skips_throttle(monkeypatch):
+    """A cached ticker returns immediately, without waiting on the throttle."""
+    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 1.0)
+    source, _ = history_source(aggs=AGGS)
+    source._mode = "eod"
+    await source.history("AAPL")
+    start = time.monotonic()
+    await source.history("AAPL")
+    assert time.monotonic() - start < 0.1
+
+
+async def test_history_snapshot_mode_not_throttled(monkeypatch):
+    """Snapshot mode (paid tiers) does not space history calls."""
+    monkeypatch.setattr(massive_source, "HISTORY_SPACING", 1.0)
+    source, _ = history_source(aggs=AGGS)
+    start = time.monotonic()
+    await asyncio.gather(source.history("AAPL"), source.history("MSFT"))
+    assert time.monotonic() - start < 0.5
