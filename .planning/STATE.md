@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-stopped_at: Milestone complete (Phase 06 was final phase)
-last_updated: 2026-10-20T07:41:03.909Z
-last_activity: 2026-10-20
+status: Awaiting next milestone
+stopped_at: v1.0 milestone archived
+last_updated: "2026-10-20T09:10:41.503Z"
+last_activity: 2026-10-20 — Milestone v1.0 completed and archived
 progress:
   total_phases: 6
   completed_phases: 6
@@ -18,19 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-10-19)
+See: .planning/PROJECT.md (updated 2026-10-20)
 
 **Core value:** From one command, the user lands in a live, dark trading terminal where prices stream, trades fill instantly, and the AI copilot can trade for them through chat.
-**Current focus:** Milestone complete
+**Current focus:** Planning next milestone (v1.0 MVP shipped 2026-10-20)
 
 ## Current Position
 
-Phase: 06
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-10-20 - Completed quick task 261020-nml: Pre-milestone check: persistence guard and E2E rerun on final HEAD
-
-Progress: [██████████] 100%
+Phase: Milestone v1.0 complete
+Plan: —
+Status: Awaiting next milestone
+Last activity: 2026-10-20 — Milestone v1.0 completed and archived
 
 ## Performance Metrics
 
@@ -108,12 +106,19 @@ None yet.
 
 ## Deferred Items
 
+Items acknowledged at milestone close on 2026-10-20 (both flagged by the audit tool but actually done):
+
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| uat_gap | Phase 06: 06-UAT.md | resolved (0 pending scenarios) | v1.0 close |
+| quick_task | 261020-nml-pre-milestone-check-persistence-guard-an | complete (summary present) | v1.0 close |
 
 ## Session Continuity
 
 Last session: 2026-10-20T07:32:23.743Z
 Stopped at: Phase 6 UI-SPEC approved
 Resume file: None
+
+## Operator Next Steps
+
+- Start the next milestone with /gsd-new-milestone
