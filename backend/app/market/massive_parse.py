@@ -1,6 +1,6 @@
 """Pure conversion of Massive SDK responses into (price, seconds, reference) quotes."""
 
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 from massive.exceptions import BadResponse
@@ -34,9 +34,15 @@ def snapshot_quote(snap: TickerSnapshot) -> Quote | None:
     return (price, updated, prev) if price and updated else None
 
 
+def ny_midnight(ms: float) -> float:
+    """Seconds at NY midnight of the NY date containing the ms timestamp."""
+    day = datetime.fromtimestamp(ms / 1e3, NY).date()
+    return datetime.combine(day, time(), tzinfo=NY).timestamp()
+
+
 def bar_quote(bar) -> Quote:
-    """Close, bar time in seconds, and the open as the day-change reference."""
-    return bar.close, bar.timestamp / 1e3, bar.open
+    """Close, the session's NY-midnight time (as in daily_points), and the open as reference."""
+    return bar.close, ny_midnight(bar.timestamp), bar.open
 
 
 async def latest_grouped_bars(fetch, today: date, tries: int = 5) -> dict[str, GroupedDailyAgg]:

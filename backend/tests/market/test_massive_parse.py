@@ -71,9 +71,9 @@ def test_quote_skips_zero_minute_bar():
 
 
 def test_bar_quote_timestamp():
-    """A bar gives close, ms timestamp in seconds, and open as reference."""
+    """A bar gives close, NY-midnight session time in seconds, and open as reference."""
     bar = GroupedDailyAgg.from_dict({"T": "AAPL", "o": 188.0, "c": 190.2, "t": 1760731200000})
-    assert bar_quote(bar) == (190.2, 1760731200.0, 188.0)
+    assert bar_quote(bar) == (190.2, 1760673600.0, 188.0)
 
 
 async def test_grouped_steps_back_over_403_and_weekend():
@@ -126,3 +126,10 @@ def test_daily_points_sorted_rounded_and_filtered():
 def test_history_window_is_180_days():
     """The window ends today and starts 180 days earlier."""
     assert history_window(date(2026, 10, 19)) == ("2026-04-22", "2026-10-19")
+
+
+def test_bar_quote_matches_daily_points_time():
+    """Grouped bar time equals the get_aggs day-bar time of the same session (WR-05)."""
+    grouped = GroupedDailyAgg.from_dict({"T": "AAPL", "o": 340.0, "c": 343.46, "t": 1792180800000})
+    agg = Agg.from_dict({"o": 340.0, "c": 343.46, "t": 1792123200000})
+    assert bar_quote(grouped)[1] == daily_points([agg])[0]["time"] == 1792123200

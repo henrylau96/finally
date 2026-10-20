@@ -12,6 +12,7 @@ from app.market import massive_source
 NOT_AUTH = '{"status":"NOT_AUTHORIZED","message":"You are not entitled to this data."}'
 TODAY = "2026-10-19"
 BAR_T = 1760731200000
+BAR_DAY = 1760673600
 
 
 class FakeClient:
@@ -92,7 +93,7 @@ async def test_fallback_to_eod_on_not_authorized():
     assert source._mode == "eod"
     assert source._interval >= 900
     assert cache.get("AAPL").price == 190.2
-    assert cache.get("AAPL").timestamp == BAR_T / 1e3
+    assert cache.get("AAPL").timestamp == BAR_DAY
     assert cache.get("MSFT").day_change_pct == 1.0
     assert cache.get("ZZZZ") is None
     await source.stop()
@@ -136,7 +137,7 @@ async def test_add_ticker_eod_prev_close():
     cache, source = await started(client)
     await source.add_ticker("PYPL")
     assert client.calls[-1] == ("prev", "PYPL")
-    assert cache.get("PYPL").timestamp == BAR_T / 1e3
+    assert cache.get("PYPL").timestamp == BAR_DAY
     await source.stop()
 
 
@@ -171,7 +172,7 @@ async def test_add_ticker_empty_start_falls_back_to_eod():
     await source.add_ticker("PYPL")
     price = cache.get("PYPL")
     assert price.price == 70.0
-    assert price.timestamp == BAR_T / 1e3
+    assert price.timestamp == BAR_DAY
     assert source._mode == "eod"
     assert source._interval >= 900
     assert client.calls[-2:] == [("one", "PYPL"), ("prev", "PYPL")]
