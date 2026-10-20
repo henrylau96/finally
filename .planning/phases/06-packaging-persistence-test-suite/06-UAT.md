@@ -8,7 +8,7 @@ updated: 2026-10-20T07:00:00Z
 
 ## Current Test
 
-[testing paused - gap closure chosen: seed watchlist sparklines from daily history; make the chat dock visible at common laptop widths]
+[testing paused - gap closure chosen: seed watchlist sparklines from daily history]
 
 ## Tests
 
@@ -29,15 +29,14 @@ severity: major
 
 ### 4. AI chat panel is visible on launch
 expected: An AI chat panel is ready to assist on first launch (PLAN.md section 2)
-result: issue
-reported: "The AI chatbot is missing as well"
-severity: major
+result: pass
+note: "User first reported it missing, then confirmed: The AI chatbot is there. It starts collapsed to a 48px strip below 1280px width (by design, 06-01)."
 
 ## Summary
 
 total: 4
-passed: 1
-issues: 2
+passed: 2
+issues: 1
 pending: 1
 skipped: 0
 blocked: 0
@@ -74,17 +73,3 @@ blocked: 0
     - "Tests: frontend test for seeded sparkline; backend test for the chosen batching/throttling"
   debug_session: ""
 
-- truth: "The AI chat panel is visibly available on launch at common laptop browser widths"
-  status: failed
-  reason: "User reported: The AI chatbot is missing as well"
-  severity: major
-  test: 4
-  root_cause: "By design from 06-01 (tablet layout), ChatDock.tsx initializes collapsed when window.matchMedia('(min-width: 1280px)') does not match, rendering only a 48px strip with a small chevron button. Proven in browser: loaded below 1280px it is collapsed (data-collapsed=true); reloaded at 1404px it starts expanded (360px); the toggle works. Windows display scaling (125-150%) puts many laptop browsers below 1280 CSS px, so users see no chat. The collapsed strip has no label, so it reads as missing."
-  artifacts:
-    - frontend/src/components/ChatDock.tsx
-    - frontend/src/components/Terminal.tsx
-    - test/e2e/07-responsive.spec.ts
-  missing:
-    - "Chat dock visible by default at laptop widths (lower the auto-collapse breakpoint to the tablet range, e.g. below 1024px) and/or a clearly labelled collapsed strip (e.g. vertical 'AI CHAT' label)"
-    - "Keep 06-01 tablet guarantees (no horizontal scroll at 1024x768 and 768x1024); update 07-responsive spec and ChatDock tests to match"
-  debug_session: ""
