@@ -219,12 +219,12 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 06-05-PLAN.md — Phase gate: suites, compose E2E, exact docker run, scripts x2 (mac + Windows), persistence, human verify (wave 3)
+- [x] 06-05-PLAN.md — Phase gate: suites, compose E2E, exact docker run, scripts x2 (mac + Windows), persistence, human verify (wave 3)
 
 **Gap closure** *(06-UAT: main chart empty on Massive EOD data)*
 
-- [ ] 06-06-PLAN.md — Backend: MarketDataSource.history, Massive daily bars cached per ticker per day, GET /api/history/{ticker} (gap wave 1)
-- [ ] 06-07-PLAN.md — Frontend: seed MainChart from /api/history, merge with live points, overlay only below 2 points (gap wave 1)
+- [x] 06-06-PLAN.md — Backend: MarketDataSource.history, Massive daily bars cached per ticker per day, GET /api/history/{ticker} (gap wave 1)
+- [x] 06-07-PLAN.md — Frontend: seed MainChart from /api/history, merge with live points, overlay only below 2 points (gap wave 1)
 - [ ] 06-08-PLAN.md — Gate re-run and human sign-off including main chart on Massive EOD data (gap wave 2)
 
 **UI hint**: yes
@@ -238,4 +238,4 @@ Plans:
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
 | 5. Real Market Data (Massive) | 4/4 | Complete   | 2026-10-20 |
-| 6. Packaging, Persistence & Test Suite | 4/5 | In Progress|  |
+| 6. Packaging, Persistence & Test Suite | 7/8 | In Progress|  |
