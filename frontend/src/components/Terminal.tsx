@@ -42,7 +42,7 @@ export default function Terminal() {
   return (
     <div className="flex h-full flex-col gap-2 p-2 max-lg:overflow-y-auto">
       <Header status={status} hasConnected={hasConnected} total={total} cash={portfolio?.cash_balance} asOf={asOf} />
-      <div className="grid min-h-0 flex-1 grid-cols-[minmax(240px,30%)_1fr_48px] gap-2 max-lg:flex-none lg:grid-cols-[minmax(240px,26%)_1fr_48px] xl:grid-cols-[minmax(320px,28%)_1fr_auto]">
+      <div className="grid min-h-0 flex-1 grid-cols-[minmax(312px,30%)_1fr_48px] gap-2 max-lg:flex-none lg:grid-cols-[minmax(312px,26%)_1fr_48px] xl:grid-cols-[minmax(320px,28%)_1fr_auto]">
         <Watchlist tickers={tickers} quotes={quotes} history={sparks} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
         <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2 max-lg:grid-rows-[auto_auto_auto] max-lg:[&>*:first-child]:min-h-[240px]">
           <Panel title="Main chart" active bodyClassName="overflow-hidden">

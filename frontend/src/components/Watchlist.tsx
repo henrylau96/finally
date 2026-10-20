@@ -4,7 +4,7 @@ import Panel from "./Panel";
 import WatchlistAddForm from "./WatchlistAddForm";
 import WatchlistRow from "./WatchlistRow";
 
-const GRID = "grid grid-cols-[72px_1fr_72px_72px_24px] gap-2";
+const GRID = "grid grid-cols-[72px_1fr_72px_72px_24px] gap-2 max-xl:grid-cols-[56px_1fr_56px_64px_24px] max-xl:gap-1";
 const HEADERS = ["Symbol", "Price", "Day %", "Chart"];
 
 function notice(

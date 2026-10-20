@@ -6,6 +6,12 @@ async function noHorizontalScroll(page: Page): Promise<void> {
   expect(over).toBeLessThanOrEqual(0);
 }
 
+async function watchlistFits(page: Page): Promise<void> {
+  const body = page.getByTestId("watchlist").locator("> div");
+  const over = await body.evaluate((el) => el.scrollWidth - el.clientWidth);
+  expect(over).toBeLessThanOrEqual(0);
+}
+
 async function noVerticalScroll(page: Page): Promise<void> {
   const over = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
   expect(over).toBeLessThanOrEqual(0);
@@ -25,6 +31,7 @@ for (const width of [1600, 1280]) {
     await expect(page.getByTestId("chat-panel")).toHaveAttribute("data-collapsed", "false");
     await noHorizontalScroll(page);
     await noVerticalScroll(page);
+    await watchlistFits(page);
   });
 }
 
@@ -45,6 +52,7 @@ test("tablet layout at 1024px", async ({ page }) => {
   await panelsVisible(page);
   await noHorizontalScroll(page);
   await noVerticalScroll(page);
+  await watchlistFits(page);
   await checkDockOverlay(page);
 });
 
@@ -53,6 +61,7 @@ test("tablet layout at 768px", async ({ page }) => {
   await openApp(page);
   await panelsVisible(page);
   await noHorizontalScroll(page);
+  await watchlistFits(page);
   const positions = await page.getByTestId("positions").boundingBox();
   const heatmap = await page.getByTestId("heatmap").boundingBox();
   expect(positions!.width).toBeGreaterThan(heatmap!.width);

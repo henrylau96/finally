@@ -48,7 +48,7 @@ export default function WatchlistRow({
         onSelect(ticker);
       }}
       className={
-        "group grid h-8 cursor-pointer grid-cols-[72px_1fr_72px_72px_24px] items-center gap-2 border-b border-l-2 border-b-border px-2 transition-colors duration-100 hover:bg-row-hover " +
+        "group grid h-8 cursor-pointer grid-cols-[72px_1fr_72px_72px_24px] items-center gap-2 max-xl:grid-cols-[56px_1fr_56px_64px_24px] max-xl:gap-1 border-b border-l-2 border-b-border px-2 transition-colors duration-100 hover:bg-row-hover " +
         (selected ? "border-l-primary bg-row-hover" : "border-l-transparent")
       }
     >
