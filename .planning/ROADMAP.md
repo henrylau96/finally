@@ -11,7 +11,7 @@ Vertical MVP: each phase ends with something the user can see and use in the bro
 - [x] **Phase 3: Trading & Portfolio** - Buy/sell at market, positions, heatmap, P&L chart and live header totals (completed 2026-10-19)
 - [x] **Phase 4: AI Chat Copilot** - Chat panel where the LLM analyzes the portfolio and executes trades and watchlist changes (completed 2026-10-19)
 - [x] **Phase 5: Real Market Data (Massive)** - Optional Massive REST poller behind the same interface, with correct timestamps and instant prices for new tickers (completed 2026-10-20)
-- [ ] **Phase 6: Packaging, Persistence & Test Suite** - One-command Docker run with persistent data, start/stop scripts, tablet-ready layout, unit and E2E tests
+- [x] **Phase 6: Packaging, Persistence & Test Suite** - One-command Docker run with persistent data, start/stop scripts, tablet-ready layout, unit and E2E tests (completed 2026-10-20)
 
 ## Phase Details
 
@@ -227,7 +227,7 @@ Plans:
 - [x] 06-07-PLAN.md — Frontend: seed MainChart from /api/history, merge with live points, overlay only below 2 points (gap wave 1)
 - [x] 06-09-PLAN.md — Backend: throttle Massive history in EOD mode (single-flight, 15 s spacing, cache fast path) (gap wave 1)
 - [x] 06-10-PLAN.md — Frontend: seed watchlist sparklines from /api/history (sequential useHistorySeeds, sparklineValues) (gap wave 1)
-- [ ] 06-08-PLAN.md — Gate re-run and human sign-off including main chart and sparklines on Massive EOD data (gap wave 2)
+- [x] 06-08-PLAN.md — Gate re-run and human sign-off including main chart and sparklines on Massive EOD data (gap wave 2)
 
 **UI hint**: yes
 
@@ -240,4 +240,4 @@ Plans:
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
 | 5. Real Market Data (Massive) | 4/4 | Complete   | 2026-10-20 |
-| 6. Packaging, Persistence & Test Suite | 9/10 | In Progress|  |
+| 6. Packaging, Persistence & Test Suite | 10/10 | Complete   | 2026-10-20 |
