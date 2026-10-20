@@ -13,10 +13,10 @@
 - [x] **MKT-03**: Simulator moves related tickers together (correlated moves, e.g. tech stocks)
 - [x] **MKT-04**: Simulator occasionally applies a sudden 2-5% move to a ticker
 - [x] **MKT-05**: Simulator starts from realistic seed prices (e.g. AAPL ~$190, GOOGL ~$175)
-- [ ] **MKT-06**: When `MASSIVE_API_KEY` is set and non-empty the backend uses the Massive REST poller; otherwise it uses the simulator
-- [ ] **MKT-07**: Massive poller fetches the union of watched tickers on a configurable interval (free tier: grouped daily bars every 15 min; paid: 2-15s) and parses responses into the simulator's format
+- [x] **MKT-06**: When `MASSIVE_API_KEY` is set and non-empty the backend uses the Massive REST poller; otherwise it uses the simulator
+- [x] **MKT-07**: Massive poller fetches the union of watched tickers on a configurable interval (free tier: grouped daily bars every 15 min; paid: 2-15s) and parses responses into the simulator's format
 - [x] **MKT-08**: A single background task writes to an in-memory price cache holding latest price, previous price and timestamp per ticker
-- [ ] **MKT-09**: A newly added ticker gets a price in the cache without waiting for the next long poll cycle, and prices carry their true source timestamp (no stale price shown as live)
+- [x] **MKT-09**: A newly added ticker gets a price in the cache without waiting for the next long poll cycle, and prices carry their true source timestamp (no stale price shown as live)
 
 ### Streaming (§6)
 
@@ -130,10 +130,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MKT-03 | Phase 1 | Complete |
 | MKT-04 | Phase 1 | Complete |
 | MKT-05 | Phase 1 | Complete |
-| MKT-06 | Phase 5 | Pending |
-| MKT-07 | Phase 5 | Pending |
+| MKT-06 | Phase 5 | Complete |
+| MKT-07 | Phase 5 | Complete |
 | MKT-08 | Phase 1 | Complete |
-| MKT-09 | Phase 5 | Pending |
+| MKT-09 | Phase 5 | Complete |
 | STRM-01 | Phase 1 | Complete |
 | STRM-02 | Phase 1 | Complete |
 | STRM-03 | Phase 1 | Complete |

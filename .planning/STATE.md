@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 5 execution started
-last_updated: "2026-10-20T00:06:26.209Z"
+stopped_at: Completed 04-03-PLAN.md
+last_updated: "2026-10-20T00:16:57.955Z"
 last_activity: 2026-10-20 -- Phase 5 execution started
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 23
-  completed_plans: 20
+  completed_plans: 21
   percent: 67
 ---
 
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-10-19)
 ## Current Position
 
 Phase: 5 — EXECUTING
-Plan: 1 of ?
+Plan: 2 of 3
 Status: Executing Phase 5
 Last activity: 2026-10-20 -- Phase 5 execution started
 
-Progress: [██████████] 100%
+Progress: [█████████░] 91%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [██████████] 100%
 | Phase 3 P04 | 15min | 2 tasks | 9 files |
 | Phase 04 P01 | 15min | 3 tasks | 13 files |
 | Phase 04 P05 | 45min | 2 tasks | 1 files |
+| Phase 05 P01 | 20min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Recent decisions affecting current work:
 - [Phase 3]: [03-01]: 422 handler omits request input (NaN bodies); qty/avg_cost 4dp, cash 2dp
 - [Phase 04]: Chat actions run through lock-owning services; watchlist changes before trades
 - [Phase 04]: Phase 4 gate passed with no code changes; user approved chat dock UX 2026-10-20
+- [Phase 05]: [05-01]: Massive source switches snapshot -> EOD once on NOT_AUTHORIZED; EOD interval >= 900 s; reference = prev_day.close (snapshot) or bar.open (EOD)
+- [Phase 05]: [05-01]: conftest blanks MASSIVE_API_KEY before importing app.main so tests always run the simulator
 
 ### Pending Todos
 
@@ -97,6 +100,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-10-19T22:59:16.125Z
+Last session: 2026-10-20T00:16:57.941Z
 Stopped at: Completed 04-03-PLAN.md
 Resume file: None

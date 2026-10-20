@@ -176,7 +176,7 @@ Plans:
 Plans:
 **Wave 1**
 
-- [ ] 05-01-PLAN.md — Massive source (snapshot -> EOD fallback), parsing, cache reference close, env factory, conftest key blanking, FakeClient tests (wave 1)
+- [x] 05-01-PLAN.md — Massive source (snapshot -> EOD fallback), parsing, cache reference close, env factory, conftest key blanking, FakeClient tests (wave 1)
 
 **Wave 2**
 
@@ -211,5 +211,5 @@ Plans:
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
-| 5. Real Market Data (Massive) | 0/3 | Planned | - |
+| 5. Real Market Data (Massive) | 1/3 | In Progress|  |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
