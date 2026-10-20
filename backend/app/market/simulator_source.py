@@ -49,6 +49,10 @@ class SimulatorDataSource(MarketDataSource):
         self._sim.remove_ticker(ticker)
         self._cache.remove(ticker)
 
+    async def history(self, ticker: str) -> list[dict]:
+        """The simulator has no past; the chart fills from the stream."""
+        return []
+
     def get_tickers(self) -> list[str]:
         return self._sim.tickers if self._sim else []
 

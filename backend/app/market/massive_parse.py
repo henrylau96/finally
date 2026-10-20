@@ -8,6 +8,7 @@ from massive.rest.models import GroupedDailyAgg, TickerSnapshot
 
 NY = ZoneInfo("America/New_York")
 EOD_MIN_INTERVAL = 900
+HISTORY_DAYS = 180
 
 Quote = tuple[float, float, float | None]
 
@@ -49,3 +50,18 @@ def latest_grouped_bars(client, today: date, tries: int = 5) -> dict[str, Groupe
             return {b.ticker: b for b in bars if b.close}
         day -= timedelta(days=1)
     return {}
+
+
+def history_window(today: date) -> tuple[str, str]:
+    """ISO (start, end) dates covering the last HISTORY_DAYS days."""
+    return (today - timedelta(days=HISTORY_DAYS)).isoformat(), today.isoformat()
+
+
+def daily_points(aggs) -> list[dict]:
+    """Ascending {time, value} points (seconds, close) from daily bars; skips bars lacking either."""
+    points = [
+        {"time": int(a.timestamp // 1000), "value": round(a.close, 2)}
+        for a in aggs
+        if a.close and a.timestamp
+    ]
+    return sorted(points, key=lambda p: p["time"])

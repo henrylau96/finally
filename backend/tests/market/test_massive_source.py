@@ -3,7 +3,7 @@ from datetime import date
 
 import pytest
 from massive.exceptions import BadResponse
-from massive.rest.models import GroupedDailyAgg, PreviousCloseAgg, TickerSnapshot
+from massive.rest.models import Agg, GroupedDailyAgg, PreviousCloseAgg, TickerSnapshot
 
 from app.market import MassiveDataSource, PriceCache
 from app.market import massive_source
@@ -16,7 +16,8 @@ BAR_T = 1760731200000
 class FakeClient:
     """Records calls; each attribute is a value or an exception to raise."""
 
-    def __init__(self, snapshots=None, grouped=None, single=None, prev=None):
+    def __init__(self, snapshots=None, grouped=None, single=None, prev=None, aggs=None):
+        self.aggs = aggs
         self.snapshots, self.grouped, self.single, self.prev = snapshots, grouped or {}, single, prev
         self.calls: list[tuple] = []
 
@@ -36,6 +37,10 @@ class FakeClient:
     def get_grouped_daily_aggs(self, date, adjusted=None):
         self.calls.append(("grouped", date))
         return self._ret(self.grouped.get(date, []))
+
+    def get_aggs(self, ticker, multiplier, timespan, from_, to, adjusted=None, sort=None, limit=None):
+        self.calls.append(("aggs", ticker, multiplier, timespan, from_, to, adjusted, sort))
+        return self._ret(self.aggs or [])
 
     def get_previous_close_agg(self, ticker, adjusted=None):
         self.calls.append(("prev", ticker))
@@ -226,3 +231,52 @@ async def test_add_ticker_retries_after_failed_fetch():
     await source.add_ticker("PYPL")
     assert cache.get("PYPL").price == 70.0
     await source.stop()
+
+
+def history_source(**kwargs):
+    client = FakeClient(**kwargs)
+    return MassiveDataSource(PriceCache(), client), client
+
+
+def agg(close, t):
+    return Agg.from_dict({"c": close, "t": t})
+
+
+AGGS = [agg(190.0, 1760400000000), agg(191.5, 1760486400000)]
+POINTS = [{"time": 1760400000, "value": 190.0}, {"time": 1760486400, "value": 191.5}]
+
+
+async def test_history_returns_points_with_exact_call():
+    """Daily bars are requested for the 180-day window and parsed."""
+    source, client = history_source(aggs=AGGS)
+    assert await source.history("AAPL") == POINTS
+    assert client.calls == [("aggs", "AAPL", 1, "day", "2026-04-22", "2026-10-19", True, "asc")]
+
+
+async def test_history_cached_per_ticker_per_day(monkeypatch):
+    """Same ticker same day hits the cache; other tickers and the next day fetch."""
+    source, client = history_source(aggs=AGGS)
+    await source.history("AAPL")
+    await source.history("AAPL")
+    assert len(client.calls) == 1
+    await source.history("MSFT")
+    assert len(client.calls) == 2
+    monkeypatch.setattr(massive_source, "ny_today", lambda: date(2026, 10, 20))
+    await source.history("AAPL")
+    assert len(client.calls) == 3
+
+
+async def test_history_failure_returns_empty_and_retries():
+    """An API error returns [] and is not cached."""
+    source, client = history_source(aggs=BadResponse(NOT_AUTH))
+    assert await source.history("AAPL") == []
+    assert await source.history("AAPL") == []
+    assert len(client.calls) == 2
+
+
+async def test_history_empty_success_is_cached():
+    """A successful empty response is cached."""
+    source, client = history_source(aggs=[])
+    assert await source.history("AAPL") == []
+    assert await source.history("AAPL") == []
+    assert len(client.calls) == 1
