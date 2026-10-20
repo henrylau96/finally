@@ -12,8 +12,19 @@ export const CHART = {
 };
 
 export const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-export const day = (t: number) => new Date(t * 1000).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
-export const clock = (t: number) => new Date(t * 1000).toLocaleTimeString("en-GB");
+const NY = { timeZone: "America/New_York" } as const;
+export const day = (t: number) => new Date(t * 1000).toLocaleDateString("en-GB", { ...NY, day: "2-digit", month: "short" });
+export const clock = (t: number) => new Date(t * 1000).toLocaleTimeString("en-GB", NY);
+const year = (t: number) => new Date(t * 1000).toLocaleDateString("en-GB", { ...NY, year: "numeric" });
+
+/** Axis label in exchange (New York) time: year, day, or clock by tick type. */
+export function tickLabel(t: number, type: TickMarkType): string {
+  if (type === TickMarkType.Year) return year(t);
+  return type < TickMarkType.Time ? day(t) : clock(t);
+}
+
+/** Crosshair label: exchange date and time. */
+export const crosshairLabel = (t: number) => day(t) + " " + clock(t);
 
 /** Create a dark-themed chart shared by the main chart and the P&L chart. */
 export function createBaseChart(container: HTMLElement, opts: { secondsVisible: boolean }): IChartApi {
@@ -29,10 +40,10 @@ export function createBaseChart(container: HTMLElement, opts: { secondsVisible: 
       timeVisible: true,
       secondsVisible: opts.secondsVisible,
       rightOffset: 4,
-      tickMarkFormatter: (t: number, type: TickMarkType) => (type < TickMarkType.Time ? day(t) : clock(t)),
+      tickMarkFormatter: tickLabel,
     },
     localization: {
-      timeFormatter: (t: number) => clock(t),
+      timeFormatter: crosshairLabel,
       priceFormatter: (p: number) =>
         "$" + p.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     },
