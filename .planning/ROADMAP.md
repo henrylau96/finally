@@ -204,7 +204,7 @@ Plans:
   4. The layout is dense on wide screens and remains usable at tablet width
   5. Backend route tests, frontend component tests and the Playwright E2E suite (fresh start, watchlist, buy, sell, visualizations, mocked AI trade, SSE reconnect) pass via `test/docker-compose.test.yml` with `LLM_MOCK=true`
 
-**Plans**: 5 plans
+**Plans**: 8 plans (3 gap closure)
 
 Plans:
 **Wave 1**
@@ -220,6 +220,12 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [ ] 06-05-PLAN.md — Phase gate: suites, compose E2E, exact docker run, scripts x2 (mac + Windows), persistence, human verify (wave 3)
+
+**Gap closure** *(06-UAT: main chart empty on Massive EOD data)*
+
+- [ ] 06-06-PLAN.md — Backend: MarketDataSource.history, Massive daily bars cached per ticker per day, GET /api/history/{ticker} (gap wave 1)
+- [ ] 06-07-PLAN.md — Frontend: seed MainChart from /api/history, merge with live points, overlay only below 2 points (gap wave 1)
+- [ ] 06-08-PLAN.md — Gate re-run and human sign-off including main chart on Massive EOD data (gap wave 2)
 
 **UI hint**: yes
 
