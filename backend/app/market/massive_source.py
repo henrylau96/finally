@@ -77,14 +77,28 @@ class MassiveDataSource(MarketDataSource):
         return list(self._tickers)
 
     async def _fetch_one(self, ticker: str) -> Quote | None:
-        """One ticker's quote: snapshot, cached grouped bar, or previous close."""
+        """One ticker's quote: snapshot, cached grouped bar, or previous close.
+
+        A snapshot entitlement error switches to EOD mode and falls through.
+        """
         if self._mode == "snapshot":
-            snap = await asyncio.to_thread(self._client.get_snapshot_ticker, "stocks", ticker)
-            return snapshot_quote(snap)
+            try:
+                snap = await asyncio.to_thread(self._client.get_snapshot_ticker, "stocks", ticker)
+                return snapshot_quote(snap)
+            except Exception as e:
+                if not not_authorized(e):
+                    raise
+                self._enter_eod()
         if ticker in self._bars:
             return bar_quote(self._bars[ticker])
         bars = await asyncio.to_thread(self._client.get_previous_close_agg, ticker, adjusted=True)
         return bar_quote(bars[0]) if bars else None
+
+    def _enter_eod(self) -> None:
+        """Switch to end-of-day bars after a snapshot entitlement error."""
+        logger.warning("Massive snapshots not authorized, using end-of-day bars")
+        self._mode = "eod"
+        self._interval = max(self._interval, EOD_MIN_INTERVAL)
 
     async def _poll_once(self) -> None:
         """Poll every tracked ticker; switch to EOD once on a snapshot entitlement error."""
@@ -98,9 +112,7 @@ class MassiveDataSource(MarketDataSource):
             except Exception as e:
                 if not not_authorized(e):
                     raise
-                logger.warning("Massive snapshots not authorized, using end-of-day bars")
-                self._mode = "eod"
-                self._interval = max(self._interval, EOD_MIN_INTERVAL)
+                self._enter_eod()
             else:
                 for snap in snaps:
                     quote = snapshot_quote(snap)
