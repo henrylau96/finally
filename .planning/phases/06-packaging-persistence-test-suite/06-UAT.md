@@ -1,31 +1,31 @@
 ---
-status: diagnosed
+status: resolved
 phase: 06-packaging-persistence-test-suite
-source: [06-05-SUMMARY.md, 06-08 Task 1 checkpoint]
+source: [06-05-SUMMARY.md, 06-08-SUMMARY.md]
 started: 2026-10-20T06:10:00Z
-updated: 2026-10-20T07:00:00Z
+updated: 2026-10-20T08:00:00Z
 ---
 
 ## Current Test
 
-[testing paused - gap closure chosen: seed watchlist sparklines from daily history]
+[testing complete - user approved all 06-08 checks]
 
 ## Tests
 
 ### 1. Main chart shows price history for the selected ticker
 expected: Clicking a watchlist ticker shows a price-over-time chart in the main chart area
 result: pass
-note: "Fixed by 06-06/06-07. Verified in browser on Massive source: AAPL shows ~6 months of daily closes (124 points from /api/history/AAPL)."
+note: "Fixed by 06-06/06-07. Verified in browser on Massive source: AAPL shows ~6 months of daily closes (124 points from /api/history/AAPL). Re-approved by user in 06-08."
 
 ### 2. Remaining 06-05 human checks (layout widths, persistence across restart)
 expected: As listed in 06-05-PLAN.md Task 3
-result: [pending]
+result: pass
+note: "User approved in 06-08: wide, 1024 and 768 layouts, data persists across stop/start."
 
 ### 3. Watchlist sparklines show price action per ticker
 expected: Each watchlist row shows a sparkline mini-chart beside the ticker
-result: issue
-reported: "still the individual stock charts not showing"
-severity: major
+result: pass
+note: "Fixed by 06-09/06-10 (seeded sparklines, throttled history). User approved in 06-08 on Massive EOD data."
 
 ### 4. AI chat panel is visible on launch
 expected: An AI chat panel is ready to assist on first launch (PLAN.md section 2)
@@ -35,9 +35,9 @@ note: "User first reported it missing, then confirmed: The AI chatbot is there. 
 ## Summary
 
 total: 4
-passed: 2
-issues: 1
-pending: 1
+passed: 4
+issues: 0
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -56,20 +56,16 @@ blocked: 0
   debug_session: ""
 
 - truth: "Every watchlist row shows a sparkline, also when the market data source is Massive end-of-day (free tier)"
-  status: failed
+  status: resolved
   reason: "User reported: still the individual stock charts not showing"
   severity: major
   test: 3
-  root_cause: "Same root cause as the main-chart gap, but 06-06/06-07 only seeded MainChart. Sparklines are fed only from SSE ticks; on Massive EOD every tick for a ticker has the same timestamp, so each sparkline holds 1 point. Sparkline.tsx draws the polyline only when points.length >= 2. Proven in browser on the rebuilt container (source massive): all 10 rows report data-points=1 and render an empty svg."
+  root_cause: "Same root cause as the main-chart gap, but 06-06/06-07 only seeded MainChart. Sparklines were fed only from SSE ticks; on Massive EOD every tick for a ticker has the same timestamp, so each sparkline held 1 point. Resolved by 06-09 (throttled history) and 06-10 (seeded sparklines)."
   artifacts:
     - frontend/src/components/Sparkline.tsx
     - frontend/src/components/Watchlist.tsx
     - frontend/src/components/Terminal.tsx
     - backend/app/api/history.py
     - backend/app/market/massive_source.py
-  missing:
-    - "Sparklines seeded from daily history (e.g. last ~30 closes) then appended with live ticks"
-    - "Respect Massive free tier (5 calls/min): history fetches for all watchlist tickers on page load must not exhaust the limit; failed fetches are not cached, so naive per-row /api/history calls leave about half the rows empty. Consider a backend-side batched/throttled warm-up or serving the cached history tail with /api/watchlist"
-    - "Tests: frontend test for seeded sparkline; backend test for the chosen batching/throttling"
+  missing: []
   debug_session: ""
-
