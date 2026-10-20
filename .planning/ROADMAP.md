@@ -204,7 +204,23 @@ Plans:
   4. The layout is dense on wide screens and remains usable at tablet width
   5. Backend route tests, frontend component tests and the Playwright E2E suite (fresh start, watchlist, buy, sell, visualizations, mocked AI trade, SSE reconnect) pass via `test/docker-compose.test.yml` with `LLM_MOCK=true`
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 06-01-PLAN.md — Responsive E2E spec, six data-testid hooks, tablet layout with collapsible chat overlay (wave 1)
+- [ ] 06-03-PLAN.md — Backend: prove and fix flaky seeded-cache test; route coverage audit and smoke tests (wave 1)
+- [ ] 06-04-PLAN.md — test/persistence.sh restart proof on a real image and volume; env and secrets hygiene (wave 1)
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 06-02-PLAN.md — Vitest + RTL frontend tests (vitest legitimacy checkpoint first) (wave 2)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 06-05-PLAN.md — Phase gate: suites, compose E2E, exact docker run, scripts x2 (mac + Windows), persistence, human verify (wave 3)
+
 **UI hint**: yes
 
 ## Progress
@@ -216,4 +232,4 @@ Plans:
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
 | 5. Real Market Data (Massive) | 4/4 | Complete   | 2026-10-20 |
-| 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
+| 6. Packaging, Persistence & Test Suite | 0/5 | Not started | - |
