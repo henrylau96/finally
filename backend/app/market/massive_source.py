@@ -55,10 +55,11 @@ class MassiveDataSource(MarketDataSource):
             self._task = None
 
     async def add_ticker(self, ticker: str) -> None:
-        """Track a ticker and price it at once; a failed fetch leaves no cache entry."""
-        if ticker in self._tickers:
+        """Track a ticker and price it unless already priced; a failed fetch leaves no cache entry."""
+        if ticker not in self._tickers:
+            self._tickers.append(ticker)
+        if self._cache.get(ticker):
             return
-        self._tickers.append(ticker)
         try:
             quote = await self._fetch_one(ticker)
         except BadResponse as e:

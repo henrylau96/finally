@@ -135,8 +135,8 @@ async def test_add_ticker_eod_prev_close():
 
 
 async def test_add_ticker_tracked_is_noop():
-    """An already tracked ticker makes no client call."""
-    client = FakeClient(snapshots=[])
+    """An already tracked and priced ticker makes no client call."""
+    client = FakeClient(snapshots=[snapshot("AAPL", 190.0, 1760790000_000000000, 188.0)])
     _, source = await started(client, ["AAPL"])
     before = len(client.calls)
     await source.add_ticker("AAPL")
@@ -213,4 +213,16 @@ async def test_unchanged_poll_keeps_cache_version():
     version = cache.version
     await source._poll_once()
     assert cache.version == version
+    await source.stop()
+
+
+async def test_add_ticker_retries_after_failed_fetch():
+    """A tracked ticker left unpriced by a failed fetch is fetched again on the next add."""
+    client = FakeClient(snapshots=[], single=RuntimeError("boom"))
+    cache, source = await started(client, ["AAPL"])
+    await source.add_ticker("PYPL")
+    assert cache.get("PYPL") is None
+    client.single = snapshot("PYPL", 70.0, 1760790000_000000000, 69.0)
+    await source.add_ticker("PYPL")
+    assert cache.get("PYPL").price == 70.0
     await source.stop()
