@@ -15,11 +15,15 @@ class PriceCache:
         self._opens: dict[str, float] = {}
         self._version = 0
 
-    def update(self, ticker: str, price: float, timestamp: float | None = None) -> PriceUpdate:
-        """Store a new price; the first price seen becomes the session open."""
+    def update(
+        self, ticker: str, price: float, timestamp: float | None = None, reference: float | None = None
+    ) -> PriceUpdate:
+        """Store a new price; a reference close sets the day-change base, else the first price does."""
         price = round(price, 2)
         with self._lock:
             prev = self._prices.get(ticker)
+            if reference is not None:
+                self._opens[ticker] = round(reference, 2)
             open_price = self._opens.setdefault(ticker, price)
             update = PriceUpdate(
                 ticker=ticker,
