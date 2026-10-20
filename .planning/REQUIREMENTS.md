@@ -30,7 +30,7 @@
 - [x] **DATA-01**: SQLite file at `db/finally.db` is created with schema and seed data on first start or first request if missing or empty; no manual migration step
 - [x] **DATA-02**: Schema has tables `users_profile`, `watchlist`, `positions`, `trades`, `portfolio_snapshots`, `chat_messages` with the PLAN.md columns; every table carries `user_id` defaulting to `"default"`
 - [x] **DATA-03**: Seed creates user `default` with $10,000 cash and watchlist AAPL, GOOGL, MSFT, AMZN, TSLA, NVDA, META, JPM, V, NFLX
-- [ ] **DATA-04**: Data persists across container restarts via the mounted `db/` volume
+- [x] **DATA-04**: Data persists across container restarts via the mounted `db/` volume
 
 ### Portfolio (§8)
 
@@ -83,11 +83,11 @@
 
 - [x] **OPS-01**: FastAPI serves the static frontend and all `/api/*` routes on port 8000 from one origin
 - [x] **OPS-02**: `GET /api/health` returns healthy status for Docker and deployment checks
-- [ ] **OPS-03**: Multi-stage Dockerfile builds the frontend (Node 20) and runs the backend (Python 3.14 + uv sync from lockfile)
+- [x] **OPS-03**: Multi-stage Dockerfile builds the frontend (Node 20) and runs the backend (Python 3.14 + uv sync from lockfile)
 - [ ] **OPS-04**: `docker run -v finally-data:/app/db -p 8000:8000 --env-file .env finally` starts a working app
 - [ ] **OPS-05**: `scripts/start_mac.sh` and `scripts/start_windows.ps1` build if needed (or on `--build`), run the container with volume, port and `.env`, and print the URL; they are idempotent
 - [ ] **OPS-06**: `scripts/stop_mac.sh` and `scripts/stop_windows.ps1` stop and remove the container but keep the volume; they are idempotent
-- [ ] **OPS-07**: `.env.example` documents `OPENROUTER_API_KEY`, `MASSIVE_API_KEY` and `LLM_MOCK`; `.env` is gitignored and read from the project root
+- [x] **OPS-07**: `.env.example` documents `OPENROUTER_API_KEY`, `MASSIVE_API_KEY` and `LLM_MOCK`; `.env` is gitignored and read from the project root
 
 ### Testing (§12)
 
@@ -141,7 +141,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-01 | Phase 2 | Complete |
 | DATA-02 | Phase 2 | Complete |
 | DATA-03 | Phase 2 | Complete |
-| DATA-04 | Phase 6 | Pending |
+| DATA-04 | Phase 6 | Complete |
 | PORT-01 | Phase 3 | Complete |
 | PORT-02 | Phase 3 | Complete |
 | PORT-03 | Phase 3 | Complete |
@@ -179,11 +179,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-14 | Phase 6 | Complete |
 | OPS-01 | Phase 1 | Complete |
 | OPS-02 | Phase 1 | Complete |
-| OPS-03 | Phase 6 | Pending |
+| OPS-03 | Phase 6 | Complete |
 | OPS-04 | Phase 6 | Pending |
 | OPS-05 | Phase 6 | Pending |
 | OPS-06 | Phase 6 | Pending |
-| OPS-07 | Phase 6 | Pending |
+| OPS-07 | Phase 6 | Complete |
 | TEST-01 | Phase 1 | Complete |
 | TEST-02 | Phase 3 | Complete |
 | TEST-03 | Phase 4 | Complete |
