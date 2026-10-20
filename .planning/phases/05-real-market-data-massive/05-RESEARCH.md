@@ -377,13 +377,13 @@ def create_market_data_source(cache: PriceCache) -> MarketDataSource:
 | A2 | Free-tier grouped bar for NY "today" becomes available after the close the same evening | Pitfall 3 | Only extra step-back calls; behaviour still correct |
 | A3 | 403 body for snapshots contains the literal `NOT_AUTHORIZED` | NOT_AUTHORIZED detection | Verified live by the prior build (commit de82f7a) and in MASSIVE_API.md; low risk |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **EOD reference close: the prior bar's close vs the bar's open**
    - What we know: the grouped endpoint returns one day, so the prior close needs a second grouped call (one more of the 5/min).
-   - Recommendation: use `bar.open` as the EOD reference, which CONTEXT allows as the fallback. Snapshot mode uses `prev_day.close`. This keeps startup within the rate limit.
+   - RESOLVED: use `bar.open` as the EOD reference, which CONTEXT allows as the fallback. Snapshot mode uses `prev_day.close`. This keeps startup within the rate limit.
 2. **EOD `add_ticker`: grouped-bar lookup before `get_previous_close_agg`**
-   - Recommendation: look in `self._bars` first (zero calls), then fall back to prev close. This stays within the locked decision and avoids 429s (Pitfall 2).
+   - RESOLVED: look in `self._bars` first (zero calls), then fall back to prev close. This stays within the locked decision and avoids 429s (Pitfall 2).
 
 ## Environment Availability
 
