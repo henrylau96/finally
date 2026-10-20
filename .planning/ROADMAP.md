@@ -215,7 +215,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 06-02-PLAN.md — Vitest + RTL frontend tests (vitest legitimacy checkpoint first) (wave 2)
+- [x] 06-02-PLAN.md — Vitest + RTL frontend tests (vitest legitimacy checkpoint first) (wave 2)
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
@@ -232,4 +232,4 @@ Plans:
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
 | 5. Real Market Data (Massive) | 4/4 | Complete   | 2026-10-20 |
-| 6. Packaging, Persistence & Test Suite | 3/5 | In Progress|  |
+| 6. Packaging, Persistence & Test Suite | 4/5 | In Progress|  |

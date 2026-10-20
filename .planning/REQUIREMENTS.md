@@ -95,7 +95,7 @@
 - [x] **TEST-02**: Backend pytest covers portfolio logic (trades, P&L, oversell, insufficient cash, selling at a loss)
 - [x] **TEST-03**: Backend pytest covers LLM structured-output parsing, malformed responses and trade validation in the chat flow
 - [x] **TEST-04**: Backend pytest covers API routes (status codes, response shapes, errors)
-- [ ] **TEST-05**: Frontend tests cover component rendering with mock data, price flash triggering, watchlist CRUD, portfolio calculations, and chat rendering with loading state
+- [x] **TEST-05**: Frontend tests cover component rendering with mock data, price flash triggering, watchlist CRUD, portfolio calculations, and chat rendering with loading state
 - [ ] **TEST-06**: `test/docker-compose.test.yml` runs the app container plus a Playwright container with `LLM_MOCK=true`
 - [x] **TEST-07**: E2E scenarios pass: fresh start, watchlist add/remove, buy, sell, portfolio visualization, mocked AI chat trade, SSE reconnection
 
@@ -188,7 +188,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-02 | Phase 3 | Complete |
 | TEST-03 | Phase 4 | Complete |
 | TEST-04 | Phase 6 | Complete |
-| TEST-05 | Phase 6 | Pending |
+| TEST-05 | Phase 6 | Complete |
 | TEST-06 | Phase 6 | Pending |
 | TEST-07 | Phase 6 | Complete |
 
