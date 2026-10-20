@@ -16,6 +16,11 @@ test("fresh start shows default watchlist and $10,000 cash", async ({ page }) =>
   }
   await expect.poll(() => readNumber(page.getByTestId("cash-balance"))).toBe(10000);
   await expect.poll(() => readNumber(page.getByTestId("total-value"))).toBe(10000);
+  await expect(page.getByTestId("watchlist")).toBeVisible();
+  await expect(page.getByTestId("app-header")).toBeVisible();
+  await expect
+    .poll(async () => Number(await page.getByTestId("sparkline-AAPL").getAttribute("data-points")))
+    .toBeGreaterThanOrEqual(2);
 });
 
 test("prices stream and update", async ({ page }) => {

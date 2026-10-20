@@ -11,6 +11,8 @@ test("buy shares: cash decreases and position appears", async ({ page, request }
 
   await expect.poll(() => readNumber(cash)).toBeLessThan(before);
   await expect(page.getByTestId("position-row-AAPL")).toBeVisible();
+  await expect(page.getByTestId("position-qty-AAPL")).toBeVisible();
+  await expect(page.getByTestId("position-pnl-AAPL")).toHaveAttribute("data-pnl", /^(up|down|flat)$/);
   expect(await heldQuantity(request, "AAPL")).toBeCloseTo(heldBefore + 2);
 });
 
