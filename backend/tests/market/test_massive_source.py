@@ -157,6 +157,21 @@ async def test_add_ticker_failure_leaves_no_entry():
     await source.stop()
 
 
+async def test_add_ticker_empty_start_falls_back_to_eod():
+    """A free-tier key started with no tickers still prices a new ticker via EOD."""
+    client = FakeClient(single=BadResponse(NOT_AUTH), prev=[bar("PYPL", 69.0, 70.0, PreviousCloseAgg)])
+    cache, source = await started(client, [])
+    assert client.calls == []
+    await source.add_ticker("PYPL")
+    price = cache.get("PYPL")
+    assert price.price == 70.0
+    assert price.timestamp == BAR_T / 1e3
+    assert source._mode == "eod"
+    assert source._interval >= 900
+    assert client.calls[-2:] == [("one", "PYPL"), ("prev", "PYPL")]
+    await source.stop()
+
+
 async def test_remove_ticker_drops_cache():
     """Removing a ticker stops tracking it and clears its price."""
     cache, source = await started(eod_client())
