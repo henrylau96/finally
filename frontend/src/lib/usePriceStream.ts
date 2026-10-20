@@ -16,6 +16,7 @@ export type ChartPoint = { time: number; value: number };
 
 const MAX_POINTS = 120;
 const CHART_POINTS = 1000;
+const STALE_SECONDS = 300;
 
 /** Append a tick as strictly ascending whole-second points, replacing a same-second value. */
 function appendPoint(arr: ChartPoint[], timestamp: number, value: number): ChartPoint[] {
@@ -45,6 +46,7 @@ export function usePriceStream() {
   const [history, setHistory] = useState<Record<string, number[]>>({});
 
   const [chart, setChart] = useState<Record<string, ChartPoint[]>>({});
+  const [asOf, setAsOf] = useState<number | null>(null);
 
   useEffect(() => {
     const es = new EventSource("/api/stream/prices");
@@ -56,6 +58,8 @@ export function usePriceStream() {
       setStatus(es.readyState === EventSource.CLOSED ? "disconnected" : "reconnecting");
     es.onmessage = (e) => {
       const next: Record<string, Quote> = JSON.parse(e.data);
+      const newest = Math.max(0, ...Object.values(next).map((q) => q.timestamp));
+      setAsOf(newest && Date.now() / 1000 - newest > STALE_SECONDS ? newest : null);
       setQuotes((prev) => withRenderedDirection(prev, next));
       setHistory((prev) =>
         Object.fromEntries(
@@ -71,5 +75,5 @@ export function usePriceStream() {
     return () => es.close();
   }, []);
 
-  return { status, hasConnected, quotes, history, chart };
+  return { status, hasConnected, quotes, history, chart, asOf };
 }

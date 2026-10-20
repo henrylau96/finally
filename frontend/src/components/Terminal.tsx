@@ -16,7 +16,7 @@ import TradeBar from "./TradeBar";
 import Watchlist from "./Watchlist";
 
 export default function Terminal() {
-  const { status, hasConnected, quotes, history, chart } = usePriceStream();
+  const { status, hasConnected, quotes, history, chart, asOf } = usePriceStream();
   const { rows, loading, error, load, add, remove } = useWatchlist();
   const { portfolio, version, refresh, trade } = usePortfolio();
   const { rows: positionRows, total } = useMemo(() => derivePositions(portfolio, quotes), [portfolio, quotes]);
@@ -32,7 +32,7 @@ export default function Terminal() {
   }, [rows, loading, selected, portfolio]);
   return (
     <div className="flex h-full flex-col gap-2 p-2">
-      <Header status={status} hasConnected={hasConnected} total={total} cash={portfolio?.cash_balance} />
+      <Header status={status} hasConnected={hasConnected} total={total} cash={portfolio?.cash_balance} asOf={asOf} />
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(320px,28%)_1fr_auto] gap-2">
         <Watchlist tickers={rows.map((r) => r.ticker)} quotes={quotes} history={history} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
         <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2">
