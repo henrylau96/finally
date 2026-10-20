@@ -131,7 +131,11 @@ class MassiveDataSource(MarketDataSource):
                 self._write(ticker, bar_quote(self._bars[ticker]))
 
     def _write(self, ticker: str, quote: Quote) -> None:
+        """Cache a quote unless it repeats the cached price and time."""
         price, ts, ref = quote
+        cur = self._cache.get(ticker)
+        if cur and cur.timestamp == ts and cur.price == round(price, 2):
+            return
         self._cache.update(ticker, price, timestamp=ts, reference=ref)
 
     async def _run_loop(self) -> None:

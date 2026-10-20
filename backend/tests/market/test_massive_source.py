@@ -205,3 +205,12 @@ async def test_bad_response_logs_one_line(caplog):
     assert len(errors) == 2
     assert all(r.exc_info is None and "Unknown API Key" in r.getMessage() for r in errors)
     await source.stop()
+
+
+async def test_unchanged_poll_keeps_cache_version():
+    """A poll that returns the same quotes does not bump the cache version."""
+    cache, source = await started(eod_client())
+    version = cache.version
+    await source._poll_once()
+    assert cache.version == version
+    await source.stop()
