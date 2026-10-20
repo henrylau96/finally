@@ -180,7 +180,7 @@ Plans:
 
 **Wave 2**
 
-- [ ] 05-02-PLAN.md — Health `source` field and header "EOD · as of <date>" stale badge, E2E health assertion (wave 2)
+- [x] 05-02-PLAN.md — Health `source` field and header "EOD · as of <date>" stale badge, E2E health assertion (wave 2)
 
 **Wave 3**
 
@@ -211,5 +211,5 @@ Plans:
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
-| 5. Real Market Data (Massive) | 1/3 | In Progress|  |
+| 5. Real Market Data (Massive) | 2/3 | In Progress|  |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
