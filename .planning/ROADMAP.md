@@ -171,7 +171,7 @@ Plans:
   2. Adding a ticker while on Massive gives it a price right away instead of waiting for the next poll
   3. Prices show their true source timestamp, so stale end-of-day data is not presented as live
 
-**Plans**: 3 plans
+**Plans**: 4 plans (1 gap closure)
 
 Plans:
 **Wave 1**
@@ -185,6 +185,10 @@ Plans:
 **Wave 3**
 
 - [x] 05-03-PLAN.md — Phase gate: full suites, simulator Playwright 01-06, optional live EOD smoke, human verify (wave 3)
+
+**Gap closure**
+
+- [ ] 05-04-PLAN.md — CR-01: `_enter_eod()` helper, single-snapshot 403 switches to EOD so empty-start free tier prices new tickers (gap closure)
 
 ### Phase 6: Packaging, Persistence & Test Suite
 
