@@ -85,7 +85,7 @@ Recent decisions affecting current work:
 - [Phase 05]: [05-01]: Massive source switches snapshot -> EOD once on NOT_AUTHORIZED; EOD interval >= 900 s; reference = prev_day.close (snapshot) or bar.open (EOD)
 - [Phase 05]: [05-01]: conftest blanks MASSIVE_API_KEY before importing app.main so tests always run the simulator
 - [Phase 05]: [05-02]: GET /api/health returns {status, source}; header EOD badge when newest timestamp > 300 s old, NY date
-- [Phase ?]: [05-03]: EOD day change % (close vs open) approved by user
+- [Phase 05]: [05-03]: EOD day change % (close vs open) approved by user
 
 ### Pending Todos
 
