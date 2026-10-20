@@ -10,7 +10,7 @@ Vertical MVP: each phase ends with something the user can see and use in the bro
 - [x] **Phase 2: Persistent Watchlist & Charts** - SQLite-backed watchlist the user can edit, with a main chart for the selected ticker (completed 2026-10-19)
 - [x] **Phase 3: Trading & Portfolio** - Buy/sell at market, positions, heatmap, P&L chart and live header totals (completed 2026-10-19)
 - [x] **Phase 4: AI Chat Copilot** - Chat panel where the LLM analyzes the portfolio and executes trades and watchlist changes (completed 2026-10-19)
-- [ ] **Phase 5: Real Market Data (Massive)** - Optional Massive REST poller behind the same interface, with correct timestamps and instant prices for new tickers
+- [x] **Phase 5: Real Market Data (Massive)** - Optional Massive REST poller behind the same interface, with correct timestamps and instant prices for new tickers (completed 2026-10-20)
 - [ ] **Phase 6: Packaging, Persistence & Test Suite** - One-command Docker run with persistent data, start/stop scripts, tablet-ready layout, unit and E2E tests
 
 ## Phase Details
@@ -184,7 +184,7 @@ Plans:
 
 **Wave 3**
 
-- [ ] 05-03-PLAN.md — Phase gate: full suites, simulator Playwright 01-06, optional live EOD smoke, human verify (wave 3)
+- [x] 05-03-PLAN.md — Phase gate: full suites, simulator Playwright 01-06, optional live EOD smoke, human verify (wave 3)
 
 ### Phase 6: Packaging, Persistence & Test Suite
 
@@ -211,5 +211,5 @@ Plans:
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
-| 5. Real Market Data (Massive) | 2/3 | In Progress|  |
+| 5. Real Market Data (Massive) | 3/3 | Complete   | 2026-10-20 |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
