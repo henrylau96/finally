@@ -28,3 +28,9 @@ def test_factory_massive_when_key_set(monkeypatch):
     assert source._interval == 15.0
     monkeypatch.setenv("MASSIVE_POLL_INTERVAL", "30")
     assert create_market_data_source(PriceCache())._interval == 30.0
+
+
+def test_factory_massive_client_does_not_retry(monkeypatch):
+    """The Massive client makes no SDK retries, which would burn the free-tier quota."""
+    monkeypatch.setenv("MASSIVE_API_KEY", "test-key")
+    assert create_market_data_source(PriceCache())._client.retries == 0
