@@ -171,7 +171,20 @@ Plans:
   2. Adding a ticker while on Massive gives it a price right away instead of waiting for the next poll
   3. Prices show their true source timestamp, so stale end-of-day data is not presented as live
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 05-01-PLAN.md — Massive source (snapshot -> EOD fallback), parsing, cache reference close, env factory, conftest key blanking, FakeClient tests (wave 1)
+
+**Wave 2**
+
+- [ ] 05-02-PLAN.md — Health `source` field and header "EOD · as of <date>" stale badge, E2E health assertion (wave 2)
+
+**Wave 3**
+
+- [ ] 05-03-PLAN.md — Phase gate: full suites, simulator Playwright 01-06, optional live EOD smoke, human verify (wave 3)
 
 ### Phase 6: Packaging, Persistence & Test Suite
 
@@ -198,5 +211,5 @@ Plans:
 | 2. Persistent Watchlist & Charts | 4/4 | Complete    | 2026-10-19 |
 | 3. Trading & Portfolio | 6/6 | Complete    | 2026-10-19 |
 | 4. AI Chat Copilot | 5/5 | Complete    | 2026-10-19 |
-| 5. Real Market Data (Massive) | 0/TBD | Not started | - |
+| 5. Real Market Data (Massive) | 0/3 | Planned | - |
 | 6. Packaging, Persistence & Test Suite | 0/TBD | Not started | - |
