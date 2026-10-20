@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-10-19)
 Phase: 06
 Plan: Not started
 Status: Milestone complete
-Last activity: 2026-10-20
+Last activity: 2026-10-20 - Completed quick task 261020-nml: Pre-milestone check: persistence guard and E2E rerun on final HEAD
 
 Progress: [██████████] 100%
 
@@ -99,6 +99,12 @@ None yet.
 
 - Prior-implementation pitfalls to avoid: Massive prices with missing timestamps looking live, no starting price for new Massive tickers, blocking sqlite in async chat handler, unbounded portfolio history, `lib/` gitignore hiding `frontend/src/lib`
 - WSL has no node; use Windows node.exe for frontend tooling
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 261020-nml | Pre-milestone check: persistence guard and E2E rerun on final HEAD | 2026-10-20 | 7be4ee3 | [261020-nml-pre-milestone-check-persistence-guard-an](./quick/261020-nml-pre-milestone-check-persistence-guard-an/) |
 
 ## Deferred Items
 
