@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { sparklineValues } from "@/lib/chartPoints";
 import { derivePositions } from "@/lib/portfolio";
 import { usePortfolio } from "@/lib/usePortfolio";
 import { usePriceStream } from "@/lib/usePriceStream";
 import { useHistory } from "@/lib/useHistory";
+import { useHistorySeeds } from "@/lib/useHistorySeeds";
 import { useWatchlist } from "@/lib/useWatchlist";
 import ChatDock from "./ChatDock";
 import Header from "./Header";
@@ -23,20 +25,25 @@ export default function Terminal() {
   const { rows: positionRows, total } = useMemo(() => derivePositions(portfolio, quotes), [portfolio, quotes]);
   const [selected, setSelected] = useState("");
   const seed = useHistory(selected);
+  const tickers = useMemo(() => rows.map((r) => r.ticker), [rows]);
+  const seeds = useHistorySeeds(tickers);
+  const sparks = useMemo(
+    () => Object.fromEntries(tickers.map((t) => [t, sparklineValues(seeds[t] ?? [], chart[t] ?? [], history[t] ?? [])])),
+    [tickers, seeds, chart, history],
+  );
   useEffect(() => {
     if (loading) return;
-    const tickers = rows.map((r) => r.ticker);
     if (selected) return;
     const held = portfolio?.positions.map((p) => p.ticker) ?? [];
     const next = tickers.includes("AAPL") ? "AAPL" : (tickers[0] ?? held[0] ?? "");
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelected(next);
-  }, [rows, loading, selected, portfolio]);
+  }, [tickers, loading, selected, portfolio]);
   return (
     <div className="flex h-full flex-col gap-2 p-2 max-lg:overflow-y-auto">
       <Header status={status} hasConnected={hasConnected} total={total} cash={portfolio?.cash_balance} asOf={asOf} />
       <div className="grid min-h-0 flex-1 grid-cols-[minmax(240px,30%)_1fr_48px] gap-2 max-lg:flex-none lg:grid-cols-[minmax(240px,26%)_1fr_48px] xl:grid-cols-[minmax(320px,28%)_1fr_auto]">
-        <Watchlist tickers={rows.map((r) => r.ticker)} quotes={quotes} history={history} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
+        <Watchlist tickers={tickers} quotes={quotes} history={sparks} status={status} selected={selected} onSelect={setSelected} onAdd={add} onRemove={remove} loading={loading} loadError={error} />
         <div className="grid min-h-0 min-w-0 grid-rows-[1.4fr_auto_1fr] gap-2 max-lg:grid-rows-[auto_auto_auto] max-lg:[&>*:first-child]:min-h-[240px]">
           <Panel title="Main chart" active bodyClassName="overflow-hidden">
             <MainChart ticker={selected} points={chart[selected] ?? []} history={seed} price={quotes[selected]?.price} live={status === "connected"} />

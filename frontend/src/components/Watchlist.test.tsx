@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { sparklineValues } from "@/lib/chartPoints";
 import type { Quote } from "@/lib/usePriceStream";
 import Watchlist from "./Watchlist";
 
@@ -34,6 +35,22 @@ describe("Watchlist", () => {
     expect(screen.getByTestId("watchlist-row-MSFT")).toBeInTheDocument();
     expect(screen.getByTestId("price-AAPL")).toHaveTextContent("$190.50");
     expect(screen.getByTestId("sparkline-AAPL")).toHaveAttribute("data-points", "3");
+  });
+
+  it("draws a seeded sparkline from one EOD tick", () => {
+    const seed = Array.from({ length: 30 }, (_, i) => ({ time: 100 + i, value: 190 + i }));
+    const history = { AAPL: sparklineValues(seed, [{ time: 129, value: 190.5 }], [190.5]) };
+    setup({ history });
+    const spark = screen.getByTestId("sparkline-AAPL");
+    expect(spark).toHaveAttribute("data-points", "30");
+    expect(spark.querySelector("polyline")).not.toBeNull();
+  });
+
+  it("leaves a simulator first tick without a line", () => {
+    setup({ history: { AAPL: sparklineValues([], [{ time: 1, value: 190.5 }], [190.5]) } });
+    const spark = screen.getByTestId("sparkline-AAPL");
+    expect(spark).toHaveAttribute("data-points", "1");
+    expect(spark.querySelector("polyline")).toBeNull();
   });
 
   it("adds an uppercased ticker", async () => {
