@@ -18,9 +18,15 @@ async def running():
     await source.stop()
 
 
-async def test_cache_seeded_before_start_returns(running):
-    cache, _ = running
-    prices = {t: u.price for t, u in cache.get_all().items()}
+async def test_cache_seeded_before_start_returns():
+    """Read straight after start: the loop task cannot tick before the next await."""
+    cache = PriceCache()
+    source = SimulatorDataSource(cache, update_interval=0.02)
+    await source.start(DEFAULT_TICKERS)
+    try:
+        prices = {t: u.price for t, u in cache.get_all().items()}
+    finally:
+        await source.stop()
     assert set(prices) == set(DEFAULT_TICKERS)
     assert all(abs(prices[t] / SEED_PRICES[t] - 1) < 0.01 for t in prices)
 
