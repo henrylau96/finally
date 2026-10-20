@@ -15,8 +15,11 @@ export interface ChatEntry {
   error?: boolean;
 }
 
+let localSeq = 0;
+
+/** Local-only entry; ids avoid crypto.randomUUID, which is missing on non-secure origins. */
 function localEntry(role: ChatEntry["role"], content: string, error = false): ChatEntry {
-  return { id: crypto.randomUUID(), role, content, actions: null, created_at: new Date().toISOString(), error };
+  return { id: `local-${++localSeq}`, role, content, actions: null, created_at: new Date().toISOString(), error };
 }
 
 /** Chat state: loads history on mount, sends messages, reports executed actions. */
