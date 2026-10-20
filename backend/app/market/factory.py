@@ -16,4 +16,5 @@ def create_market_data_source(cache: PriceCache) -> MarketDataSource:
     if not key:
         return SimulatorDataSource(cache)
     interval = float(os.environ.get("MASSIVE_POLL_INTERVAL", "").strip() or 15)
-    return MassiveDataSource(cache, RESTClient(api_key=key, retries=0), interval)
+    client = RESTClient(api_key=key, retries=0, connect_timeout=5.0, read_timeout=5.0)
+    return MassiveDataSource(cache, client, interval)

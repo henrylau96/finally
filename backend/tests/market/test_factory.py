@@ -34,3 +34,10 @@ def test_factory_massive_client_does_not_retry(monkeypatch):
     """The Massive client makes no SDK retries, which would burn the free-tier quota."""
     monkeypatch.setenv("MASSIVE_API_KEY", "test-key")
     assert create_market_data_source(PriceCache())._client.retries == 0
+
+
+def test_factory_massive_client_short_timeouts(monkeypatch):
+    """Short timeouts bound how long a slow API can hold up startup."""
+    monkeypatch.setenv("MASSIVE_API_KEY", "test-key")
+    timeout = create_market_data_source(PriceCache())._client.timeout
+    assert (timeout.connect_timeout, timeout.read_timeout) == (5.0, 5.0)
